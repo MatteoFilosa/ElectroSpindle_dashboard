@@ -1,0 +1,1081 @@
+<!doctype html>
+<html>
+<head>
+    <!---Step 2-->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <title>Single spindle visualization</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="./style_single.css"></link>
+    <script>
+    //inizializzazione array di colori per i grafici
+      var counter_zoom = 1, counter_zoom_out = 1
+
+    const colors = [
+        "#0074D9", // blu
+        "#FF4136", // rosso
+        "#2ECC40", // verde
+        "#FF851B", // arancione
+        "#7FDBFF", // celeste
+        "#B10DC9", // viola
+        "#FFDC00", // giallo
+        "#001f3f", // blu scuro
+        "#39CCCC", // verde acqua
+        "#F012BE", // magenta
+        "#3D9970", // verde scuro
+        "#111111", // nero
+        "#AAAAAA", // grigio
+        "#DDDDDD", // grigio chiaro
+      ];
+
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+</head>
+
+<body>
+<h1>Single spindle visualization</h1>
+<!-- <Body background="images/PROVA.png" background-repeat="no-repeat” background-size="cover”>  -->
+<!--<Body background="images/test.png" background-repeat="no-repeat” background-size="cover”></Body>-->
+<div id ="selectedSpindles"></div>
+<input type = "checkbox" id ="aggregato" class = "checkbox" onclick="aggregateHelper()" > Aggregate
+
+<select id="selectMenu">
+  <option value="" disabled selected>Select attribute</option>
+</select>
+<div id = "selectedValues"></div>
+
+
+<!--Step 2-->
+<div id = "svg-div">
+ <!--<div id="loader"></div>-->
+
+</div>
+
+<div id="tooltip"></div>
+
+<div id = "problems-found">
+
+
+    <h3>Problems found </h3>
+    <!--
+    <img src="images/warning.png" style="vertical-align:middle" alt="warning" width="25" height="25"> Problema in: Tba
+     -->
+    <img src="images/check.png" style="vertical-align:middle" alt="check" width="25" height="25"> No problem found!
+
+    <!--<img src="images/2.png" style="vertical-align:middle" alt="check" width="150" height="80">-->
+
+    
+</div>
+<button id = "analytics_1" class="button-blue" style = "left: 900px;">Analytics 1</button>
+<button id = "analytics_2" class="button-blue"style = "left: 900px;" >Analytics 2</button>
+
+
+
+
+<div id = "info"></div>
+<br>
+
+
+<div id = "coordinates"></div>
+<button id = "clear" onclick="clearSvg()" class = "button-blue">Clear all</button>
+
+<script>
+
+  
+
+
+  function sleep(time) {
+      return new Promise((resolve) => setTimeout(resolve, time));
+    }
+
+  function displayTooltip(d, i, selectedGroup, event) {
+      document.getElementById("tooltip").style.visibility = "visible"
+     
+      var tooltip = document.getElementById("tooltip")
+      tooltip.innerHTML = selectedGroup + ": " + d[1]
+      tooltip.style.position = "absolute"
+      tooltip.style.top = (event.screenY - 80) + "px"
+      tooltip.style.left = (event.screenX - 80) + "px"
+
+
+    }
+
+    function hideTooltip(d, i, event) {
+
+      document.getElementById("tooltip").style.visibility = "hidden"
+
+    }
+
+  
+        var allGroup = ["Tamb", "Tba", "Itot", "Qtir", "Speed_S3_BUS", "Speed_Sync", "Tdut2", "Tdut3", "VibANT_Sync", "Step"]
+        d3.select("#selectMenu")
+        .selectAll('myOptions')
+        .data(allGroup)
+        .enter()
+        .append('option')
+        .text(function (d) { return d; }) // text showed in the menu
+        .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+        var coordinates = - 750,  colorSelector = 0, selectedValues = [], globalData = []
+        var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
+
+
+        var globalData = []
+        for (let i = 0; i < allGroup.length; i++) {
+
+            d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=0&factor=100&points=0&columns=" + allGroup[i], function (data) {
+              
+              globalData[i] = data
+              
+              
+
+            })
+
+          }
+
+       sleep(1000).then(() => {
+  
+        console.log(globalData)
+      
+        
+       })
+         
+
+
+
+
+
+
+   
+
+        function aggregateHelper(){
+
+
+          
+          var data = globalData
+          console.log(data)
+
+          if(document.getElementById("aggregato").checked == true) newGraph("", data,   coordinates, 1, 0)
+
+          else { //vuol dire che devo rendere visibili gli attributi di prima
+
+            var to_add = document.getElementById("selectedValues").childNodes
+            var count = -1
+            colorSelector -= 1
+            for (let i = 0; i <= to_add.length; i++) {
+              
+              if(to_add[i] != undefined){
+
+                if ((to_add[i].id != null) && (to_add[i].checked == true)) {
+
+                  count ++;
+                  var tmp = to_add[i].id
+              
+                  
+       
+                  d3.select("#svg" + tmp).attr("visibility", "visible")
+                
+
+                  if(d3.select("#svg" + tmp).size() == 0){
+                    newGraph(tmp, data,   (400*count), 0, 3)
+                  }
+                }
+
+              }
+              
+            }
+            d3.select("#svg_default").attr("visibility", "hidden")
+          }
+
+
+
+
+        }
+
+        function modifyElement(selectedOption, flag){ 
+            
+        
+          if (flag != 1) selectedOption = selectedOption.id
+            var data = globalData
+            //var selectedOption = JSON.parse(localStorage.getItem("selectedOption"));
+            
+
+            if (document.getElementById(selectedOption).checked == true){
+
+                var toAddDot = "#dot" + selectedOption
+                var toAddPath = "#path" + selectedOption
+                
+                if(document.getElementById("aggregato").checked == true){
+
+                  d3.select("#svg_default").selectAll(toAddDot).attr("visibility", "visible");
+                  d3.select("#svg_default").selectAll(toAddPath).attr("visibility", "visible");
+
+                }
+
+                else{
+                  d3.selectAll("#svg" + selectedOption).attr("visibility", "visible");
+                }
+
+            }
+        //si cancella tutto ciò che fa parte del grafico con l'id selezionato
+            else if (document.getElementById(selectedOption).checked == false){
+
+                var toRemoveDot = "#dot" + selectedOption
+                var toRemovePath = "#path" + selectedOption
+
+                if(document.getElementById("aggregato").checked == true){
+
+                  
+                  d3.selectAll(toRemoveDot).attr("visibility", "hidden");
+                  d3.selectAll(toRemovePath).attr("visibility", "hidden");
+
+                }
+
+                else {
+                  d3.selectAll("#svg" + selectedOption).remove()
+                  document.getElementById(selectedOption).remove()
+                  document.getElementById("label" + selectedOption).remove()
+                  var values = JSON.parse(localStorage.getItem("selectedValues"))
+                  if (values.includes(selectedOption)) {
+
+                    const index = values.indexOf(selectedOption);
+                    if (index > -1) { // only splice array when item is found
+                      values.splice(index, 1); // 2nd parameter means remove one item only
+                    }
+
+                  }
+                  localStorage.removeItem("selectedValues")
+                  localStorage.setItem("selectedValues", JSON.stringify(values))
+
+                }
+                
+
+                // da rivedere per colore
+                if(colorSelector != -1) --colorSelector
+                else colorSelector = 0
+                
+            }
+            
+        }
+
+        function clearSvg(){
+
+
+                document.getElementById("selectedValues").innerHTML = ""
+                document.getElementById("aggregato").checked = false
+                document.getElementById("selectMenu").selectedIndex = 0; 
+
+                d3.select("#svg_default").remove()    //attr("visibility", "hidden");
+
+                for (let i = 0; i <= allGroup.length; i ++){
+
+                    var tmp = allGroup[i]
+                   
+                    d3.select("#svg" + tmp).selectAll("circle").remove();
+                    d3.select("#svg" + tmp).selectAll("path").remove();
+                    d3.select("#svg" + tmp).selectAll("text").remove();
+                    d3.select("#svg" + tmp).selectAll("g").remove();
+                    //document.getElementById("svg" + i).remove();
+                    
+                }
+   
+                coordinates = - 400
+                localStorage.removeItem("selectedValues");
+                }
+
+
+    function newGraph(selectedGroup, data,  coordinates, aggregato, toAddDefault){
+
+      var selectedIndex = 0
+
+      if (selectedGroup == "Tba") selectedIndex = 1
+      if (selectedGroup == "Itot") selectedIndex = 2
+      if (selectedGroup == "Qtir") selectedIndex = 3
+      if (selectedGroup == "Speed_S3_BUS") selectedIndex = 4
+      if (selectedGroup == "Speed_Sync") selectedIndex = 5
+      if (selectedGroup == "Tdut2") selectedIndex = 6
+      if (selectedGroup == "Tdut3") selectedIndex = 7
+      if (selectedGroup == "VibANT_Sync") selectedIndex = 8
+      if (selectedGroup == "Step") selectedIndex = 9
+
+      if(aggregato != 1){
+
+        var tmp_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
+        var my_data = JSON.parse(tmp_data)
+
+      }
+      
+   
+      
+
+      var dataset = [];
+      var min = 100000
+      var max = 0
+      var control = 0
+
+          if(aggregato == 1){ // Caso AGGREGATO
+
+            ///Variabili 
+
+
+            coordinates = 0, colorSelector = 0
+            
+            d3.select("#svg_default").attr("visibility", "visible");
+
+            ///Nascosti altri grafici OK
+            for (let i = 0; i <= allGroup.length; i ++){
+
+                    var tmp = allGroup[i]
+                  
+                    d3.select("#svg" + tmp).attr("visibility", "hidden")
+                    
+                    
+                }
+            
+            ///Scala per grafici OK
+
+            var min = 100000
+            var max = 0
+            var toAddDefaultArray = []
+            var data = globalData
+    
+
+            
+            var valori = []
+            var to_add = document.getElementById("selectedValues").childNodes
+
+            for(let i = 0; i < to_add.length; i++){
+
+              if (to_add[i] != undefined) {
+
+                if ((to_add[i].id != null) && (to_add[i].checked == true)) {
+
+                  valori.push(to_add[i])
+
+                }
+              }
+
+            }
+
+
+              var scalaAggiuntiva = 0
+              if (document.getElementById("svg_default") != null) document.getElementById("svg_default").remove()
+              var valori = JSON.parse(localStorage.getItem("selectedValues"))
+              document.getElementById("svg-div").innerHTML += "<svg width='1000' height='800' id ='svg_default'></svg>"
+              var new_svg = d3.select("#svg_default")
+              var g = new_svg.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+              var width = 500, height = 400
+
+              ///SETTING DEL TESTO
+
+              new_svg.selectAll('text').remove()
+
+              new_svg.append('text')
+                .attr('x', width / 2 + 100)
+                .attr('y', 80)
+                .attr('text-anchor', 'middle')
+                .style('font-family', 'Helvetica')
+                .style('font-size', 20)
+                .text("Aggregate chart");
+
+              // X label
+              new_svg.append('text')
+                .attr('x', width / 2 + 100)
+                .attr('y', height - 15 + 150)
+                .attr('text-anchor', 'middle')
+                .style('font-family', 'Helvetica')
+                .style('font-size', 12)
+                .text("Time");
+
+              // Y label
+              new_svg.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('transform', 'translate(40,' + height + ')rotate(-90)')
+                .style('font-family', 'Helvetica')
+                .style('font-size', 12)
+                .text("Aggregate values");
+
+                console.log(valori)
+
+              for (let j = 0; j < valori.length; j++) { //Serve per scalare gli assi correttamente
+
+                var selectedGroup = valori[j]
+
+
+                console.log(selectedGroup, j)
+
+                var selectedIndex = 0
+
+                if (selectedGroup == "Tba") selectedIndex = 1
+                if (selectedGroup == "Itot") selectedIndex = 2
+                if (selectedGroup == "Qtir") selectedIndex = 3
+                if (selectedGroup == "Speed_S3_BUS") selectedIndex = 4
+                if (selectedGroup == "Speed_Sync") selectedIndex = 5
+                if (selectedGroup == "Tdut2") selectedIndex = 6
+                if (selectedGroup == "Tdut3") selectedIndex = 7
+                if (selectedGroup == "VibANT_Sync") selectedIndex = 8
+                if (selectedGroup == "Step") selectedIndex = 9
+
+                var tmp_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
+                var my_data = JSON.parse(tmp_data)
+
+
+                if(valori.includes("Tba") || valori.includes("Tamb") || valori.includes("Tdut2") || valori.includes("Tdut3") ){
+                  if (valori.includes("Itot") || valori.includes("Qtir") || valori.includes("Speed_S3_BUS") || valori.includes("Speed_Sync") || valori.includes("VibANT_Sync")){ //scale non omogenee
+
+                    max = 0, min = 100000, scalaAggiuntiva += 1, control = 1
+
+
+
+                    for (let i = 0; i < 43100; i += 10) { //Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+
+                      if (selectedGroup == "Tdut2") {
+
+                        dataset.push([i + 1, 255]);
+
+                        min = 250
+                        max = 260
+
+                      }
+
+                      else {
+                        dataset.push([i + 1, my_data[i]]);
+                        if (my_data[i] < min) {
+                          min = my_data[i]
+                        }
+                        if (my_data[i] > max) {
+                          max = my_data[i]
+                        }
+
+                      }
+
+                    }
+
+                    console.log(dataset)
+                    xScale = d3.scaleLinear().domain([0, 43100]).range([0, width]),
+                    yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+                    localStorage.setItem("maxDefault", JSON.stringify(max))
+                    localStorage.setItem("minDefault", JSON.stringify(min))
+
+                    
+
+                    if (scalaAggiuntiva == 1) {
+
+                      g.append("g")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(d3.axisBottom(xScale)); //aggiungiamo una sola volta asse x
+
+                      g.append("g")
+                        .call(d3.axisRight(yScale))
+                        .attr("class", "asseDestro");
+                      console.log("sì")
+                      d3.select(".asseDestro").attr("transform", "translate(500,0)")
+                      d3.select(".asseDestro").selectAll("text").style("fill", colors[colorSelector])
+                   
+                    }
+
+
+                    else if (scalaAggiuntiva == 2) {
+
+                      g.append("g")
+                        .call(d3.axisLeft(yScale))
+                        .attr("class", "asseSinistro");
+                     
+                        d3.select(".asseSinistro").selectAll("text").style("fill", colors[colorSelector])
+                      console.log("eo")
+                      
+
+                    }
+
+                    else if (scalaAggiuntiva == 3) {
+
+                      g.append("g")
+                        .call(d3.axisRight(yScale))
+                        .attr("class", "asseSinistro2");
+
+                      d3.select(".asseSinistro2").selectAll("text").style("fill", colors[colorSelector])
+                     
+
+                    }
+
+                    else if (scalaAggiuntiva == 4) {
+
+                      g.append("g")
+                        .call(d3.axisLeft(yScale))
+                        .attr("class", "asseDestro2");
+
+                      d3.select(".asseDestro2").attr("transform", "translate(500,0)")
+                      d3.select(".asseDestro2").selectAll("text").style("fill", colors[colorSelector])
+
+
+                    }
+                    
+
+                    var dataset = []
+
+                    for (let i = 0; i < 43100; i += 10) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+
+                      if (selectedGroup == "Tdut2") {
+
+                        dataset.push([i + 1, 255]);
+
+                        min = 250
+                        max = 260
+
+                      }
+
+                      else {
+                        if (my_data[i] != undefined) {
+                        dataset.push([i + 1, my_data[i]]);
+                        if (my_data[i] < min) {
+                          min = my_data[i]
+                        }
+                        if (my_data[i] > max) {
+                          max = my_data[i]
+                        }
+
+                      }
+                    }
+                    }
+
+
+                    new_svg.append('g')
+                      .selectAll("dot")
+                      .data(dataset)
+                      .enter()
+                      .append("circle")
+                      .attr("cx", function (d) { return xScale(d[0]); })
+                      .attr("cy", function (d) { return yScale(d[1]); })
+                      .attr("r", 1)
+                      .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                      .style("fill", colors[colorSelector])
+                      .attr("id", function (d, i) { return "dot" + valori[j] })
+                      .on("mouseover", function (d, i) {
+                     
+                        displayTooltip(d, i, valori[j], event)
+                      })
+                      .on("mouseout", function (d, i) { hideTooltip() })
+
+                    var line = d3.line()
+                      .x(function (d) { return xScale(d[0]); })
+                      .y(function (d) { return yScale(d[1]); })
+                      .curve(d3.curveMonotoneX)
+
+                    new_svg.append("path")
+                      .datum(dataset)
+                      .attr("class", "line")
+                      .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                      .attr("d", line)
+                      .style("fill", "none")
+                      .style("stroke", colors[colorSelector])
+                      .style("stroke-width", "1")
+                      .attr("id", function (d, i) { return "path" + valori[j] });
+
+                    if (colorSelector < colors.length) colorSelector += 1
+                    else colorSelector = 0
+
+                  }          
+                } 
+              }
+              
+              if(control != 1){ // Quando non devo scalare tra due grandezze
+
+                for (let j = 0; j < valori.length; j++) { 
+
+                  var selectedGroup = valori[j]
+
+                  var selectedIndex = 0
+
+                  if (selectedGroup == "Tba") selectedIndex = 1
+                  if (selectedGroup == "Itot") selectedIndex = 2
+                  if (selectedGroup == "Qtir") selectedIndex = 3
+                  if (selectedGroup == "Speed_S3_BUS") selectedIndex = 4
+                  if (selectedGroup == "Speed_Sync") selectedIndex = 5
+                  if (selectedGroup == "Tdut2") selectedIndex = 6
+                  if (selectedGroup == "Tdut3") selectedIndex = 7
+                  if (selectedGroup == "VibANT_Sync") selectedIndex = 8
+                  if (selectedGroup == "Step") selectedIndex = 9
+
+                  var tmp_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
+                  var my_data = JSON.parse(tmp_data)
+
+                  if(selectedGroup == "Tdut2"){
+                    min = 250
+                    max = 260
+                  }
+
+                  else{
+
+                    for (let i = 0; i < 43100; i += 10) { //riscalo y per ogni valore
+
+                      if (my_data[i] < min) {
+                        min = my_data[i]
+
+                      }
+                      if (my_data[i] > max) {
+                        max = my_data[i]
+                      }
+
+                    }
+
+                  }
+                  
+                  
+
+
+                  xScale = d3.scaleLinear().domain([0, 43100]).range([0, width]),
+                  yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+                  }
+
+                  for (let j = 0; j < valori.length; j++) { //parte onerosa
+
+                     var dataset = []
+
+                     var selectedGroup = valori[j]
+
+                    var selectedIndex = 0
+
+                    if (selectedGroup == "Tba") selectedIndex = 1
+                    if (selectedGroup == "Itot") selectedIndex = 2
+                    if (selectedGroup == "Qtir") selectedIndex = 3
+                    if (selectedGroup == "Speed_S3_BUS") selectedIndex = 4
+                    if (selectedGroup == "Speed_Sync") selectedIndex = 5
+                    if (selectedGroup == "Tdut2") selectedIndex = 6
+                    if (selectedGroup == "Tdut3") selectedIndex = 7
+                    if (selectedGroup == "VibANT_Sync") selectedIndex = 8
+                    if (selectedGroup == "Step") selectedIndex = 9
+
+                    var tmp_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
+                    var my_data = JSON.parse(tmp_data)
+
+                    for (let i = 0; i < 43100; i += 10) {
+
+
+                      if(selectedGroup == "Tdut2") dataset.push([i + 1,255]);
+                      else if (my_data[i] != undefined) {
+                        dataset.push([i + 1, my_data[i]]);
+                      }
+
+
+                    }
+
+                    console.log(selectedGroup)
+ 
+                  g.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(xScale));
+
+                  g.append("g")
+                    .call(d3.axisLeft(yScale));
+
+
+             
+                  new_svg.append('g')
+                    .selectAll("dot")
+                    .data(dataset)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return xScale(d[0]); })
+                    .attr("cy", function (d) { return yScale(d[1]); })
+                    .attr("r", 3)
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .style("fill", colors[colorSelector])
+                    .attr("id", function (d, i) { return "dot" + valori[j] })
+                    .on("mouseover", function (d, i) {
+                 
+                      displayTooltip(d, i, valori[j], event)
+                    })
+                    .on("mouseout", function (d, i) { hideTooltip() })
+
+                  var line = d3.line()
+                    .x(function (d) { return xScale(d[0]); })
+                    .y(function (d) { return yScale(d[1]); })
+                    .curve(d3.curveMonotoneX)
+
+                  new_svg.append("path")
+                    .datum(dataset)
+                    .attr("class", "line")
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .attr("d", line)
+                    .style("fill", "none")
+                    .style("stroke", colors[colorSelector])
+                    .style("stroke-width", "2")
+                    .attr("id", function (d, i) { return "path" + valori[j] });
+
+                  if (colorSelector < colors.length) colorSelector += 1
+                  else colorSelector = 0
+            
+
+                
+                
+                  }
+
+              }
+              
+
+            }
+
+
+
+        else if (aggregato == 0){ //Caso NON aggregato
+
+         
+          if (toAddDefault == 3) coordinates += 750
+          //scala per grafico
+
+          for(let i = 0; i < 43100; i += 10){ //SINGOLO. Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+           
+            if(selectedGroup == "Tdut2"){
+
+              dataset.push([i + 1, 255]);
+
+              min = 250
+              max = 260
+
+            }
+
+            else{
+              if(my_data[i] != undefined){
+                dataset.push([i + 1, my_data[i]]);
+                if (my_data[i] < min) {
+                  min = my_data[i]
+                }
+                if (my_data[i] > max) {
+                  max = my_data[i]
+                }    
+
+
+              }
+              
+            } 
+
+        }
+
+        console.log(dataset)
+
+       
+          xScale = d3.scaleLinear().domain([0, 43100]).range([0, width]),
+          yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+      
+
+          //Creazione grafico
+
+          document.getElementById("svg-div").innerHTML += '<svg width="800" height="510" id="svg' + selectedGroup +'"></svg>'
+            var svg_to_select = "#svg" + selectedGroup
+
+            var new_svg = d3.select(svg_to_select),
+                margin = 200,
+                width = new_svg.attr("width") - margin, //300
+                height = new_svg.attr("height") - margin //200
+
+             // nel caso io cancelli tutto nell'opzione sovrapponi, adesso metto i nuovi svg dalla coordinata 0+400 anziché dalle vecchie.
+            
+            var tmp =  document.getElementById("svg" + selectedGroup)
+            tmp.style.position = 'absolute';
+            tmp.style.top = '200px';
+            tmp.style.left = coordinates + "px"
+
+   
+    
+            var g = new_svg.append("g")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .attr("id", function (d, i) { return "g" + selectedGroup })
+
+
+          new_svg.append('text')
+            .attr('x', width/2 + 100)
+            .attr('y', 80)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 20)
+            .text(selectedGroup + " Chart");
+        
+            // X label
+            new_svg.append('text')
+            .attr('x', width/2 + 100)
+            .attr('y', height - 15 + 150)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 12)
+            .text("Time");
+        
+            // Y label
+            new_svg.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('transform', 'translate(40,' + height + ')rotate(-90)')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 12)
+            .text(selectedGroup);
+
+            var xScale = d3.scaleLinear().domain([0, 43100]).range([0, width]),
+                yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+            g.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .attr("id", function (d, i) { return "xAxis" + selectedGroup })
+            .call(d3.axisBottom(xScale));
+        
+            g.append("g")
+            .attr("id", function (d, i) { return "yAxis" + selectedGroup })
+            .call(d3.axisLeft(yScale));
+
+            new_svg.append("svg:image")
+              .attr('x', 280)
+              .attr('y', 60)
+              .attr('width', 30)
+              .attr('height', 30)
+              .attr("xlink:href", "images/lensPlus.png")
+              .attr("id", function (d, i) { return "lens" + selectedGroup })
+              .on("click", function (d, i) { //zoomIn
+
+                
+
+                //new_svg.selectAll('text').attr("transform", "translate(0," + height + ")") trasla correttamente il testo
+                new_svg.selectAll('g').remove()
+                new_svg.selectAll('path').remove()
+                new_svg.selectAll('dot').remove()
+                new_svg.style("width", 1310 * counter_zoom + "px")
+               
+
+                counter_zoom += 1
+ 
+                var g = new_svg.append("g")
+                  .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                  .attr("id", function (d, i) { return "g" + selectedGroup })
+
+                var xScale = d3.scaleLinear().domain([0, 43100]).range([0, width * counter_zoom]),
+                  yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+
+
+                g.append("g")
+                  .attr("transform", "translate(0," + height + ")")
+                  .attr("id", function (d, i) { return "xAxis" + selectedGroup })
+                  .call(d3.axisBottom(xScale));
+
+                g.append("g")
+                  .attr("id", function (d, i) { return "yAxis" + selectedGroup })
+                  .call(d3.axisLeft(yScale));
+
+                new_svg.append('g')
+                  .selectAll("dot")
+                  .data(dataset)
+                  .enter()
+                  .append("circle")
+                  .attr("cx", function (d) { return xScale(d[0]); })
+                  .attr("cy", function (d) { return yScale(d[1]); })
+                  .attr("r", 3)
+                  .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                  .style("fill", "#CC0000")
+                  .attr("id", function (d, i) { return "dot" + selectedGroup })
+                  .on("mouseover", function (d, i) {
+                    displayTooltip(d, i, selectedGroup, event)
+                  })
+                  .on("mouseout", function (d, i) { hideTooltip() })
+
+                // Step 8        
+
+                var line = d3.line()
+                  .x(function (d) { return xScale(d[0]); })
+                  .y(function (d) { return yScale(d[1]); })
+                  .curve(d3.curveMonotoneX)
+
+                new_svg.append("path")
+                  .datum(dataset)
+                  .attr("class", "line")
+                  .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                  .attr("d", line)
+                  .style("fill", "none")
+                  .style("stroke", "#CC0000")
+                  .style("stroke-width", "2")
+                  .attr("id", function (d, i) { return "path" + selectedGroup });
+
+
+               }
+                ) //fine zoom
+
+
+            new_svg.append("svg:image")
+              .attr('x', 320)
+              .attr('y', 60)
+              .attr('width', 30)
+              .attr('height', 30)
+              .attr("xlink:href", "images/lensMinus.png")
+              .attr("id", function (d, i) { return "lens" + selectedGroup })
+              .on("click", function (d, i) { //zoomOut
+
+                var curr_width = 1310 * counter_zoom
+                console.log(curr_width)
+
+                
+
+                //new_svg.selectAll('text').attr("transform", "translate(0," + height + ")") trasla correttamente il testo
+                new_svg.selectAll('g').remove()
+                new_svg.selectAll('path').remove()
+                new_svg.selectAll('dot').remove() 
+                new_svg.style("width", curr_width - 200* counter_zoom_out + "px")
+
+                counter_zoom_out += 1
+               
+
+                var g = new_svg.append("g")
+                  .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                  .attr("id", function (d, i) { return "g" + selectedGroup })
+
+                var xScale = d3.scaleLinear().domain([0, 43100]).range([0, curr_width - 200 * counter_zoom_out]),
+                  yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+
+
+                g.append("g")
+                  .attr("transform", "translate(0," + height + ")")
+                  .attr("id", function (d, i) { return "xAxis" + selectedGroup })
+                  .call(d3.axisBottom(xScale));
+
+                g.append("g")
+                  .attr("id", function (d, i) { return "yAxis" + selectedGroup })
+                  .call(d3.axisLeft(yScale));
+
+                new_svg.append('g')
+                  .selectAll("dot")
+                  .data(dataset)
+                  .enter()
+                  .append("circle")
+                  .attr("cx", function (d) { return xScale(d[0]); })
+                  .attr("cy", function (d) { return yScale(d[1]); })
+                  .attr("r", 3)
+                  .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                  .style("fill", "#CC0000")
+                  .attr("id", function (d, i) { return "dot" + selectedGroup })
+                  .on("mouseover", function (d, i) {
+                    displayTooltip(d, i, selectedGroup, event)
+                  })
+                  .on("mouseout", function (d, i) { hideTooltip() })
+
+                // Step 8        
+
+                var line = d3.line()
+                  .x(function (d) { return xScale(d[0]); })
+                  .y(function (d) { return yScale(d[1]); })
+                  .curve(d3.curveMonotoneX)
+
+                new_svg.append("path")
+                  .datum(dataset)
+                  .attr("class", "line")
+                  .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                  .attr("d", line)
+                  .style("fill", "none")
+                  .style("stroke", "#CC0000")
+                  .style("stroke-width", "2")
+                  .attr("id", function (d, i) { return "path" + selectedGroup });
+
+
+              }
+              ) //fine zoom
+         
+        
+            // Step 7
+            new_svg.append('g')
+            .selectAll("dot")
+            .data(dataset)
+            .enter()
+            .append("circle")
+            .attr("cx", function (d) { return xScale(d[0]); } )
+            .attr("cy", function (d) { return yScale(d[1]); } )
+            .attr("r", 3)
+            .attr("transform", "translate(" + 100 + "," + 100 + ")")
+            .style("fill", "#CC0000")
+            .attr("id", function(d,i){ return "dot" + selectedGroup})
+            .on("mouseover", function (d, i) { 
+              displayTooltip(d, i, selectedGroup, event) })
+            .on("mouseout", function (d, i) { hideTooltip() })
+
+            // Step 8        
+
+            var line = d3.line()
+            .x(function(d) { return xScale(d[0]); }) 
+            .y(function(d) { return yScale(d[1]); }) 
+            .curve(d3.curveMonotoneX)
+        
+              new_svg.append("path")
+                .datum(dataset)
+                .attr("class", "line")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                .attr("d", line)
+                .style("fill", "none")
+                .style("stroke", "#CC0000")
+                .style("stroke-width", "2")
+                .attr("id", function (d, i) { return "path" + selectedGroup });
+
+
+
+        }
+
+        
+            // codice finale
+            //if (aggregato == 0) document.getElementById("selectedValues").style.visibility = "hidden"
+       
+            if (aggregato != 1) document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedGroup +'" onchange = "modifyElement('+ selectedGroup +')" checked>' + "<label for='" + selectedGroup + "' id = 'label" + selectedGroup + "'>" + selectedGroup + "</label>" 
+            selectedValues.push(selectedGroup)
+            localStorage.setItem("selectedValues", JSON.stringify(selectedValues))
+
+            //d3.select("#loader").attr("hidden", true);
+
+
+        }
+
+  d3.select("#selectMenu").on("change", function(d) {
+
+
+      
+      //if(selectedOption != undefined) document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption +'" onchange = "modifyElement('+ selectedOption +')" checked>' + selectedOption + "</checkbox>"
+      //document.getElementById("selectedOption").style.visibility = "hidden"
+      var checkBoxAggregato = document.getElementById("aggregato");
+      var data = globalData
+    
+      var selectedOption = d3.select(this).property("value")
+      //d3.select(this).attr("disabled", "true")
+
+
+      localStorage.setItem("selectedOption", JSON.stringify(selectedOption));
+
+    if (checkBoxAggregato.checked == false){ //se Aggregato non è checkato, cancella tutto per fare spazio al nuovo grafico sullo stesso svg
+
+        
+        coordinates += 750
+        newGraph(selectedOption, data, coordinates, 0, 0)
+    
+
+    }
+
+    else if (checkBoxAggregato.checked == true){ 
+
+
+      document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption +'" onchange = "modifyElement('+ selectedOption +')" checked>' + "<label for='" + selectedOption + "' id = 'label" + selectedOption + "'>" + selectedOption + "</label>" 
+      localStorage.setItem("selectedOption", JSON.stringify(selectedOption))
+      //modifyElement(selectedOption, 1)
+      newGraph(selectedOption, data,   coordinates, 1, 1)
+ 
+    }
+
+
+})
+
+        
+
+
+
+        var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
+        
+        document.getElementById("selectedSpindles").innerHTML += "Selected spindle: "+ sn_and_date[0][0] + ", Breakin date: " + sn_and_date[0][1]
+            
+
+            
+
+</script>
+</body>
+</html>

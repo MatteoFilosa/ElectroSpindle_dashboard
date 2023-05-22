@@ -1,0 +1,166 @@
+<script>
+function aggregate(){
+      var cambio = 0
+      var realDataset = []
+      var min = 100000
+      var max = 0
+      var selectedSpindles = JSON.parse(localStorage.getItem("selectedSpindles"))
+      console.log(id_and_sn)
+      if(document.getElementById("aggregato").checked == true){
+
+        colorSelector = 0, dataset = []
+      
+        d3.select("#svg_default").attr("visibility", "visible");
+
+        
+        for(let i = 0; i < allGroup.length; i++){ //Per ogni attributo...
+
+
+          if(document.getElementById(allGroup[i]) != null){ //Se quell'attributo è presente nel div delle checkbox...
+            
+         
+            document.getElementById("svg-div").innerHTML += "<svg width='1000' height='800' id ='svg_aggregate_" + allGroup[i] + "'></svg>" // per ogni attributo ho un grafico
+            var new_svg = d3.select("#svg_aggregate_" + allGroup[i])
+            var g = new_svg.append("g")
+              .attr("class", "axis")
+              .attr("transform", "translate(" + 100 + "," + 100 + ")");
+            var width = 500, height = 400
+
+            ///SETTING DEL TESTO
+
+            new_svg.selectAll('text').remove()
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 80)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text("Grafico Aggregato " + allGroup[i]);
+
+            // X label
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', height - 15 + 150)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 12)
+              .text("Time");
+
+            // Y label
+            new_svg.append('text')
+              .attr('text-anchor', 'middle')
+              .attr('transform', 'translate(60,' + height + ')rotate(-90)')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 12)
+              .text(allGroup[i]);
+
+           
+
+            for (let j = 0; j < selectedSpindles.length; j++) { //Per ogni spindle facente parte di quell'attributo...
+
+              var data = JSON.parse(localStorage.getItem("storageData"+j))
+              max = 0, min = 100000
+
+              for (let z = 0; z < 99; z++) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
+                console.log(tmp)
+                if (eval('data.data.' + tmp + "[" + z + "]") < min) {
+                  min = eval('data.data.' + tmp + "[" + z + "]")
+
+                }
+                if (eval('data.data.' + tmp + "[" + z + "]") > max) {
+                  max = eval('data.data.' + tmp + "[" + z + "]")
+                }
+                dataset.push([z + 1, eval('data.data.' + tmp + "[" + z + "]"), selectedSpindles[j][1]]);
+
+              }
+
+
+              xScale = d3.scaleLinear().domain([0, 100]).range([0, width]),
+              yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+              
+              g.append("g")
+                .attr("class", "axis" )
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+
+              if (cambio == 0){
+
+                g.append("g")
+                  .attr("class", "axis" + j)
+                  .attr("transform", "translate(0,0)")
+                  .call(d3.axisLeft(yScale));
+                
+                cambio = 1
+
+              }
+
+              else {
+
+    
+                g.append("g")
+                  .attr("class", "axis" + j)
+                  .attr("transform", "translate(0,0)")
+                  .call(d3.axisRight(yScale));
+
+                d3.select(".axis" + j).attr("transform", "translate(500,0)")
+                d3.select(".axis" + j).selectAll("text").style('fill', 'white')
+                  
+                cambio = 0
+
+
+              }
+
+              
+              
+              
+              
+              console.log(".axis" + j)
+              console.log(dataset)
+
+              new_svg.append('g')
+                .selectAll("dot")
+                .data(dataset)
+                .enter()
+                .append("circle")
+                .attr("cx", function (d) { return xScale(d[0]); })
+                .attr("cy", function (d) { return yScale(d[1]); })
+                .attr("r", 3)
+                .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                .style("fill", colors[colorSelector])
+                .attr("id", function (d, i) { return "dot" + tmp })
+                .on("mouseover", function (d, i) { return displayTooltip(d, i, tmp, event) })
+                .on("mouseout", function (d, i) { return hideTooltip() })
+
+              var line = d3.line()
+                .x(function (d) { return xScale(d[0]); })
+                .y(function (d) { return yScale(d[1]); })
+                .curve(d3.curveMonotoneX)
+
+              new_svg.append("path")
+                .datum(dataset)
+                .attr("class", "line")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                .attr("d", line)
+                .style("fill", "none")
+                .style("stroke", colors[colorSelector])
+                .style("stroke-width", "2")
+                .attr("id", function (d, i) { return "path" + tmp });
+
+              if (colorSelector < colors.length) colorSelector += 1
+              else colorSelector = 0
+              dataset.length = 0
+
+
+            }
+
+
+
+          }
+        }
+        
+
+      }
+
+      }
+      </script>

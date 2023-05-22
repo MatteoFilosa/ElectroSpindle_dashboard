@@ -1,0 +1,913 @@
+<!doctype html>
+<html>
+<head>
+    <!---Step 2-->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <title>ElectroSpindle Dashboard</title>
+
+    <link rel="stylesheet" href="./style.css"></link>
+    <script>
+        //inizializzazione array di colori per i grafici
+        var colors = [
+  '#ff7f50','#87cefa','#da70d6','#32cd32','#6495ed',
+  '#ff69b4','#ba55d3','#cd5c5c','#ffa500','#40e0d0'
+    ];
+        
+    
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+</head>
+
+<body>
+<h1>ElectroSpindle: Dashboard</h1>
+<!-- <Body background="images/PROVA.png" background-repeat="no-repeat” background-size="cover”>  -->
+<Body background="images/test.png" background-repeat="no-repeat” background-size="cover”>  
+<p id ="spindle">Spindle ID: </p> 
+Inserisci ID Spindle<input type = "number" id ="request" maxlength="3" required> <button id ="submit" class = "button-green"> Cerca</button>
+<select id="selectMenu" disabled = true></select>  
+<!--Step 2-->
+<div id = "svg-div">
+    <svg width="500" height="400" id ="svg_default"></svg> <!-- cambiare width e height dinamicamente per funzione zoom-->
+</div>
+
+<div id = "problems-found">
+    <h3>Problemi trovati </h3> 
+    <!-- 
+    <img src="images/warning.png" style="vertical-align:middle" alt="warning" width="25" height="25"> Problema in: Tba
+     -->
+    <img src="images/check.png" style="vertical-align:middle" alt="check" width="25" height="25"> Nessun problema trovato!
+</div>
+
+<!-- Initialize a select button -->
+<button id = "clear" onclick="clearSvg()" class = "button-blue">Rimuovi tutto</button>
+<input type="checkbox" id ="sovrapponi" onchange = "checkElements()"> Sovrapponi grafici
+<input type="checkbox" id ="separati" onchange = "separati()"> Separati 
+<div id ="selectedValues"></div>
+<div id = "coordinates"></div>
+
+
+<script>
+        // Step 1: creazione menu a tendina per attributi.
+
+        
+        if(document.getElementById("sovrapponi").checked == true) document.getElementById("separati").disabled = true
+        if(document.getElementById("separati").checked == true) document.getElementById("sovrapponi").disabled = true
+        
+        var colorSelector = 0, token = 0, free_svg_1 = true, free_svg_2 = true, free_svg_3 = true, graph_number = 1, old_left = 0, svg_total = 1;
+        localStorage.setItem("flag", JSON.stringify(1));
+        var allGroup = ["Tamb", "Tba", "Time", "BUS_TERMICA_OK", "BUS_VENTOLA_ON","Barcode_DUT","C39_Sync","Date_start","Error_Code_HSD",
+        "Errore_es_Bus", "Esito_prova", "Itot", "NHR", "No_tool", "NodeStateCounter", "Operatore", "Qtir", "Ripetizione", "S1",
+        "S2", "S3", "S4", "S5", "SN", "Slot", "Speed_S3_BUS", "Speed_Sync", "Stazione", "Step", "TH", "TR", "Tdut1", "Tdut2",
+        "Tdut3", "VibANT_Sync", "Vib_EM", "error_mask", "linea", "not used"]
+        d3.select("#selectMenu")
+        .selectAll('myOptions')
+        .data(allGroup)
+        .enter()
+        .append('option')
+        .text(function (d) { return d; }) // text showed in the menu
+        .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+        var svg = d3.select("#svg_default"),
+            margin = 200,
+            width = svg.attr("width") - margin, //300
+            height = svg.attr("height") - margin //200
+
+        var g = svg.append("g")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+
+        //funzione che controlla se la spunta sulla checkbox di id "sovrapponi" è messa o no. Se viene tolta, cancella tutte le checkbox che rappresentano i singoli attributi
+        function checkElements(){
+            
+            if(document.getElementById("sovrapponi").checked == true){
+                document.getElementById("separati").disabled = true
+                var selectedOption = JSON.parse(localStorage.getItem("selectedOption"));
+                console.log(selectedOption)
+                if (selectedOption == "Time") selectedOption = "time"
+                var tmpDot = "#dot" + selectedOption 
+                var tmpPath = "#path" + selectedOption
+                
+                if ((d3.selectAll(tmpDot) != null) && (d3.selectAll(tmpPath)!=null)){
+                    
+                    document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption +'" onchange = "modifyElement('+ selectedOption +')" checked>' + selectedOption + "</checkbox>"
+           
+                }
+
+            }
+            else{
+                document.getElementById("separati").disabled = false
+                colorSelector = 0
+                document.getElementById("selectedValues").innerHTML = ""
+                clearSvg();
+            }
+
+        }
+
+        function separati(){
+
+            console.log("yoo")
+            if(document.getElementById("separati").checked == true){
+                document.getElementById("sovrapponi").disabled = true
+                var selectedOption = JSON.parse(localStorage.getItem("selectedOption"));
+                console.log(selectedOption)
+                if (selectedOption == "Time") selectedOption = "time"
+                var tmpDot = "#dot" + selectedOption 
+                var tmpPath = "#path" + selectedOption
+                
+                
+
+            }
+            else{
+                console.log("eccoci")
+                document.getElementById("sovrapponi").disabled = false
+                colorSelector = 0
+                document.getElementById("selectedValues").innerHTML = ""
+                clearSvg();
+                free_svg_1 = true
+                
+
+            }
+            
+        }
+
+
+        //funzione chiamata quando vengono spuntate o meno le checkbox per i singoli attributi (la checkbox su "sovrapponi" è ovviamente spuntata )
+        function modifyElement(selectedOption){ 
+            
+            var data = JSON.parse(localStorage.getItem("storageData"));
+            //var selectedOption = JSON.parse(localStorage.getItem("selectedOption"));
+            selectedOption = selectedOption.id
+            if(selectedOption == "Time") selectedOption = "time"
+            
+            if (document.getElementById(selectedOption).checked == true){
+
+                if(colorSelector + 1 >= colors.length) colorSelector = 0;
+                else colorSelector += 1;
+                
+                var dataset = [];
+                var min = 100000
+                var max = 0
+                console.log(eval('data.data.' + selectedOption + "[0]")) //eval serve perché se facessi data.data.selectedGroup[0] direttamente da errore.
+                
+        
+    for(let i = 0; i < 99; i++){
+        if(eval('data.data.' + selectedOption + "["+ i +"]") < min){
+        min = eval('data.data.' + selectedOption + "["+ i +"]")
+        }
+        if(eval('data.data.' + selectedOption + "["+ i +"]") > max){
+        max = eval('data.data.' + selectedOption + "["+ i +"]")
+        }    
+    dataset.push([i+1, eval('data.data.' + selectedOption + "["+ i +"]")]);
+    //rescale axes
+    }
+    xScale = d3.scaleLinear().domain([0, 100]).range([0, width]),
+    yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+    svg.append('g')
+        .selectAll("dot")
+        .data(dataset)
+        .enter()
+        .append("circle")
+        .attr("cx", function (d) { return xScale(d[0]); } )
+        .attr("cy", function (d) { return yScale(d[1]); } )
+        .attr("r", 3)
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .style("fill", colors[colorSelector])
+        .attr("id", function(d,i){ return "dot" + selectedOption})
+        .on('mouseover', function (d, i) {
+            document.getElementById("coordinates").innerHTML = "Time: " + d[0] + " , " + selectedOption + ": " + d[1]
+            d3.select(this).style("fill", "#7CFC00")
+        })
+        .on('mouseout', function (d, i) {
+            document.getElementById("coordinates").innerHTML = ""
+            d3.select(this).style("fill", colors[colorSelector])
+        }) 
+
+    //creazione path. Ogni grafico è formato da punti (dot) e una linea (path). Ho assegnato a ognuna di queste cose un id in base a quello che rappresentano (i dot e il path di "tba" avranno come id "#dottba" e "pathtba".)
+        var line = d3.line()
+        .x(function(d) { return xScale(d[0]); }) 
+        .y(function(d) { return yScale(d[1]); }) 
+        .curve(d3.curveMonotoneX)
+        svg.append("path")
+        .datum(dataset) 
+        .attr("class", "line") 
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .attr("d", line)
+        .style("fill", "none")
+        .style("stroke", colors[colorSelector])
+        .style("stroke-width", "2")
+        .attr("id", function(d,i){ return "path" + selectedOption});    
+                
+
+            }
+        //si cancella tutto ciò che fa parte del grafico con l'id selezionato
+            else if (document.getElementById(selectedOption).checked == false){
+                
+                var toRemoveDot = "#dot" + selectedOption
+                var toRemovePath = "#path" + selectedOption
+                console.log("Deleted: " + toRemoveDot + ", " + toRemovePath) 
+                d3.selectAll(toRemoveDot).remove()
+                d3.selectAll(toRemovePath).remove()
+            }
+            
+        }
+
+        //quando si preme il bottone "Clear":
+       
+        function clearSvg(){
+
+                document.getElementById("selectedValues").innerHTML = ""
+                document.getElementById("sovrapponi").checked = false
+                document.getElementById("separati").checked = false
+                document.getElementById("sovrapponi").disabled = false
+                document.getElementById("separati").disabled = false
+                document.getElementById("selectMenu").selectedIndex = 0; 
+
+                d3.select("#svg_default").selectAll("circle").remove();
+                d3.select("#svg_default").selectAll("path").remove();
+                d3.select("#svg_default").selectAll("text").remove();
+                //document.getElementById("svg_default").remove();
+                d3.select("#svg_default").selectAll("g").remove();
+                
+                for (let i = 2; i <= 100; i ++){
+
+                    console.log("#svg" + i)
+                    d3.select("#svg" + i).selectAll("circle").remove();
+                    d3.select("#svg" + i).selectAll("path").remove();
+                    d3.select("#svg" + i).selectAll("text").remove();
+                    d3.select("#svg" + i).selectAll("g").remove();
+                    document.getElementById("svg" + i).remove();
+                    
+                }
+
+                free_svg_1 = true
+                    
+                colorSelector = 0
+                var svg = d3.select("#svg_default"),
+                margin = 200,
+                width = svg.attr("width") - margin, //300
+                height = svg.attr("height") - margin //200
+
+                var g = svg.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+                var xScale = d3.scaleLinear().domain([0, 100]).range([0, width]),
+                    yScale = d3.scaleLinear().domain([0, 100]).range([height, 0]);
+
+                g.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+        
+                g.append("g")
+                .call(d3.axisLeft(yScale));
+
+                
+                localStorage.setItem("selectedOption", "")
+                }
+
+        //new request based on the id
+
+        d3.select("#submit").on("click", function(d){
+            
+            //quando faccio una ricerca per id, mi visualizza come primo grafico quello della temperatura ambientale (Tamb).
+            document.getElementById("selectMenu").disabled = false
+            document.getElementById("selectedValues").innerHTML = ""
+            spindle_id = document.getElementById('request').value
+            if(spindle_id == "") alert("Id mancante o scorretto")
+            document.getElementById("spindle").innerHTML = "Spindle ID: " + spindle_id
+            d3.json("http://arca.diag.uniroma1.it:8082/rodaggi/spindles/" + spindle_id +"/raw_data?limit=100", function(data) {
+            console.log(data.data)
+            
+            //per ora salvo i dati su localstorage, perché molte funzioni non si vedono tra loro e le variabili, anche se globali, non si vedono tra loro comunque. Che roba
+            localStorage.setItem("storageData", JSON.stringify(data));
+
+    
+            var dropDown = document.getElementById("selectMenu");
+            dropDown.selectedIndex = 0;        
+        
+            var datasetTamb = [];
+    
+            var min = 100000
+            var max = 0
+
+            for(let i = 0; i < 99; i++){
+                if(data.data.Tamb[i] < min){
+                    min = data.data.Tamb[i]
+                }
+                if(data.data.Tamb[i] > max){
+                    max = data.data.Tamb[i]
+                }
+                datasetTamb.push([i+1, data.data.Tamb[i]]);
+            }
+            
+  
+            var selectedOption = "Tamb"
+            localStorage.setItem("selectedOption", JSON.stringify(selectedOption));
+            
+            d3.selectAll("circle").remove();
+            d3.selectAll("path").remove();
+            d3.selectAll("text").remove();
+
+            
+
+        // Creazione assi cartesiani. 
+        xScale = d3.scaleLinear().domain([0, 100]).range([0, width]),
+                yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+                var g = svg.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+                
+                g.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+        
+                g.append("g")
+                .call(d3.axisLeft(yScale));
+
+                svg.append('g')
+                    .selectAll("dot")
+                    .data(datasetTamb)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return xScale(d[0]); } )
+                    .attr("cy", function (d) { return yScale(d[1]); } )
+                    .attr("r", 3)
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .style("fill", "#CC0000")
+                    .attr("id", function(d,i){ return "dotTamb"})
+                    .on('mouseover', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = "Time: " + d[0] + " , " + "Tamb" + ": " + d[1]
+                    d3.select(this).style("fill", "#7CFC00")
+                  
+                })
+                    
+                    .on('mouseout', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = ""
+                    d3.select(this).style("fill", "#CC0000")
+                }); 
+
+                var line = d3.line()
+                    .x(function(d) { return xScale(d[0]); }) 
+                    .y(function(d) { return yScale(d[1]); }) 
+                    .curve(d3.curveMonotoneX)
+
+                svg.append("path")
+                    .datum(datasetTamb) 
+                    .attr("class", "line") 
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .attr("d", line)
+                    .style("fill", "none")
+                    .style("stroke", "#CC0000")
+                    .style("stroke-width", "2")
+                    .attr("id", function(d,i){ return "pathTamb"});
+
+                svg.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 100)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 20)
+                    .text('Grafico Tamb');
+        
+                // X label
+                svg.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', height - 15 + 150)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Time');
+        
+                // Y label
+                svg.append('text')
+                    .attr('text-anchor', 'middle')
+                    .attr('transform', 'translate(60,' + height + ')rotate(-90)')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Tamb');
+
+            free_svg_1 = false
+
+            })
+    
+           //funzione che  del grafico in base all' attributo del menu a tendina selezionato. Se la spunta su "sovrapponi" c'è, allora creo delle checkbox per ogni attributo richiesto su un div apposito.
+       
+        d3.select("#selectMenu").on("change", function(d) {
+
+            
+            var checkBoxSovrapponi = document.getElementById("sovrapponi");
+            var checkBoxSeparati = document.getElementById("separati");
+            var data = JSON.parse(localStorage.getItem("storageData"));
+            // recover the option that has been chosen
+            var selectedOption = d3.select(this).property("value")
+           
+            localStorage.setItem("selectedOption", JSON.stringify(selectedOption));
+
+            if (checkBoxSeparati.checked == true){ 
+
+                colour = "#CC0000"
+                    //d3.selectAll("g").remove();
+                    //d3.selectAll("svg").remove();
+                
+                    if(free_svg_1 == true){ 
+
+                        console.log("free_svg_1")
+                        d3.selectAll("circle").remove();
+                        d3.selectAll("path").remove();
+                        d3.selectAll("text").remove();
+                        
+                        resetText(selectedOption);
+                        update(selectedOption, data, colour);
+                        free_svg_1 = false
+
+                    } 
+                    else{ 
+                        graph_number += 1
+                        if(document.getElementById("svg2") == null){
+                            graph_number = 2
+                            console.log("basta")
+                            var reset_svg_pos = 0
+                        }
+                        
+                        newGraph(selectedOption, data, colour, graph_number, reset_svg_pos);
+                    }
+
+                
+                
+            }
+          
+
+            else if (checkBoxSovrapponi.checked == false){ //se sovrapponi non è checkato, cancella tutto per fare spazio al nuovo grafico sullo stesso svg
+                console.log("ultima speranza")
+               
+                //d3.select("#svg_default").selectAll("circle").remove();
+                //d3.select("#svg_default").selectAll("path").remove();
+                //d3.select("#svg_default").selectAll("text").remove();
+                //d3.select("#svg_default").selectAll("g").remove();
+                
+                for (let i = 2; i <= svg_total; i ++){
+
+                    console.log("#svg" + i)
+                    d3.select("#svg" + i).selectAll("circle").remove();
+                    d3.select("#svg" + i).selectAll("path").remove();
+                    d3.select("#svg" + i).selectAll("text").remove();
+                }
+                
+                colour = "#CC0000"
+                update(selectedOption, data, colour);
+                resetText(selectedOption);
+
+            }
+
+            else if ((checkBoxSovrapponi.checked == true) || (checkboxSeparati.checked == false)){
+
+                console.log("senno qui")
+                update(selectedOption, data, colors[colorSelector]);
+                if(colorSelector + 1 >= colors.length) colorSelector = 0;
+                else colorSelector += 1;
+                if (selectedOption == "Time") selectedOption = "time"
+
+                if(document.getElementById(selectedOption) == null) document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption +'" onchange = "modifyElement('+ selectedOption + ')" checked>' + selectedOption + "</checkbox>"
+                
+            }
+            
+                 
+            
+            
+        })
+
+
+        function createAxes(selectedOption){
+
+            g.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(xScale));
+        
+            g.append("g")
+            .call(d3.axisLeft(yScale));
+        }
+
+        function resetText(selectedOption){
+
+            
+
+            svg.append('text')
+            .attr('x', width/2 + 100)
+            .attr('y', 100)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 20)
+            .text('Grafico ' + selectedOption );
+        
+            // X label
+            svg.append('text')
+            .attr('x', width/2 + 100)
+            .attr('y', height - 15 + 150)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 12)
+            .text('Time');
+        
+            // Y label
+            svg.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('transform', 'translate(60,' + height + ')rotate(-90)')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 12)
+            .text(selectedOption);
+            }
+
+              
+
+      
+       
+        function update(selectedGroup, data, colour) {
+
+            //var id_and_sn = JSON.parse(localStorage.getItem("selectedSpindles"));
+        
+        document.getElementById("selectedSpindles").innerHTML += "Spindle selezionato: "+ id_and_sn[0][1]
+            
+            
+            if(selectedGroup == "Time") selectedGroup = "time"
+                console.log(selectedGroup)
+
+                var dataset = [];
+                var min = 100000
+                var max = 0
+                console.log(eval('data.data.' + selectedGroup + "[0]")) //eval serve perché se facessi data.data.selectedGroup[0] direttamente da errore.
+            
+            if(document.getElementById("sovrapponi").checked == false){
+        console.log("issue")
+                for(let i = 0; i < 99; i++){
+                
+                        if(eval('data.data.' + selectedGroup + "["+ i +"]") < min){
+                            min = eval('data.data.' + selectedGroup + "["+ i +"]")
+                        }
+                        if(eval('data.data.' + selectedGroup + "["+ i +"]") > max){
+                            max = eval('data.data.' + selectedGroup + "["+ i +"]")
+                        }    
+                    dataset.push([i+1, eval('data.data.' + selectedGroup + "["+ i +"]")]);
+                    }
+                }
+
+            else{
+                console.log("issue")
+                for(let i = 0; i < 99; i++){
+
+                    if(token == 1){ //ho generato almeno un grafico
+
+                    min = JSON.parse(localStorage.getItem("min"));
+                    max = JSON.parse(localStorage.getItem("max"));
+
+                    }
+                        
+
+                    if(eval('data.data.' + selectedGroup + "["+ i +"]") < min){
+                        min = eval('data.data.' + selectedGroup + "["+ i +"]")
+                    }
+                    if(eval('data.data.' + selectedGroup + "["+ i +"]") > max){
+                        max = eval('data.data.' + selectedGroup + "["+ i +"]")
+                    }    
+                dataset.push([i+1, eval('data.data.' + selectedGroup + "["+ i +"]")]);
+                localStorage.setItem("min", JSON.stringify(min))
+                localStorage.setItem("max", JSON.stringify(max))
+                token = 1
+                }
+                }
+
+    
+            if(document.getElementById("sovrapponi").checked == false){
+
+                console.log("issue")
+
+                d3.select("#svg_default").selectAll("circle").remove();
+                d3.select("#svg_default").selectAll("path").remove();
+                d3.select("#svg_default").selectAll("text").remove();
+                //d3.select("#svg_default").selectAll("g").remove();
+
+                var svg = d3.select("#svg_default")
+
+                
+
+                xScale = d3.scaleLinear().domain([0, 100]).range([0, width]),
+                yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+                var g = svg.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+                
+                g.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+        
+                g.append("g")
+                .call(d3.axisLeft(yScale));
+
+                svg.append('g')
+                    .selectAll("dot")
+                    .data(dataset)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return xScale(d[0]); } )
+                    .attr("cy", function (d) { return yScale(d[1]); } )
+                    .attr("r", 3)
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .style("fill", colour)
+                    .attr("id", function(d,i){ return "dot" + selectedGroup})
+                    .on('mouseover', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = "Time: " + d[0] + " , " + selectedGroup + ": " + d[1]
+                    d3.select(this).style("fill", "#7CFC00")
+                  
+                })
+                    
+                    .on('mouseout', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = ""
+                    d3.select(this).style("fill", colour)
+                }); 
+
+                var line = d3.line()
+                    .x(function(d) { return xScale(d[0]); }) 
+                    .y(function(d) { return yScale(d[1]); }) 
+                    .curve(d3.curveMonotoneX)
+
+                svg.append("path")
+                    .datum(dataset) 
+                    .attr("class", "line") 
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .attr("d", line)
+                    .style("fill", "none")
+                    .style("stroke", colour)
+                    .style("stroke-width", "2")
+                    .attr("id", function(d,i){ return "path" + selectedGroup});
+
+                svg.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 100)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 20)
+                    .text('Grafico ' + selectedGroup);
+        
+                // X label
+                svg.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', height - 15 + 150)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Time');
+        
+                // Y label
+                svg.append('text')
+                    .attr('text-anchor', 'middle')
+                    .attr('transform', 'translate(60,' + height + ')rotate(-90)')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text(selectedGroup);
+
+            }
+
+            else {
+
+                
+                console.log("issue")
+                //far scalare il vecchio path alla nuova grandezza del grafico, magari prima rimuovo il vecchio path assegnandogli id etc e lo ridisegno mano mano
+                
+                
+                d3.select("#svg_default").selectAll("text").remove();
+                var svg = d3.select("#svg_default")
+                svg.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 100)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 20)
+                    .text("Grafico Misto");
+        
+            // X label
+                svg.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', height - 15 + 150)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text("Time");
+            
+            // Y label
+
+                svg.append('text')
+                    .attr('text-anchor', 'middle')
+                    .attr('transform', 'translate(60,' + height + ')rotate(-90)')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text("Valori Misti");
+
+                xScale = d3.scaleLinear().domain([0, 100]).range([0, width]),
+                yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+                //createAxes();
+
+                svg.append('g')
+                    .selectAll("dot")
+                    .data(dataset)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return xScale(d[0]); } )
+                    .attr("cy", function (d) { return yScale(d[1]); } )
+                    .attr("r", 3)
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .style("fill", colour)
+                    .attr("id", function(d,i){ return "dot" + selectedGroup})
+                    .on('mouseover', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = "Time: " + d[0] + " , " + selectedGroup + ": " + d[1]
+                    d3.select(this).style("fill", "#7CFC00")
+                    })
+                    .on('mouseout', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = ""
+                    d3.select(this).style("fill", colour)
+                }) ;
+
+                var line = d3.line()
+                    .x(function(d) { return xScale(d[0]); }) 
+                    .y(function(d) { return yScale(d[1]); }) 
+                    .curve(d3.curveMonotoneX)
+
+                svg.append("path")
+                    .datum(dataset) 
+                    .attr("class", "line") 
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .attr("d", line)
+                    .style("fill", "none")
+                    .style("stroke", colour)
+                    .style("stroke-width", "2")
+                    .attr("id", function(d,i){ return "path" + selectedGroup});
+               
+                
+
+            }
+  
+                
+
+    
+        }
+
+    function newGraph(selectedGroup, data, colour, svg_number, new_coordinates){
+        
+
+
+        if(selectedGroup == "Time") selectedGroup = "time"
+
+                var dataset = [];
+                var min = 100000
+                var max = 0
+                console.log(eval('data.data.' + selectedGroup + "[0]")) //eval serve perché se facessi data.data.selectedGroup[0] direttamente da errore.
+                
+        
+        for(let i = 0; i < 99; i++){
+
+            xScale = d3.scaleLinear().domain([0, 100]).range([0, width]),
+            yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+                if(eval('data.data.' + selectedGroup + "["+ i +"]") < min){
+                    min = eval('data.data.' + selectedGroup + "["+ i +"]")
+                }
+                if(eval('data.data.' + selectedGroup + "["+ i +"]") > max){
+                    max = eval('data.data.' + selectedGroup + "["+ i +"]")
+                }    
+            dataset.push([i+1, eval('data.data.' + selectedGroup + "["+ i +"]")]);
+  
+    }    
+    
+                 
+            document.getElementById("svg-div").innerHTML += '<svg width="500" height="400" id="svg' + svg_number +'"></svg>'
+            var svg_to_select = "#svg" + svg_number
+            console.log(svg_to_select)
+            var new_svg = d3.select(svg_to_select),
+                margin = 200,
+                width = svg.attr("width") - margin, //300
+                height = svg.attr("height") - margin //200
+
+            if(new_coordinates == 0) old_left = new_coordinates // nel caso io cancelli tutto nell'opzione sovrapponi, adesso metto i nuovi svg dalla coordinata 0+400 anziché dalle vecchie.
+            old_left += 400
+            var tmp =  document.getElementById("svg" + svg_number)
+            tmp.style.position = 'absolute';
+            tmp.style.top = '200px';
+            tmp.style.left = old_left + "px"
+            
+            
+                
+
+            var g = new_svg.append("g")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+        new_svg.append('text')
+            .attr('x', width/2 + 100)
+            .attr('y', 100)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 20)
+            .text("Grafico " + selectedGroup);
+        
+            // X label
+            new_svg.append('text')
+            .attr('x', width/2 + 100)
+            .attr('y', height - 15 + 150)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 12)
+            .text("Time");
+        
+            // Y label
+            new_svg.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('transform', 'translate(60,' + height + ')rotate(-90)')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 12)
+            .text(selectedGroup);
+
+            var xScale = d3.scaleLinear().domain([0, 100]).range([0, width]),
+                yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+            g.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(xScale));
+        
+            g.append("g")
+            .call(d3.axisLeft(yScale));
+        
+            // Step 7
+            new_svg.append('g')
+            .selectAll("dot")
+            .data(dataset)
+            .enter()
+            .append("circle")
+            .attr("cx", function (d) { return xScale(d[0]); } )
+            .attr("cy", function (d) { return yScale(d[1]); } )
+            .attr("r", 3)
+            .attr("transform", "translate(" + 100 + "," + 100 + ")")
+            .style("fill", "#CC0000")
+            .attr("id", function(d,i){ return "dot" + selectedGroup + "3"})
+            .on('mouseover', function (d, i) {
+            document.getElementById("coordinates").innerHTML = "Time: " + d[0] + " , " + selectedGroup + ": " + d[1]
+            d3.select(this).style("fill", "#7CFC00")
+        })
+            .on('mouseout', function (d, i) {
+                document.getElementById("coordinates").innerHTML = ""
+                d3.select(this).style("fill", "#CC0000")
+            });
+
+            // Step 8        
+            var line = d3.line()
+            .x(function(d) { return xScale(d[0]); }) 
+            .y(function(d) { return yScale(d[1]); }) 
+            .curve(d3.curveMonotoneX)
+        
+            new_svg.append("path")
+            .datum(dataset) 
+            .attr("class", "line") 
+            .attr("transform", "translate(" + 100 + "," + 100 + ")")
+            .attr("d", line)
+            .style("fill", "none")
+            .style("stroke", "#CC0000")
+            .style("stroke-width", "2")
+            .attr("id", function(d,i){ return "path" + selectedGroup + svg_number});
+
+            svg_total += 1
+           
+
+            g.append("foreignObject")
+        .attr("width", 75)
+        .attr("height", 45)
+        .append("xhtml:body")
+        .html("<button class = 'button-red'> Elimina </button>")
+        .on("click", function(d, i){
+            console.log("click")
+            d3.select(svg_to_select).selectAll("circle").remove();
+            d3.select(svg_to_select).selectAll("path").remove();
+            d3.select(svg_to_select).selectAll("text").remove();
+            d3.select(svg_to_select).selectAll("g").remove();
+            tmp.remove()
+            var i = svg_number + 1
+            while(i <= svg_total){
+                var to_move = document.getElementById("svg" + i)
+                var new_left = to_move.style.left.slice(0, -2)
+                new_left = new_left - 400
+                to_move.style.left = new_left + "px"
+                console.log(new_left)
+                i+=1
+            }
+            svg_total -= 1
+            graph_number -= 1;
+
+        
+            
+        });
+
+        }
+             
+    
+        
+    
+})
+
+       
+
+        
+</script>
+</body>
+</html>

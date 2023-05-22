@@ -1,0 +1,729 @@
+<!doctype html>
+<html>
+<head>
+    <!---Step 2-->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <title>Multiple spindles visualization</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="./style_aggregate.css"></link>
+    <script>
+    //inizializzazione array di colori per i grafici
+        var colors = [ "#CC0000",
+  '#ff7f50','#87cefa','#da70d6','#32cd32','#6495ed',
+  '#ff69b4','#ba55d3','#cd5c5c','#cc5500','#40e0d0'
+    ];
+//
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+</head>
+
+
+<body>
+<h1>Multiple spindles visualization</h1>
+<!-- <Body background="images/PROVA.png" background-repeat="no-repeat” background-size="cover”>  -->
+<!--<Body background="images/test.png" background-repeat="no-repeat” background-size="cover”></Body>-->
+
+<input type = "checkbox" id ="aggregato" class = "checkbox" onchange ="aggregate()"> Aggregate
+<!--<input type = "checkbox" id ="tamb" class = "checkbox" onchange ="modifyElement('tamb')" checked> Tamb
+<input typddde = "checkbox" id ="tba" class = "checkbox" onchange ="modifyElement('tba')" checked> Tba -->
+
+<select id="selectMenu" >
+  <option value="" disabled selected>Select attribute</option>
+</select>
+<div id="selectedValues"></div>
+
+<button id="featuresBtn" class="button-blue" style="left: 550px; top: -25px;" onclick="features()">Features</button>
+<button id="analytics_2" class="button-blue" style="left: 550px; top: -25px;">Analytics</button>
+<div id = "svg-div">
+  <div class="grid-container" id = "grid-container">
+  </div>
+</div>
+<div id="tooltip"></div>
+
+
+
+<!-- Initialize a select button -->
+<!--<button id = "clear" onclick="clearSvg()" class = "button-blue">Rimuovi tutto</button>!-->
+
+
+<div id = "info"></div>
+<br>
+
+
+<div id = "coordinates"></div>
+<div id = "features" style = "float: right"></div>
+
+<script>
+
+  function sleep(time) {
+      return new Promise((resolve) => setTimeout(resolve, time));
+    }
+
+    
+   var selectedSpindles = JSON.parse(localStorage.getItem("selectedSpindles"))
+   var globalData = [], current_spindle
+   var allGroup = ["Tamb", "Tba", "Itot", "Qtir", "Speed_S3_BUS", "Speed_Sync", "Tdut2", "Tdut3", "VibANT_Sync", "Step"]
+    d3.select("#selectMenu")
+      .selectAll('myOptions')
+      .data(allGroup)
+      .enter()
+      .append('option')
+      .text(function (d) { return d; }) // text showed in the menu
+      .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+
+    console.log(selectedSpindles)
+
+    const spindleArrays = {};
+
+      for (let j = 0; j < selectedSpindles.length; j++) {
+        // Get the current selected spindle
+        const spindle = selectedSpindles[j][0];
+
+        for (let i = 0; i < allGroup.length; i++) {
+          const column = allGroup[i];
+
+          d3.json(
+            "http://arca.diag.uniroma1.it:8082/data/breakin/" +
+            spindle +
+            "/raw_data?mode=0&factor=100&points=0&columns=" +
+            column,
+            function (data) {
+              // Check if the data array for the current spindle exists
+              if (!spindleArrays[spindle]) {
+                spindleArrays[spindle] = {};
+              }
+
+              // Save the data array for the current column
+              spindleArrays[spindle][column] = data;
+              if (j === 0 && column === "Tamb") {
+                // Parse the "Tamb" string into an array
+                const tambString = spindleArrays[spindle][column].Tamb;
+                const tambArray = JSON.parse(tambString);
+
+                // Access and print the first value of "Tamb" of the first spindle
+                const firstTambValue = tambArray[0];
+                console.log("First Tamb value of the first spindle:", firstTambValue);
+              }
+
+    
+            }
+          );
+        }
+      }
+      console.log(spindleArrays);
+
+      sleep(1000).then(() => {
+
+          
+
+
+        })
+      // Example usage of the data arrays
+      
+      
+
+  
+
+  function modifyElement(selectedGroup){
+
+    console.log(selectedGroup)
+    selectedGroup = selectedGroup.id
+    document.getElementById(selectedGroup).remove()
+    document.getElementById("label" + selectedGroup).remove()
+    if (selectedGroup == "Time") selectedGroup = "time"
+
+    for (let i = 0; i < sn_and_date.length; i++) {
+
+      d3.select("#svg" + selectedGroup + "_" + i).remove();
+      
+
+
+    }
+  }
+
+   function displayTooltip(d, i, selectedGroup, event) {
+      document.getElementById("tooltip").style.visibility = "visible"
+      
+      var tooltip = document.getElementById("tooltip")
+      if(d[2] !=null) tooltip.innerHTML = selectedGroup + ": " + d[1] + ", SN: " + d[2]
+      else tooltip.innerHTML = selectedGroup + ": " + d[1]
+      tooltip.style.position = "absolute"
+      tooltip.style.top = (event.screenY - 80) + "px"
+      tooltip.style.left = (event.screenX - 80) + "px"
+
+
+    }
+
+    function hideTooltip(d, i, event) {
+
+      document.getElementById("tooltip").style.visibility = "hidden"
+
+    }
+
+
+
+    function aggregate(){
+      var cambio = 0, dataset = [], data = []
+      var min = 100000
+      var max = 0
+      var selectedSpindles = JSON.parse(localStorage.getItem("selectedSpindles"))
+      
+
+      if(document.getElementById("aggregato").checked == true){
+
+        document.getElementById('selectMenu').setAttribute("disabled", "disabled")
+
+        colorSelector = 0
+      
+        d3.select("#svg_default").attr("visibility", "visible");
+
+        
+
+        
+        for(let i = 0; i < allGroup.length; i++){ //Per ogni attributo...
+
+          
+          
+
+          if(document.getElementById(allGroup[i]) != null){ //Se quell'attributo è presente nel div delle checkbox...
+
+          //Disegno prima un svg generico di quell'attributo...
+          max = 0, min = 1000000
+
+          document.getElementById("svg-div").innerHTML += "<svg width='1000' height='800' class ='svg_aggregate' id ='svg_aggregate_" + allGroup[i] + "'></svg>" // per ogni attributo ho un grafico
+            var new_svg = d3.select("#svg_aggregate_" + allGroup[i])
+            var g = new_svg.append("g")
+              .attr("class", "axis")
+              .attr("transform", "translate(" + 100 + "," + 100 + ")");
+            var width = 500, height = 400
+
+            ///SETTING DEL TESTO
+
+            new_svg.selectAll('text').remove()
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 80)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text(allGroup[i] + " Aggregate Chart");
+
+            // X label
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', height - 15 + 150)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 12)
+              .text("Time");
+
+            // Y label
+            new_svg.append('text')
+              .attr('text-anchor', 'middle')
+              .attr('transform', 'translate(40,' + height + ')rotate(-90)')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 12)
+              .text(allGroup[i]);
+
+          for (let j = 0; j < selectedSpindles.length; j++) { //Poi, per ogni spindle facente parte di quell'attributo scalo al massimo e minimo e cancello i grafici di prima singoli
+
+              current_spindle = selectedSpindles[j][0]
+              selectedOption = allGroup[i]
+              
+              //accrocco funzionante
+              const attributeArray = spindleArrays[current_spindle][selectedOption];
+              const attributeString = eval("attributeArray." + selectedOption);
+              const attributeValues = JSON.parse(attributeString);
+
+              const firstValue = attributeValues[0];
+              console.log("First value of the first spindle:", firstValue);
+
+
+              d3.select("#svg" + selectedOption + "_" + j).remove();
+
+              for (let z = 0; z < 43100; z++) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
+              
+                if (attributeValues[z] != undefined) {
+                if (attributeValues[z] < min) {
+                  min = attributeValues[z]
+
+                }
+                if (attributeValues[z] > max) {
+                  max = attributeValues[z]
+                }
+              
+
+            }
+          }
+              
+        }
+
+        console.log(min, max)
+        //e ora ho la mia scala definitiva...
+        xScale = d3.scaleLinear().domain([0, 43100]).range([0, width]),
+        yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);    
+         
+            
+
+           
+
+            for (let j = 0; j < selectedSpindles.length; j++) { //Per ogni spindle facente parte di quell'attributo...
+
+              current_spindle = selectedSpindles[j][0]
+              const attributeArray = spindleArrays[current_spindle][selectedOption];
+              const attributeString = eval("attributeArray." + selectedOption);
+              const attributeValues = JSON.parse(attributeString);
+
+              const firstValue = attributeValues[0];
+              console.log("First value of the first spindle:", firstValue);
+             
+              dataset.length = 0 //annulliamo il dataset ogni volta sennò diventa un misto 
+              for (let z = 0; z < 43100; z+=10) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
+
+              if (attributeValues[z] != undefined){
+                if (attributeValues[z] < min) {
+                  min = attributeValues[z]
+
+                }
+                if (attributeValues[z] > max) {
+                  max = attributeValues[z]
+                }
+
+                dataset.push([z + 1, attributeValues[z], selectedSpindles[j][1]]);
+                console.log(z + 1, attributeValues[z], selectedSpindles[j][1])
+              }
+            }
+
+              console.log(dataset)
+              
+              g.append("g")
+                .attr("class", "axis" )
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+
+              
+
+              g.append("g")
+                  .attr("class", "axis")
+                  .call(d3.axisLeft(yScale));
+     
+              
+           
+
+              new_svg.append('g')
+                .selectAll("dot")
+                .data(dataset)
+                .enter()
+                .append("circle")
+                .attr("cx", function (d) { return xScale(d[0]); })
+                .attr("cy", function (d) { return yScale(d[1]); })
+                .attr("r", 3)
+                .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                .style("fill", colors[colorSelector])
+                .attr("id", function (d, i) { return "dot" + selectedOption })
+                .on("mouseover", function (d, i) { return displayTooltip(d, i, selectedOption, event) })
+                .on("mouseout", function (d, i) { return hideTooltip() })
+
+              var line = d3.line()
+                .x(function (d) { return xScale(d[0]); })
+                .y(function (d) { return yScale(d[1]); })
+                .curve(d3.curveMonotoneX)
+
+              new_svg.append("path")
+                .datum(dataset)
+                .attr("class", "line")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                .attr("d", line)
+                .style("fill", "none")
+                .style("stroke", colors[colorSelector])
+                .style("stroke-width", "2")
+                .attr("id", function (d, i) { return "path" + selectedOption });
+
+              if (colorSelector < colors.length) colorSelector += 1
+              else colorSelector = 0
+              
+
+
+            }
+
+
+
+          }
+        }
+        
+
+
+      }
+
+      else if (document.getElementById("aggregato").checked == false){
+
+        document.getElementById("selectMenu").disabled = "false"
+
+        d3.selectAll(".svg_aggregate").remove()
+        count = 0
+        
+        var nodes = document.getElementById("selectedValues").childNodes
+
+        for (let i = 0; i < nodes.length; i++) { //Per ogni attributo...
+
+          
+        if ((document.getElementById(nodes[i].id) != null) && (nodes[i].id.includes("label") == false )) {
+
+          var selectedOption = nodes[i].id
+         
+
+        for (let j = 0; j < sn_and_date.length; j++) {
+
+          current_spindle = sn_and_date[j][0]
+          
+          count += 1
+          document.getElementById("svg-div").innerHTML += "<div class='grid-container' id='grid-container" + count + "'>"
+
+          document.getElementById("grid-container" + count).innerHTML += "<svg width='800' height='510' id ='svg" + selectedOption + "_" + j + "'></svg>"
+
+          
+
+            data = JSON.parse(localStorage.getItem("storageData" + j))
+
+            console.log("#svg" + selectedOption + "_" + j)
+            var svg = d3.select("#svg" + selectedOption + "_" + j),
+              margin = 200,
+              width = svg.attr("width") - margin, //300
+              height = svg.attr("height") - margin //200
+
+
+
+            var g = svg.append("g")
+              .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+
+
+            var dataset = [];
+
+            var min = 100000
+            var max = 0
+
+            const attributeArray = spindleArrays[current_spindle][selectedOption];
+            const attributeString = eval("attributeArray." + selectedOption);
+            const attributeValues = JSON.parse(attributeString);
+
+            const firstValue = attributeValues[0];
+            console.log("First value of the first spindle:", firstValue);
+
+            for (let i = 0; i < 43100; i += 10) {
+
+            
+            if (attributeValues[i] != undefined) {
+              if (attributeValues[i] < min) {
+                min = attributeValues[i]
+              }
+              if (attributeValues[i] > max) {
+                max = attributeValues[i]
+              }
+              dataset.push([i + 1, attributeValues[i]]);
+              
+            }
+          }
+            
+            localStorage.setItem("max", JSON.stringify(max));
+            localStorage.setItem("min", JSON.stringify(min));
+
+
+
+            xScale = d3.scaleLinear().domain([0, 43100]).range([0, width]),
+              yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+            var g = svg.append("g")
+              .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+            g.append("g")
+              .attr("transform", "translate(0," + height + ")")
+              .call(d3.axisBottom(xScale));
+
+            g.append("g")
+              .call(d3.axisLeft(yScale));
+
+            svg.append('g')
+              .selectAll("dot")
+              .data(dataset)
+              .enter()
+              .append("circle")
+              .attr("cx", function (d) { return xScale(d[0]); })
+              .attr("cy", function (d) { return yScale(d[1]); })
+              .attr("r", 3)
+              .attr("transform", "translate(" + 100 + "," + 100 + ")")
+              .style("fill", "#CC0000")
+              .attr("id", function (d, i) { return "dot_" + j + "_" + selectedOption })
+              .on("mouseover", function (d, i) { return displayTooltip(d, i, selectedOption, event) })
+              .on("mouseout", function (d, i) { return hideTooltip() })
+
+            var line = d3.line()
+              .x(function (d) { return xScale(d[0]); })
+              .y(function (d) { return yScale(d[1]); })
+              .curve(d3.curveMonotoneX)
+
+            svg.append("path")
+              .datum(dataset)
+              .attr("class", "line")
+              .attr("transform", "translate(" + 100 + "," + 100 + ")")
+              .attr("d", line)
+              .style("fill", "none")
+              .style("stroke", "#CC0000")
+              .style("stroke-width", "2")
+              .attr("id", function (d, i) { return "path_" + j + "_" + selectedOption });
+
+            svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 80)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text(selectedOption + ' chart');
+
+            // X label
+            svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', height - 15 + 150)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 12)
+              .text('Time');
+
+            // Y label
+            svg.append('text')
+              .attr('text-anchor', 'middle')
+              .attr('transform', 'translate(40,' + height + ')rotate(-90)')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 12)
+              .text(selectedOption);
+
+            //SN
+            svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 55)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 16)
+              .text(sn_and_date[j][1]);
+
+
+
+
+        }
+        document.getElementById("svg-div").innerHTML += "</div>"
+
+        //document.getElementById("grid-container").innerHTML += "</div>" //chiusura riga
+
+      }
+      
+
+  }
+}
+}
+
+       
+        
+
+        function features(){
+
+          window.open('features.html', '_blank');
+
+          var valori = []
+          var to_add = document.getElementById("selectedValues").childNodes
+
+          for (let i = 0; i < to_add.length; i++) {
+
+            if (to_add[i] != undefined) {
+
+              if ((to_add[i].id != null) && (to_add[i].checked == true)) {
+
+                valori.push(to_add[i].id)
+
+              }
+            }
+
+          }
+          console.log(valori)
+
+          localStorage.setItem("selectedValuesFeatures", JSON.stringify(valori))
+
+
+        }
+
+       
+    
+
+    var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
+    //var aggregato = 0
+    var count = 0
+    
+    //ECCOCI!
+
+    d3.select("#selectMenu").on("change", function(d) {
+
+  
+
+    count += 1
+    var selectedOption = d3.select(this).property("value")
+    //if (document.getElementById("aggregato").checked == true) aggregato = 1
+    //else aggregato = 0
+    
+    document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption + '" onchange = "modifyElement(' + selectedOption + ')" checked>' + "<label for='" + selectedOption + "' id = 'label" + selectedOption + "'>"+ selectedOption +"</label>" 
+  
+    document.getElementById("svg-div").innerHTML += "<div class='grid-container' id='grid-container" + count + "'>"
+    
+    
+    //Per ogni spindle devo aggiungere un grafichetto
+
+    for(let i = 0; i < sn_and_date.length; i++){
+        
+    current_spindle = sn_and_date[i][0]   
+        
+        document.getElementById("grid-container" + count).innerHTML += "<svg width='800' height='510' id ='svg" + selectedOption + "_" + i +"'></svg>"
+        
+            
+            var svg = d3.select("#svg" + selectedOption + "_" + i),
+            margin = 200,
+            width = svg.attr("width") - margin, //300
+            height = svg.attr("height") - margin //200
+
+
+
+            var g = svg.append("g")
+            .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+          
+
+            var dataset = [];
+    
+            var min = 100000
+            var max = 0
+
+            console.log("spindleArrays:", spindleArrays);
+            console.log("current_spindle:", current_spindle);
+            console.log("selectedOption:", selectedOption);
+
+            //accrocco funzionante
+            const attributeArray = spindleArrays[current_spindle][selectedOption];
+            const attributeString = eval("attributeArray." + selectedOption);
+            const attributeValues = JSON.parse(attributeString);
+
+            const firstValue = attributeValues[0];
+            console.log("First value of the first spindle:", firstValue);
+            
+            for(let j = 0; j < 43100; j+=10){
+
+      
+          if (attributeValues[j] != undefined) {
+            if (attributeValues[j] < min){
+                min = attributeValues[j]
+            }
+            if (attributeValues[j] > max){
+              max = attributeValues[j]
+            }    
+          dataset.push([j+1, attributeValues[j]]);
+
+          }
+        }
+            console.log(dataset)
+            localStorage.setItem("max", JSON.stringify(max)); 
+            localStorage.setItem("min", JSON.stringify(min)); 
+
+            
+   
+                xScale = d3.scaleLinear().domain([0, 43100]).range([0, width]),
+                yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+                var g = svg.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+                
+                g.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+        
+                g.append("g")
+                .call(d3.axisLeft(yScale));
+
+                svg.append('g')
+                    .selectAll("dot")
+                    .data(dataset)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return xScale(d[0]); } )
+                    .attr("cy", function (d) { return yScale(d[1]); } )
+                    .attr("r", 3)
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .style("fill", "#CC0000")
+                    .attr("id", function(d,i){ return "dot_" + i + "_" + selectedOption})
+                    .on("mouseover", function (d, i) { return displayTooltip(d, i, selectedOption, event) })
+                  .on("mouseout", function (d, i) { return hideTooltip() })
+
+                var line = d3.line()
+                    .x(function(d) { return xScale(d[0]); }) 
+                    .y(function(d) { return yScale(d[1]); }) 
+                    .curve(d3.curveMonotoneX)
+
+                svg.append("path")
+                    .datum(dataset) 
+                    .attr("class", "line") 
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .attr("d", line)
+                    .style("fill", "none")
+                    .style("stroke", "#CC0000")
+                    .style("stroke-width", "2")
+                    .attr("id", function(d,i){ return "path_" + i + "_" + selectedOption});
+
+                svg.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 80)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 20)
+                    .text(selectedOption + ' chart');
+        
+                // X label
+                svg.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', height - 15 + 150)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Time');
+        
+                // Y label
+                svg.append('text')
+                    .attr('text-anchor', 'middle')
+                    .attr('transform', 'translate(40,' + height + ')rotate(-90)')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text(selectedOption);
+
+                //SN
+                svg.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 55)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 16)
+                    .text(sn_and_date[i][0]);
+
+                
+
+    }
+    document.getElementById("svg-div").innerHTML += "</div>"
+
+    //document.getElementById("grid-container").innerHTML += "</div>" //chiusura riga
+  })
+        
+        
+        
+       
+
+</script>
+</body>
+</html>

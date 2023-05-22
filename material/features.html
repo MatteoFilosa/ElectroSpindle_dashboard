@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--<meta http-equiv="X-UA-Compatible" content="ie=edge">-->
+  <title>Features</title>
+  <link rel="stylesheet" href="style_features.css">
+  <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+  <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+</head>
+
+<body>
+  <div class="selectedSpindlesDiv">
+    <h3 id="featuresH3">Features: </h3>
+  </div>
+
+  <!--<Body background="images/test.png" background-repeat="no-repeat” background-size="cover”></Body>-->
+  <select id="selectMenuFeatures">
+    <option value="" disabled selected>Select feature</option>
+  </select>
+  <br>
+  <div id="selectedFeatures"></div>
+  <br>
+  <select id="selectMenu">
+    <option value="" disabled selected>Select attribute</option>
+  </select>
+  <br>
+  <div id="selectedValues"></div>
+  <br>
+  <div id="coordinates"></div>
+  <div id="svg-div">
+
+    <div id="loader"></div>
+    <svg width='500' height='400' id='svg_last_tba'></svg>
+    <div id="tooltip"></div>
+  </div>
+  <script>
+    function modifyElement(selectedOption) {
+
+
+      d3.select("#svg_last_tba").remove()
+      document.getElementById(selectedOption).remove()
+      document.getElementById("label" + selectedOption).remove()
+
+
+    }
+
+
+    function sleep(time) {
+      return new Promise((resolve) => setTimeout(resolve, time));
+    }
+
+    var colors = ["#CC0000", '#ff7f50', '#87cefa', '#da70d6', '#32cd32', '#6495ed', '#ff69b4', '#ba55d3', '#cd5c5c', '#cc5500', '#40e0d0'];
+    var featuresGroup = ["Last value"]
+    var datasetLastTba = [];
+    var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
+    var allGroup = ["Tba"]
+
+    d3.select("#selectMenuFeatures")
+      .selectAll('myOptions')
+      .data(featuresGroup)
+      .enter()
+      .append('option')
+      .text(function (d) { return d; }) // text showed in the menu
+      .attr("value", function (d) { return d; }) // corresponding value returned by the button   
+
+
+    d3.select("#selectMenu")
+      .selectAll('myOptions')
+      .data(allGroup)
+      .enter()
+      .append('option')
+      .text(function (d) { return d; }) // text showed in the menu
+      .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+
+    for (let i = 0; i < sn_and_date.length; i++) {
+      if (sn_and_date.length >= 50) document.getElementById("svg_last_tba").style = "margin-top: 240px;"
+      var tmp = sn_and_date[i][0]
+      var virgola = ", "
+      if (i + 1 == sn_and_date.length) virgola = ""
+      document.getElementById("featuresH3").innerHTML += tmp + virgola
+    }
+
+    var valori = JSON.parse(localStorage.getItem("selectedValuesFeatures"))
+
+    for (i = 0; i < valori.length; i++) {
+
+      document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + valori[i] + '" onchange = "modifyElement(' + valori[i] + ')" checked>' + "<label for='" + valori[i] + "' id = 'label" + valori[i] + "'>" + valori[i] + "</label>"
+
+
+    }
+
+
+
+    let completedRequests = 0;
+
+    for (let i = 0; i < sn_and_date.length; i++) {
+      d3.json('http://arca.diag.uniroma1.it:8082/data/breakin/' + sn_and_date[i][0] + '/features_values?columns=Tba&feature=lastValue', function (data) {
+        console.log(data["Last Tba"]);
+        datasetLastTba.push([i + 1, data["Last Tba"], sn_and_date[i][0]]);
+
+        completedRequests++;
+
+        if (completedRequests === sn_and_date.length) {
+          // Tutte le richieste sono state completate
+          console.log(datasetLastTba[0]);
+
+        }
+      });
+    }
+
+    var min = 100000, max = 0, count = 0, countVarianza = 0, media = 0, varianza = 0, varianzaSopra = 0, varianzaSotto = 0, average_tba_array = [], upper_variance_array = [], lower_variance_array = [], sleeper = 1
+
+    sleep(1000 * sleeper).then(() => { //devo farlo per forza perché l'api è lenta a prendere i dati
+
+
+      for (let i = 0; i < datasetLastTba.length; i++) {
+        console.log(datasetLastTba[i][1])
+
+        if (datasetLastTba[i][1] > max) max = datasetLastTba[i][1]
+
+        if (datasetLastTba[i][1] < min) min = datasetLastTba[i][1]
+
+        count += parseFloat(datasetLastTba[i][1])
+
+      }
+      console.log(count)
+      media = count / datasetLastTba.length
+      var countVarianza = 0
+      console.log(media)
+
+      for (let i = 0; i < datasetLastTba.length; i++) {
+
+        console.log(datasetLastTba[i][1])
+        countVarianza += Math.pow((datasetLastTba[i][1] - media), 2)
+
+      }
+
+      varianza = Math.sqrt(countVarianza / datasetLastTba.length)
+      varianzaSopra = media + varianza * 3
+      varianzaSotto = media - varianza * 3
+      console.log(varianzaSopra, varianzaSotto)
+
+
+      for (let i = 0; i <= datasetLastTba.length; i++) {
+
+        average_tba_array.push([i, media])
+
+      }
+
+
+      for (let i = 0; i <= datasetLastTba.length; i++) {
+
+        upper_variance_array.push([i, varianzaSopra])
+
+      }
+
+
+      for (let i = 0; i <= datasetLastTba.length; i++) {
+
+        lower_variance_array.push([i, varianzaSotto])
+
+      }
+
+      if (min > varianzaSotto) min = varianzaSotto - 5
+      if (min < 0) min = 0
+      if (max < varianzaSopra) max = varianzaSopra + 5
+
+      document.getElementById("loader").remove()
+
+    })
+    function displayTooltip(d, i, event) {
+      document.getElementById("tooltip").style.visibility = "visible"
+      console.log(d[0], d[1], event.screenX, event.screenY)
+      var tooltip = document.getElementById("tooltip")
+      tooltip.innerHTML = "Spindle " + d[2] + ", Last Tba: " + d[1]
+      tooltip.style.position = "absolute"
+      tooltip.style.top = (event.screenY - 80) + "px"
+      tooltip.style.left = (event.screenX - 80) + "px"
+
+
+    }
+
+    function hideTooltip(d, i, event) {
+
+      document.getElementById("tooltip").style.visibility = "hidden"
+
+    }
+
+
+
+    //document.getElementById("svg-div").innerHTML += "<svg width='500' height='400' id ='svg_last_tba' style = 'margin-top: 500px'></svg>"
+
+
+    d3.select("#selectMenuFeatures").on("change", function (d) {
+
+      var selectedFeature = d3.select(this).property("value")
+      document.getElementById("selectedFeatures").innerHTML += '<input type = "checkbox" id = "' + selectedFeature + '" onchange = "modifyElement(' + selectedFeature + ')" checked>' + "<label for='" + selectedFeature + "' id = 'label" + selectedFeature + "'>" + selectedFeature + "</label>"
+
+
+
+      console.log(datasetLastTba)
+      //localStorage.setItem("datasetLastTba", JSON.stringify(datasetLastTba));
+
+      var new_svg = d3.select("#svg_last_tba"),
+        margin = 200,
+        width = new_svg.attr("width") - margin, //300
+        height = new_svg.attr("height") - margin //200
+
+      xScale = d3.scaleLinear().domain([0, sn_and_date.length]).range([0, width]),
+        yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+
+      var g = new_svg.append("g")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+
+      new_svg.append('text')
+        .attr('x', width / 2 + 100)
+        .attr('y', 80)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 20)
+        .text("Grafico Last Tba");
+
+      // X label
+      new_svg.append('text')
+        .attr('x', width / 2 + 100)
+        .attr('y', height - 15 + 150)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 12)
+        .text("Spindles");
+
+      // Y label
+      new_svg.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('transform', 'translate(40,' + height + ')rotate(-90)')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 12)
+        .text("Last Tba");
+
+
+      g.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale));
+
+      g.append("g")
+        .call(d3.axisLeft(yScale));
+
+
+      // Step 7
+      new_svg.append('g')
+        .selectAll("dot")
+        .data(datasetLastTba)
+        .enter()
+        .append("circle")
+        .attr("cx", function (d) { return xScale(d[0]); })
+        .attr("cy", function (d) { return yScale(d[1]); })
+        .attr("r", 3)
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .style("fill", "#CC0000")
+        .attr("id", function (d, i) { return "dotLastTba" })
+        .on("mouseover", function (d, i) { return displayTooltip(d, i, event) })
+        .on("mouseout", function (d, i) { return hideTooltip() })
+
+
+
+      var average_line = d3.line()
+        .x(function (d) { return xScale(d[0]); })
+        .y(function (d) { return yScale(d[1]); })
+        .curve(d3.curveMonotoneX)
+
+
+      new_svg.append("path")
+        .datum(average_tba_array)
+        .attr("class", "line")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .attr("d", average_line)
+        .style("fill", "none")
+        .style("stroke", "#CC0000")
+        .style("stroke-width", "2")
+
+
+
+      //upper variance line
+
+      var upper_variance_line = d3.line()
+        .x(function (d) { return xScale(d[0]); })
+        .y(function (d) { return yScale(d[1]); })
+        .curve(d3.curveMonotoneX)
+
+      console.log(average_tba_array, upper_variance_array, lower_variance_array)
+      new_svg.append("path")
+        .datum(upper_variance_array)
+        .attr("class", "line")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .attr("d", upper_variance_line)
+        .style("fill", "none")
+        .style("stroke", "#006400")
+        .style("stroke-width", "2")
+
+      //lower variance line
+      var lower_variance_line = d3.line()
+        .x(function (d) { return xScale(d[0]); })
+        .y(function (d) { return yScale(d[1]); })
+        .curve(d3.curveMonotoneX)
+
+
+      new_svg.append("path")
+        .datum(lower_variance_array)
+        .attr("class", "line")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .attr("d", lower_variance_line)
+        .style("fill", "none")
+        .style("stroke", "#ff8c00")
+        .style("stroke-width", "2")
+
+      new_svg.append('text')
+        .attr('x', width / 2 - 50)
+        .attr('y', 50)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 20)
+        .style('fill', "#CC0000")
+        .text("■ Average(μ)")
+
+      new_svg.append('text')
+        .attr('x', width / 2 + 90)
+        .attr('y', 50)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 20)
+        .style('fill', "#006400")
+        .text("■ μ + 3σ")
+
+      new_svg.append('text')
+        .attr('x', width / 2 + 220)
+        .attr('y', 50)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 20)
+        .style('fill', "#ff8c00")
+        .text("■ μ - 3σ")
+
+      console.log(average_tba_array, lower_variance_array, upper_variance_array)
+
+
+
+
+    })
+
+
+
+
+  </script>
+</body>
+
+</html>

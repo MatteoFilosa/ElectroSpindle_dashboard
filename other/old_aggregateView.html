@@ -1,0 +1,1540 @@
+<!doctype html>
+<html>
+<head>
+    <!---Step 2-->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <title>ElectroSpindle Dashboard</title>
+
+    <link rel="stylesheet" href="./style.css"></link>
+    <script>
+    //inizializzazione array di colori per i grafici
+        var colors = [ "#CC0000",
+  '#ff7f50','#87cefa','#da70d6','#32cd32','#6495ed',
+  '#ff69b4','#ba55d3','#cd5c5c','#cc5500','#40e0d0'
+    ];
+
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+</head>
+<style>
+    /* CSS */
+text.shadow {
+  stroke: black;
+  stroke-width: 0.6px;
+  opacity: 0.8s;
+}
+
+svg {
+  position: absolute;
+  left: 0px;
+  top: 130px;
+}
+
+#svg_last_tba {
+  position: absolute;
+  left: 0px;
+  top: 130px;
+}
+
+#svg_tba {
+  position: absolute;
+  left: 400px;
+  top: 130px;
+}
+
+#svg_tba0{
+
+  position: absolute;
+  left: 0px;
+  top: 400px;
+
+}
+
+#svg_tamb1{
+
+  position: absolute;
+  left: 400px;
+  top: 130px;
+  
+}
+
+#svg_tba1{
+
+  position: absolute;
+  left: 400px;
+  top: 400px;
+
+}
+
+#svg_tamb2{
+
+  position: absolute;
+  left: 800px;
+  top: 130px;
+  
+}
+
+#svg_tba2{
+
+  position: absolute;
+  left: 800px;
+  top: 400px;
+
+}
+
+#svg_tamb3{
+
+  position: absolute;
+  left: 1200px;
+  top: 130px;
+  
+}
+
+#svg_tba3{
+
+  position: absolute;
+  left: 1200px;
+  top: 400px;
+
+}
+
+#svg_tamb4{
+
+  position: absolute;
+  left: 1600px;
+  top: 130px;
+  
+}
+
+#svg_tba4{
+
+  position: absolute;
+  left: 1600px;
+  top: 400px;
+
+}
+
+
+#svg_tamb5{
+
+  position: absolute;
+  left: 2000px;
+  top: 130px;
+  
+}
+
+#svg_tba5{
+
+  position: absolute;
+  left: 2000px;
+  top: 400px;
+
+}
+
+#svg_tamb6{
+
+  position: absolute;
+  left: 2400px;
+  top: 130px;
+  
+}
+
+#svg_tba6{
+
+  position: absolute;
+  left: 2400px;
+  top: 400px;
+
+}
+
+#svg_tamb7{
+
+  position: absolute;
+  left: 2800px;
+  top: 130px;
+  
+}
+
+#svg_tba7{
+
+  position: absolute;
+  left: 2800px;
+  top: 400px;
+
+}
+
+#svg_tamb8{
+
+  position: absolute;
+  left: 3200px;
+  top: 130px;
+  
+}
+
+#svg_tba8{
+
+  position: absolute;
+  left: 3200px;
+  top: 400px;
+
+}
+
+#svg_tamb9{
+
+  position: absolute;
+  left: 3600px;
+  top: 130px;
+  
+}
+
+#svg_tba9{
+
+  position: absolute;
+  left: 3600px;
+  top: 400px;
+
+}
+
+#svg_tamb10{
+
+  position: absolute;
+  left: 4000px;
+  top: 130px;
+  
+}
+
+#svg_tba10{
+
+  position: absolute;
+  left: 4000px;
+  top: 400px;
+
+}
+
+#svg_tamb11{
+
+  position: absolute;
+  left: 4400px;
+  top: 130px;
+  
+}
+
+#svg_tba11{
+
+  position: absolute;
+  left: 4400px;
+  top: 400px;
+
+}
+
+#svg_tamb12{
+
+  position: absolute;
+  left: 4800px;
+  top: 130px;
+  
+}
+
+#svg_tba12{
+
+  position: absolute;
+  left: 4800px;
+  top: 400px;
+
+}
+
+#svg_tamb13{
+
+  position: absolute;
+  left: 4800px;
+  top: 130px;
+  
+}
+
+#svg_tba13{
+
+  position: absolute;
+  left: 4800px;
+  top: 400px;
+
+}
+
+#svg_tamb14{
+
+  position: absolute;
+  left: 5200px;
+  top: 130px;
+  
+}
+
+#svg_tba14{
+
+  position: absolute;
+  left: 5200px;
+  top: 400px;
+
+}
+
+#svg_tamb15{
+
+  position: absolute;
+  left: 5600px;
+  top: 130px;
+  
+}
+
+#svg_tba15{
+
+  position: absolute;
+  left: 5600px;
+  top: 400px;
+
+}
+
+
+#coordinates{
+
+  position: absolute;
+  left: 8px;
+  top: 140px;
+}
+
+#legenda {
+  clear:both
+}
+
+.input-color {
+  position: relative;
+}
+.input-color input {
+  padding-left: 20px;
+}
+.input-color .color-box {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  background-color: #ccc;
+  position: absolute;
+  left: 5px;
+  top: 5px;
+}
+
+input[type=number] {
+
+  margin-left: 8px;
+  box-sizing: border-box;
+  border: 2px solid lightseagreen;
+  border-radius: 4px;
+  background-color: rgb(205, 236, 246);
+ 
+}
+
+input[type=checkbox] {
+  background-color: lightblue;
+}
+
+
+#problems-found{
+
+  position: absolute;
+  left: 500px;
+  top: 0px; 
+  height: 200px;
+  width: 500px;
+
+}
+
+#availableSpindles{
+
+  position: absolute;
+  left: 800px;
+  top: 0px; 
+  height: 500px;
+  width: 500px;
+
+}
+
+#histogram {
+  position: absolute;
+  left: 600px;
+  top: 0px;
+}
+
+#svg3 {
+  position: absolute;
+  left: 800px;
+  top: 200px;
+}
+
+  .button-blue {
+    background-color: #0095ff;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: -apple-system,system-ui,"Segoe UI","Liberation Sans",sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.15385;
+    margin: 0;
+    outline: none;
+    padding: 8px .8em;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: baseline;
+    white-space: nowrap;
+  }
+  
+  .button-blue:hover,
+  .button-blue:focus {
+    background-color: #07c;
+  }
+  
+  .button-blue:focus {
+    box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
+  }
+  
+  .button-blue:active {
+    background-color: #0064bd;
+    box-shadow: none;
+  }
+
+  .button-green {
+    background-color: #32CD32;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: -apple-system,system-ui,"Segoe UI","Liberation Sans",sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.15385;
+    margin: 0;
+    outline: none;
+    padding: 8px .8em;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: baseline;
+    white-space: nowrap;
+  }
+
+  .button-blue-spindle {
+    background-color: #0095ff;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: -apple-system,system-ui,"Segoe UI","Liberation Sans",sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.15385;
+    margin: 0;
+    outline: none;
+    padding: 8px .8em;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: baseline;
+    white-space: nowrap;
+    height: fit-content;
+    width: fit-content;
+  }
+  
+  .button-blue:hover,
+  .button-blue:focus {
+    background-color: #07c;
+  }
+  
+  .button-blue:focus {
+    box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
+  }
+  
+  .button-blue:active {
+    background-color: #0064bd;
+    box-shadow: none;
+  }
+
+  .button-green {
+    background-color: #32CD32;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: -apple-system,system-ui,"Segoe UI","Liberation Sans",sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.15385;
+    margin: 0;
+    outline: none;
+    padding: 8px .8em;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: baseline;
+    white-space: nowrap;
+  }
+  
+  .button-green:hover,
+  .button-green:focus {
+    background-color: #9ACD32;
+  }
+  
+  .button-green:focus {
+    box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
+  }
+  
+  .button-green:active {
+    background-color: #228B22;
+    box-shadow: none;
+  }
+
+
+
+  .button-red {
+    background-color: #ff0000;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: -apple-system,system-ui,"Segoe UI","Liberation Sans",sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.15385;
+    margin: 0;
+    outline: none;
+    padding: 8px .8em;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: baseline;
+    white-space: nowrap;
+  }
+  
+  .button-red:hover,
+  .button-red:focus {
+    background-color: #b30000;
+  }
+  
+  .button-red:focus {
+    box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
+  }
+  
+  .button-red:active {
+    background-color: #ffbfbf;
+    box-shadow: none;
+  }
+
+  
+
+</style>
+
+<body>
+<h1>ElectroSpindle: Dashboard</h1>
+<!-- <Body background="images/PROVA.png" background-repeat="no-repeat” background-size="cover”>  -->
+<Body background="images/test.png" background-repeat="no-repeat” background-size="cover”>
+
+<input type = "checkbox" id ="aggregato" class = "checkbox" onchange ="modifyElement()"> Aggregato
+<!--<input type = "checkbox" id ="tamb" class = "checkbox" onchange ="modifyElement('tamb')" checked> Tamb
+<input type = "checkbox" id ="tba" class = "checkbox" onchange ="modifyElement('tba')" checked> Tba -->
+
+<select id="selectMenu" ></select>
+
+
+<!--Step 2-->
+<div id = "svg-div">
+  <svg width='500' height='400' id ='svg_last_tba'></svg>
+</div>
+
+
+<button id = "featuresBtn" class="button-blue" style = "left: 250px; top: -25px;" onclick = "features()" >Features</button>
+<button id = "analytics_2" class="button-blue"style = "left: 250px; top: -25px;" >Analytics</button>
+<!-- Initialize a select button -->
+<!--<button id = "clear" onclick="clearSvg()" class = "button-blue">Rimuovi tutto</button>!-->
+
+
+<div id = "info"></div>
+<br>
+
+
+<div id = "coordinates"></div>
+<div id = "features" style = "float: right"></div>
+
+<script>
+
+        var allGroup = ["Tamb", "Tba", "Time", "BUS_TERMICA_OK", "BUS_VENTOLA_ON","Barcode_DUT","C39_Sync","Date_start","Error_Code_HSD",
+        "Errore_es_Bus", "Esito_prova", "Itot", "NHR", "No_tool", "NodeStateCounter", "Operatore", "Qtir", "Ripetizione", "S1",
+        "S2", "S3", "S4", "S5", "SN", "Slot", "Speed_S3_BUS", "Speed_Sync", "Stazione", "Step", "TH", "TR", "Tdut1", "Tdut2",
+        "Tdut3", "VibANT_Sync", "Vib_EM", "error_mask", "linea", "not used"]
+        d3.select("#selectMenu")
+        .selectAll('myOptions')
+        .data(allGroup)
+        .enter()
+        .append('option')
+        .text(function (d) { return d; }) // text showed in the menu
+        .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+        function features(){
+
+            var id_and_sn = JSON.parse(localStorage.getItem("selectedSpindles"));
+
+            var datasetLastTba = [];
+
+            var svg_last_tba = d3.select("#svg_last_tba"),
+            margin = 200,
+            width = svg_last_tba.attr("width") - margin, //300
+            height = svg_last_tba.attr("height") - margin //200
+
+            var g = svg_last_tba.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+
+            for(let i = 0; i < id_and_sn.length; i++){
+
+                d3.json("http://arca.diag.uniroma1.it:8082/spindles/breakin/" + id_and_sn[i][0] +"/features", function(data){
+
+             
+
+            console.log(data.last_tba)
+
+
+            ////DATA TAMB
+
+            
+    
+  
+            datasetLastTba.push(data.last_tba)
+            
+            
+
+                })
+
+
+
+            }
+
+            console.log(datasetLastTba)
+            
+            localStorage.setItem("max", JSON.stringify(100)); //riferito a Tamb
+            localStorage.setItem("min", JSON.stringify(0)); //riferito a Tamb
+            localStorage.setItem("datasetLastTba", JSON.stringify(datasetLastTba));
+
+            
+        // Creazione assi cartesiani TAMB. 
+                xScale = d3.scaleLinear().domain([0, id_and_sn.length]).range([0, width]),
+                yScale = d3.scaleLinear().domain([0, 100]).range([height, 0]);
+
+                
+
+                    g.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+        
+                g.append("g")
+                .call(d3.axisLeft(yScale));
+
+
+                svg_last_tba.append('g')
+                    .selectAll("dot")
+                    .data(datasetLastTba)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return xScale(d[0]); } )
+                    .attr("cy", function (d) { return yScale(d[1]); } )
+                    .attr("r", 3)
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .style("fill", "#CC0000")
+                    .attr("id", function(d,i){ return "dotLastTba"})
+                    .on('mouseover', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = "Time: " + d[0] + " , " + "Last Tba" + ": " + d[1]
+                    d3.select(this).style("fill", "#7CFC00")
+                  
+                })
+                    
+                    .on('mouseout', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = ""
+                    d3.select(this).style("fill", "#CC0000")
+                }); 
+
+                var line = d3.line()
+                    .x(function(d) { return xScale(d[0]); }) 
+                    .y(function(d) { return yScale(d[1]); }) 
+                    .curve(d3.curveMonotoneX)
+
+                    svg_last_tba.append("path")
+                    .datum(datasetLastTba) 
+                    .attr("class", "line") 
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .attr("d", line)
+                    .style("fill", "none")
+                    .style("stroke", "#CC0000")
+                    .style("stroke-width", "2")
+                    .attr("id", function(d,i){ return "pathLastTba"});
+
+                    svg_last_tba.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 100)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 20)
+                    .text('Grafico ultima Tba');
+        
+                // X label
+                svg_last_tba.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', height - 15 + 150)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Time');
+        
+                // Y label
+                svg_last_tba.append('text')
+                    .attr('text-anchor', 'middle')
+                    .attr('transform', 'translate(60,' + height + ')rotate(-90)')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Ultima Tba');
+
+                //SN
+                svg_last_tba.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 70)
+                    .attr('text-anchor', 'middle')
+                    .attr("class", "shadow")
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 16)
+                    .style('fill', "#CC0000")
+                    .text("SN");
+
+
+        }
+
+        function modifyElement(datasetTba, datasetTamb){
+
+
+
+            var id_and_sn = JSON.parse(localStorage.getItem("selectedSpindles"));
+            
+            
+            if (document.getElementById("aggregato").checked == true){
+
+                var colorSelector = 0, flag = 0, done_tamb = 0, done_tba = 0;
+
+            document.getElementById("svg-div").innerHTML += "<svg width='500' height='400' id ='svg_tamb'></svg>"
+            document.getElementById("svg-div").innerHTML += "<svg width='500' height='400' id ='svg_tba0'></svg>"
+
+                for(let i = 0; i < id_and_sn.length; i++){
+
+             
+        d3.select("#svg_tba" + i).remove()
+        d3.select("#svg_tamb" + i).remove()
+
+        if(i+1 == id_and_sn.length) flag = 1
+        
+       
+
+
+            d3.json("http://arca.diag.uniroma1.it:8082/spindles/breakin/" + id_and_sn[i][0] +"/raw_data?limit=100", function(data) {
+        
+                //quando faccio una ricerca per id, mi visualizza come primo grafico quello della temperatura ambientale (Tamb).
+            
+            //document.getElementById("selectedValues").innerHTML = ""
+            //per ora salvo i dati su localstorage, perché molte funzioni non si vedono tra loro e le variabili, anche se globali, non si vedono tra loro comunque. Che roba
+          
+            ////SVG TAMB/////
+            var svg_tamb = d3.select("#svg_tamb"),
+            margin = 200,
+            width = svg_tamb.attr("width") - margin, //300
+            height = svg_tamb.attr("height") - margin //200
+
+
+            ////DATA TAMB
+
+            var datasetTamb = [];
+    
+            var min = 100000
+            var max = 0
+
+            for(let i = 0; i < 99; i++){
+                if(data.data.Tamb[i] < min){
+                    min = data.data.Tamb[i]
+                }
+                if(data.data.Tamb[i] > max){
+                    max = data.data.Tamb[i]
+                }
+                datasetTamb.push([i+1, data.data.Tamb[i]]);
+            }
+            
+            localStorage.setItem("max", JSON.stringify(max)); //riferito a Tamb
+            localStorage.setItem("min", JSON.stringify(min)); //riferito a Tamb
+            localStorage.setItem("datasetTamb", JSON.stringify(datasetTamb));
+
+            
+        // Creazione assi cartesiani TAMB. 
+                xScale = d3.scaleLinear().domain([0, 100]).range([0, width]),
+                yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+                var g = svg_tamb.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+                if((flag == 1) && (done_tamb != 1)){
+
+                    g.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+        
+                g.append("g")
+                .call(d3.axisLeft(yScale));
+
+                done_tamb = 1
+
+                }
+                
+                
+
+                svg_tamb.append('g')
+                    .selectAll("dot")
+                    .data(datasetTamb)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return xScale(d[0]); } )
+                    .attr("cy", function (d) { return yScale(d[1]); } )
+                    .attr("r", 3)
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .style("fill", colors[colorSelector])
+                    .attr("id", function(d,i){ return "dotTamb"})
+                    .on('mouseover', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = "Time: " + d[0] + " , " + "Tamb" + ": " + d[1]
+                    d3.select(this).style("fill", "#7CFC00")
+                  
+                })
+                    
+                    .on('mouseout', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = ""
+                    d3.select(this).style("fill", colors[colorSelector])
+                }); 
+
+                var line = d3.line()
+                    .x(function(d) { return xScale(d[0]); }) 
+                    .y(function(d) { return yScale(d[1]); }) 
+                    .curve(d3.curveMonotoneX)
+
+                svg_tamb.append("path")
+                    .datum(datasetTamb) 
+                    .attr("class", "line") 
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .attr("d", line)
+                    .style("fill", "none")
+                    .style("stroke", colors[colorSelector])
+                    .style("stroke-width", "2")
+                    .attr("id", function(d,i){ return "pathTamb"});
+
+                svg_tamb.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 100)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 20)
+                    .text('Grafico Tamb');
+        
+                // X label
+                svg_tamb.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', height - 15 + 150)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Time');
+        
+                // Y label
+                svg_tamb.append('text')
+                    .attr('text-anchor', 'middle')
+                    .attr('transform', 'translate(60,' + height + ')rotate(-90)')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Tamb');
+
+                //SN
+                svg_tamb.append('text')
+                    .attr('x', width/2 + 100*i)
+                    .attr('y', 70)
+                    .attr('text-anchor', 'middle')
+                    .attr("class", "shadow")
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 16)
+                    .style('fill', colors[colorSelector])
+                    .text(id_and_sn[i][1] + "  ");
+
+                
+
+                ////SVG TBA/////
+
+                var svg_tba = d3.select("#svg_tba0"),
+                margin = 200,
+                width = svg_tba.attr("width") - margin, //300
+                height = svg_tba.attr("height") - margin //200
+
+                var g = svg_tba.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+                //DATA TBA
+
+            localStorage.setItem("storageData", JSON.stringify(data));
+
+            var datasetTba = [];
+    
+            var min = 100000
+            var max = 0
+
+            for(let i = 0; i < 99; i++){
+                if(data.data.Tba[i] < min){
+                    min = data.data.Tba[i]
+                }
+                if(data.data.Tba[i] > max){
+                    max = data.data.Tba[i]
+                }
+                datasetTba.push([i+1, data.data.Tba[i]]);
+            }
+
+            localStorage.setItem("datasetTba", JSON.stringify(datasetTba));
+
+                
+                // Creazione assi cartesiani TBA. 
+                xScale = d3.scaleLinear().domain([0, 100]).range([0, width]),
+                yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+                var g = svg_tba.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+                
+                if((flag == 1) && (done_tba != 1)){
+                    console.log("ok")
+                    console.log(i, id_and_sn.length)
+                    done_tba = 1
+
+                g.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+        
+                g.append("g")
+                .call(d3.axisLeft(yScale));
+
+                }
+
+                
+
+                svg_tba.append('g')
+                    .selectAll("dot")
+                    .data(datasetTba)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return xScale(d[0]); } )
+                    .attr("cy", function (d) { return yScale(d[1]); } )
+                    .attr("r", 3)
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .style("fill", colors[colorSelector])
+                    .attr("id", function(d,i){ return "dotTba"})
+                    .on('mouseover', function (d, i) {
+                    document.getElementById("coordinates").innerHTML =  "Time: " + d[0] + " , " + "Tba" + ": " + d[1]
+                    d3.select(this).style("fill", "#7CFC00")
+                  
+                })
+                    
+                    .on('mouseout', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = ""
+                    d3.select(this).style("fill", colors[colorSelector])
+                }); 
+
+                var line = d3.line()
+                    .x(function(d) { return xScale(d[0]); }) 
+                    .y(function(d) { return yScale(d[1]); }) 
+                    .curve(d3.curveMonotoneX)
+
+                svg_tba.append("path")
+                    .datum(datasetTba) 
+                    .attr("class", "line") 
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .attr("d", line)
+                    .style("fill", "none")
+                    .style("stroke", colors[colorSelector])
+                    .style("stroke-width", "2")
+                    .attr("id", function(d,i){ return "pathTba"});
+
+                svg_tba.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 100)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 20)
+                    .text('Grafico Tba');
+        
+                // X label
+                svg_tba.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', height - 15 + 150)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Time');
+        
+                // Y label
+                svg_tba.append('text')
+                    .attr('text-anchor', 'middle')
+                    .attr('transform', 'translate(60,' + height + ')rotate(-90)')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Tba');
+
+                
+                    if(colorSelector < colors.length) colorSelector += 1
+                else colorSelector = 0
+
+      
+            
+                  });    
+                
+        }
+        }
+
+    else if (document.getElementById("aggregato").checked == false){
+        var id_and_sn = JSON.parse(localStorage.getItem("selectedSpindles"));
+        d3.select("#svg_tamb").remove()
+        d3.select("#svg_tba0").remove()
+        colorSelector = 0
+
+    for(let i = 0; i < id_and_sn.length; i++){
+
+        document.getElementById("svg-div").innerHTML += "<svg width='500' height='400' id ='svg_tamb" + i + "'></svg>"
+        document.getElementById("svg-div").innerHTML += "<svg width='500' height='400' id ='svg_tba" + i + "'></svg>"
+
+
+            d3.json("http://arca.diag.uniroma1.it:8082/spindles/breakin/" + id_and_sn[i][0] +"/raw_data?limit=100", function(data) {
+        
+                //quando faccio una ricerca per id, mi visualizza come primo grafico quello della temperatura ambientale (Tamb).
+            
+            //document.getElementById("selectedValues").innerHTML = ""
+            //per ora salvo i dati su localstorage, perché molte funzioni non si vedono tra loro e le variabili, anche se globali, non si vedono tra loro comunque. Che roba
+          
+            ////SVG TAMB/////
+            var svg_tamb = d3.select("#svg_tamb" + i),
+            margin = 200,
+            width = svg_tamb.attr("width") - margin, //300
+            height = svg_tamb.attr("height") - margin //200
+
+            var g = svg_tamb.append("g")
+            .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+            ////DATA TAMB
+
+            var datasetTamb = [];
+    
+            var min = 100000
+            var max = 0
+
+            for(let i = 0; i < 99; i++){
+                if(data.data.Tamb[i] < min){
+                    min = data.data.Tamb[i]
+                }
+                if(data.data.Tamb[i] > max){
+                    max = data.data.Tamb[i]
+                }
+                datasetTamb.push([i+1, data.data.Tamb[i]]);
+            }
+            
+            localStorage.setItem("max", JSON.stringify(max)); //riferito a Tamb
+            localStorage.setItem("min", JSON.stringify(min)); //riferito a Tamb
+            localStorage.setItem("datasetTamb", JSON.stringify(datasetTamb));
+
+            
+        // Creazione assi cartesiani TAMB. 
+                xScale = d3.scaleLinear().domain([0, 100]).range([0, width]),
+                yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+                var g = svg_tamb.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+                
+                g.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+        
+                g.append("g")
+                .call(d3.axisLeft(yScale));
+
+                svg_tamb.append('g')
+                    .selectAll("dot")
+                    .data(datasetTamb)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return xScale(d[0]); } )
+                    .attr("cy", function (d) { return yScale(d[1]); } )
+                    .attr("r", 3)
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .style("fill", "#CC0000")
+                    .attr("id", function(d,i){ return "dotTamb"})
+                    .on('mouseover', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = "Time: " + d[0] + " , " + "Tamb" + ": " + d[1]
+                    d3.select(this).style("fill", "#7CFC00")
+                  
+                })
+                    
+                    .on('mouseout', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = ""
+                    d3.select(this).style("fill", "#CC0000")
+                }); 
+
+                var line = d3.line()
+                    .x(function(d) { return xScale(d[0]); }) 
+                    .y(function(d) { return yScale(d[1]); }) 
+                    .curve(d3.curveMonotoneX)
+
+                svg_tamb.append("path")
+                    .datum(datasetTamb) 
+                    .attr("class", "line") 
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .attr("d", line)
+                    .style("fill", "none")
+                    .style("stroke", "#CC0000")
+                    .style("stroke-width", "2")
+                    .attr("id", function(d,i){ return "pathTamb"});
+
+                svg_tamb.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 100)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 20)
+                    .text('Grafico Tamb');
+        
+                // X label
+                svg_tamb.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', height - 15 + 150)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Time');
+        
+                // Y label
+                svg_tamb.append('text')
+                    .attr('text-anchor', 'middle')
+                    .attr('transform', 'translate(60,' + height + ')rotate(-90)')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Tamb');
+
+                //SN
+                svg_tamb.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 70)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 16)
+                    .text(id_and_sn[i][1]);
+
+                
+
+                ////SVG TBA/////
+
+                var svg_tba = d3.select("#svg_tba" + i),
+                margin = 200,
+                width = svg_tba.attr("width") - margin, //300
+                height = svg_tba.attr("height") - margin //200
+
+                var g = svg_tba.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+                //DATA TBA
+
+            localStorage.setItem("storageData", JSON.stringify(data));
+
+            var datasetTba = [];
+    
+            var min = 100000
+            var max = 0
+
+            for(let i = 0; i < 99; i++){
+                if(data.data.Tba[i] < min){
+                    min = data.data.Tba[i]
+                }
+                if(data.data.Tba[i] > max){
+                    max = data.data.Tba[i]
+                }
+                datasetTba.push([i+1, data.data.Tba[i]]);
+            }
+
+            localStorage.setItem("datasetTba", JSON.stringify(datasetTba));
+
+                
+                // Creazione assi cartesiani TBA. 
+                xScale = d3.scaleLinear().domain([0, 100]).range([0, width]),
+                yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+                var g = svg_tba.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+                
+                g.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+        
+                g.append("g")
+                .call(d3.axisLeft(yScale));
+
+                svg_tba.append('g')
+                    .selectAll("dot")
+                    .data(datasetTba)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return xScale(d[0]); } )
+                    .attr("cy", function (d) { return yScale(d[1]); } )
+                    .attr("r", 3)
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .style("fill", "#CC0000")
+                    .attr("id", function(d,i){ return "dotTba"})
+                    .on('mouseover', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = "Time: " + d[0] + " , " + "Tba" + ": " + d[1]
+                    d3.select(this).style("fill", "#7CFC00")
+                  
+                })
+                    
+                    .on('mouseout', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = ""
+                    d3.select(this).style("fill", "#CC0000")
+                }); 
+
+                var line = d3.line()
+                    .x(function(d) { return xScale(d[0]); }) 
+                    .y(function(d) { return yScale(d[1]); }) 
+                    .curve(d3.curveMonotoneX)
+
+                svg_tba.append("path")
+                    .datum(datasetTba) 
+                    .attr("class", "line") 
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .attr("d", line)
+                    .style("fill", "none")
+                    .style("stroke", "#CC0000")
+                    .style("stroke-width", "2")
+                    .attr("id", function(d,i){ return "pathTba"});
+
+                svg_tba.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 100)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 20)
+                    .text('Grafico Tba');
+        
+                // X label
+                svg_tba.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', height - 15 + 150)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Time');
+        
+                // Y label
+                svg_tba.append('text')
+                    .attr('text-anchor', 'middle')
+                    .attr('transform', 'translate(60,' + height + ')rotate(-90)')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Tba');
+
+      
+            
+                  });
+
+    }
+        
+    }
+    }
+    
+
+    var id_and_sn = JSON.parse(localStorage.getItem("selectedSpindles"));
+    
+
+    for(let i = 0; i < id_and_sn.length; i++){
+
+        document.getElementById("svg-div").innerHTML += "<svg width='500' height='400' id ='svg_tamb" + i + "'></svg>"
+        document.getElementById("svg-div").innerHTML += "<svg width='500' height='400' id ='svg_tba" + i + "'></svg>"
+
+
+            d3.json("http://arca.diag.uniroma1.it:8082/spindles/breakin/" + id_and_sn[i][0] +"/raw_data?limit=100", function(data) {
+        
+                //quando faccio una ricerca per id, mi visualizza come primo grafico quello della temperatura ambientale (Tamb).
+            
+            //document.getElementById("selectedValues").innerHTML = ""
+            //per ora salvo i dati su localstorage, perché molte funzioni non si vedono tra loro e le variabili, anche se globali, non si vedono tra loro comunque. Che roba
+          
+            ////SVG TAMB/////
+            var svg_tamb = d3.select("#svg_tamb" + i),
+            margin = 200,
+            width = svg_tamb.attr("width") - margin, //300
+            height = svg_tamb.attr("height") - margin //200
+
+            var g = svg_tamb.append("g")
+            .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+            ////DATA TAMB
+
+            var datasetTamb = [];
+    
+            var min = 100000
+            var max = 0
+
+            for(let i = 0; i < 99; i++){
+                if(data.data.Tamb[i] < min){
+                    min = data.data.Tamb[i]
+                }
+                if(data.data.Tamb[i] > max){
+                    max = data.data.Tamb[i]
+                }
+                datasetTamb.push([i+1, data.data.Tamb[i]]);
+            }
+            
+            localStorage.setItem("max", JSON.stringify(max)); //riferito a Tamb
+            localStorage.setItem("min", JSON.stringify(min)); //riferito a Tamb
+            localStorage.setItem("datasetTamb", JSON.stringify(datasetTamb));
+
+            
+        // Creazione assi cartesiani TAMB. 
+                xScale = d3.scaleLinear().domain([0, 100]).range([0, width]),
+                yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+                var g = svg_tamb.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+                
+                g.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+        
+                g.append("g")
+                .call(d3.axisLeft(yScale));
+
+                svg_tamb.append('g')
+                    .selectAll("dot")
+                    .data(datasetTamb)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return xScale(d[0]); } )
+                    .attr("cy", function (d) { return yScale(d[1]); } )
+                    .attr("r", 3)
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .style("fill", "#CC0000")
+                    .attr("id", function(d,i){ return "dotTamb"})
+                    .on('mouseover', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = "Time: " + d[0] + " , " + "Tamb" + ": " + d[1]
+                    d3.select(this).style("fill", "#7CFC00")
+                  
+                })
+                    
+                    .on('mouseout', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = ""
+                    d3.select(this).style("fill", "#CC0000")
+                }); 
+
+                var line = d3.line()
+                    .x(function(d) { return xScale(d[0]); }) 
+                    .y(function(d) { return yScale(d[1]); }) 
+                    .curve(d3.curveMonotoneX)
+
+                svg_tamb.append("path")
+                    .datum(datasetTamb) 
+                    .attr("class", "line") 
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .attr("d", line)
+                    .style("fill", "none")
+                    .style("stroke", "#CC0000")
+                    .style("stroke-width", "2")
+                    .attr("id", function(d,i){ return "pathTamb"});
+
+                svg_tamb.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 100)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 20)
+                    .text('Grafico Tamb');
+        
+                // X label
+                svg_tamb.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', height - 15 + 150)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Time');
+        
+                // Y label
+                svg_tamb.append('text')
+                    .attr('text-anchor', 'middle')
+                    .attr('transform', 'translate(60,' + height + ')rotate(-90)')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Tamb');
+
+                //SN
+                svg_tamb.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 70)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 16)
+                    .text(id_and_sn[i][1]);
+
+                
+
+                ////SVG TBA/////
+
+                var svg_tba = d3.select("#svg_tba" + i),
+                margin = 200,
+                width = svg_tba.attr("width") - margin, //300
+                height = svg_tba.attr("height") - margin //200
+
+                var g = svg_tba.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+                //DATA TBA
+
+            localStorage.setItem("storageData", JSON.stringify(data));
+
+            var datasetTba = [];
+    
+            var min = 100000
+            var max = 0
+
+            for(let i = 0; i < 99; i++){
+                if(data.data.Tba[i] < min){
+                    min = data.data.Tba[i]
+                }
+                if(data.data.Tba[i] > max){
+                    max = data.data.Tba[i]
+                }
+                datasetTba.push([i+1, data.data.Tba[i]]);
+            }
+
+            localStorage.setItem("datasetTba", JSON.stringify(datasetTba));
+
+                
+                // Creazione assi cartesiani TBA. 
+                xScale = d3.scaleLinear().domain([0, 100]).range([0, width]),
+                yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+                var g = svg_tba.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+                
+                g.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+        
+                g.append("g")
+                .call(d3.axisLeft(yScale));
+
+                svg_tba.append('g')
+                    .selectAll("dot")
+                    .data(datasetTba)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return xScale(d[0]); } )
+                    .attr("cy", function (d) { return yScale(d[1]); } )
+                    .attr("r", 3)
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .style("fill", "#CC0000")
+                    .attr("id", function(d,i){ return "dotTba"})
+                    .on('mouseover', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = "Time: " + d[0] + " , " + "Tba" + ": " + d[1]
+                    d3.select(this).style("fill", "#7CFC00")
+                  
+                })
+                    
+                    .on('mouseout', function (d, i) {
+                    document.getElementById("coordinates").innerHTML = ""
+                    d3.select(this).style("fill", "#CC0000")
+                }); 
+
+                var line = d3.line()
+                    .x(function(d) { return xScale(d[0]); }) 
+                    .y(function(d) { return yScale(d[1]); }) 
+                    .curve(d3.curveMonotoneX)
+
+                svg_tba.append("path")
+                    .datum(datasetTba) 
+                    .attr("class", "line") 
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .attr("d", line)
+                    .style("fill", "none")
+                    .style("stroke", "#CC0000")
+                    .style("stroke-width", "2")
+                    .attr("id", function(d,i){ return "pathTba"});
+
+                svg_tba.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', 100)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 20)
+                    .text('Grafico Tba');
+        
+                // X label
+                svg_tba.append('text')
+                    .attr('x', width/2 + 100)
+                    .attr('y', height - 15 + 150)
+                    .attr('text-anchor', 'middle')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Time');
+        
+                // Y label
+                svg_tba.append('text')
+                    .attr('text-anchor', 'middle')
+                    .attr('transform', 'translate(60,' + height + ')rotate(-90)')
+                    .style('font-family', 'Helvetica')
+                    .style('font-size', 12)
+                    .text('Tba');
+
+      
+            
+                  });
+
+    }
+        
+        
+        
+       
+
+</script>
+</body>
+</html>
