@@ -432,7 +432,9 @@ h3 {
 }
 
 .button-wrapper {
-    margin-left: 100px;
+    position:absolute;
+    left:-250px;
+    top:0px;
 }
 
 #day-start {
@@ -477,7 +479,7 @@ h3 {
 #resetFilters {
 
     position: absolute;
-    left: 225px;
-    top: 155px;
+    left: 425px;
+    top: 160px;
 
 }

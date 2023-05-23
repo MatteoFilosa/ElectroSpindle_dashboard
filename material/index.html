@@ -44,26 +44,14 @@ Insert Spindle SN <input type = "text" id ="request" maxlength="10" required pla
 
 
 
-
-
-<!-- Initialize a select button -->
-<!--<button id = "clear" onclick="clearSvg()" class = "button-blue">Rimuovi tutto</button> -->
-<!--<input type="checkbox" id ="sovrapponi" onchange = "checkElements()"> Sovrapponi grafici-->
-<!--<input type="checkbox" id ="separati" onchange = "separati()"> Separati -->
-<br> <br>
-
-
-<br> <br>
-
 <div class = "button-wrapper">
 
-  <button class = "button-green" onclick = "displayCalendar()" id = "PickDate">Pick date</button>
-
-  <div id = "day-start"> <h5>From</h5></div>
 
 
+  <div id = "day-start"> <button class="button-green" onclick="displayCalendar()" id="fromButton">From</button> </div>
 
-<div id = "day-end"> <h5>To</h5> </div>
+
+<div id = "day-end"> <button class="button-green" onclick="displayCalendar()" id="toButton">To</button></div>
 
 </div>
 
@@ -370,24 +358,7 @@ function resetFilters(){
             else if (selected_sn.length > 1) window.open('aggregateView.html', '_blank');
             
         }
-
-        function sortFunction(a, b) {
-            if (a[0] === b[0]) {
-                return 0;
-            }
-            else {
-                return (a[0] < b[0]) ? -1 : 1;
-            }
-        }
-
-        function compareSecondColumn(a, b) {
-            if (a[1] === b[1]) {
-                return 0;
-            }
-            else {
-                return (a[1] < b[1]) ? -1 : 1;
-            }
-        }        
+    
 
           var tmp_id, tmp_sn
           var sn_and_date = []
@@ -420,8 +391,7 @@ function resetFilters(){
              
             
             localStorage.setItem("sn_and_date", JSON.stringify(sn_and_date))
-            datasetDataInizio.sort(sortFunction)
-            datasetDataFine.sort(sortFunction)
+       
             document.getElementById("availableSpindles").innerHTML += "<div id = 'loader'></div>"
  
         })
@@ -429,7 +399,7 @@ function resetFilters(){
         d3.json("http://arca.diag.uniroma1.it:8082/data/breakin?pagination=256&fromItem=20", function (data) {
 
 
-            document.getElementById("loader").remove()
+            //document.getElementById("loader").remove()
             var tmp_id, tmp_sn
 
             var sn_and_date = []
@@ -457,8 +427,7 @@ function resetFilters(){
 
 
             localStorage.setItem("sn_and_date", JSON.stringify(sn_and_date))
-            datasetDataInizio.sort(sortFunction)
-            datasetDataFine.sort(sortFunction)
+            
             
 
           })
