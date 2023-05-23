@@ -289,14 +289,16 @@ function resetFilters(){
 
   resetCalendar()
 
-  document.getElementById("day-start").innerHTML = ""
-  document.getElementById("day-end").innerHTML = ""
+  document.getElementById("day-start").innerHTML = "<h5>From</h5>"
+  document.getElementById("day-end").innerHTML = "<h5>To</h5>"
   document.getElementById("request").value = ""
   //document.getElementById("daButton").disabled = false
 
   sn_and_date = JSON.parse(localStorage.getItem("sn_and_date"))
 
   clearAvailableSpindles()
+
+  console.log(sn_and_date)
 
   for (i = 0; i < sn_and_date.length; i++) {              
 
@@ -549,33 +551,32 @@ function resetFilters(){
           console.log(data_inizio, data_fine)
 
           
-            d3.json("http://arca.diag.uniroma1.it:8082/data/breakin?pagination=256&fromItem=0", function(data){
+            ////
                 
                 var spindle_sn = document.getElementById('request').value
                 var tmp_date
-                console.log(data)
+               
                 
                 var to_write = ""
                 clearAvailableSpindles()
 
-            for(let i = 0; i< data.results.length; i++){
+            for(let i = 0; i< sn_and_date.length; i++){
 
-              tmp_date =  data.results[i]["Date_start"]
-              tmp_date = tmp_date.slice(0, -9)
+              tmp_date =  sn_and_date[i][1]
               console.log(tmp_date, data_inizio, data_fine)
               
                 
               //console.log(data.breakin_data.results[i].date)
                 if((tmp_date >= data_inizio) && (tmp_date <= data_fine)) {
 
-                  console.log("au")
+               
 
                     if(document.getElementById("request").value == ""){
 
                     
-                      sn_to_save.push(data.results[i]["Serial Number"])
-                      to_write = data.results[i]["Serial Number"]
-                      console.log(data.results[i]["Serial Number"])
+                      sn_to_save.push(sn_and_date[i][0])
+                      to_write = sn_and_date[i][0]
+                      console.log(sn_and_date[i][0])
                       var real_write = "<span id = 'spindlesSpan'>" + to_write + "</span>" + "<span id = 'spindlesSpan'>" +"ES951" + "</span>"  + "<span id = 'spindlesSpan'>" + tmp_date + "</span>"
                       document.getElementById("availableSpindles").innerHTML += "<div id = 'spindleRow'><input type = 'checkbox' class = 'checkbox-spindles' id = '"+ to_write +"'onclick = saveSpindle("+ to_write +")>"+ "<label for='" + to_write + "'>" + real_write + "</label></div>"
 
@@ -584,16 +585,16 @@ function resetFilters(){
                     else{
 
                       var written = document.getElementById("request").value
-                      var tmp = data.results[i]["Serial Number"]
+                      var tmp = sn_and_date[i][0]
                       const found = tmp.match(written);
                       if(found != null){
                       var tmp = found["input"]
-                      var real_write = data.results[i]["Serial Number"] + "   ES951    " + data.results[i]["Date_start"]
+                      var real_write = sn_and_date[i][0] + "   ES951    " + sn_and_date[i][1]
                       if(tmp!=null) document.getElementById("availableSpindles").innerHTML += "<div id = 'spindleRow'><input type = 'checkbox' class = 'checkbox-spindles' id = '"+ tmp +"' onclick = saveSpindle("+ tmp +")>"+ "<label for='" + tmp + "'>" + real_write + "</label></div>"
                       }
 
                 
-                      sn_to_save.push(data.results[i]["Serial Number"], tmp_date)
+                      sn_to_save.push(sn_and_date[i][0], tmp_date)
                       
                     }
 
@@ -603,9 +604,9 @@ function resetFilters(){
             }
 
             localStorage.setItem("filterHelper", JSON.stringify(sn_to_save))
-            document.getElementById("loader").remove()
+            //document.getElementById("loader").remove()
           
-            })
+            
 
           }
 
