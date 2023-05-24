@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <title>Analytics</title>
+    <link rel="stylesheet" type="text/css" href="css/style_analytics.css"> 
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+
+<body>
+    <header>
+        <h1>Analytics</h1>
+    </header>
+
+    <div id = "heatmapContainer"></div>
+
+    <script>
+
+        var selectedAttributes = JSON.parse(localStorage.getItem("selectedAttributes"))
+        var selectedFeature = JSON.parse(localStorage.getItem("selectedFeature"))
+        var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
+        var selectedSpindle = sn_and_date[0][0]
+        var request = ""
+
+        for(let i = 0; i < selectedAttributes.length; i++){
+
+            if(i+1 < selectedAttributes.length){
+
+                request += selectedAttributes[i] + "%2C"
+
+            }
+
+            else request += selectedAttributes[i]
+            
+        }
+        console.log("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=" + selectedFeature + "")
+
+        d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle  + "?fields=" + request + "&analitycs=" + selectedFeature +"", function (data) {
+
+            console.log(data.pearson)
+            // Estrai i nomi delle relazioni e i valori di correlazione
+            
+        });
+
+
+
+
+    </script>
+
+
+
+</body>
+
+</html>

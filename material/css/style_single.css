@@ -8,6 +8,16 @@
         opacity: 0.8s;
     }
 
+    #analyticsDiv{
+        position: absolute;
+        left: 900px;
+        top:120px;
+        display: flex;
+        column-gap: 20px;
+        justify-content: space-between;
+        
+        }
+
         #loader {
             border: 16px solid #f3f3f3;
             /* Light grey */
