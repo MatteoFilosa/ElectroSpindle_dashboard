@@ -103,9 +103,9 @@ function resetCalendar(){
 
 function setDate(day){
 
-
+    var resetClicked = JSON.parse(localStorage.getItem("resetClicked"))
     if(document.getElementById("day-start").innerHTML.length <15){
-        if (flag == 0){
+        if ((flag == 0) || (resetClicked == 1)){
 
             //document.getElementById("day-start").innerHTML = "Data inizio: "
             document.getElementById("day-start").innerHTML += day + " " + document.getElementById("month-picker").innerHTML + " " + document.getElementById("year").innerHTML
@@ -114,6 +114,8 @@ function setDate(day){
             localStorage.setItem("year-start", JSON.stringify(document.getElementById("year").innerHTML))
             //if(document.getElementById("cambia_data_fine")!= null) document.getElementById("cambia_data_fine").disabled = false
             document.getElementById("calendar-original").hidden = true
+            localStorage.setItem("resetClicked", JSON.stringify(0))
+            if(resetClicked == 1) flag = 0
     
         }
     }

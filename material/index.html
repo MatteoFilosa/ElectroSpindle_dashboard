@@ -44,17 +44,22 @@ Insert Spindle SN <input type = "text" id ="request" maxlength="10" required pla
 
 
 
-<div class = "button-wrapper">
+<h5>Pick Date</h5>
+
+<div class="button-wrapper">
+
+  <button class="button-green" onclick="displayCalendar(0)" id="fromButton">From</button>
+
+  
+
+  <button class="button-green" onclick="displayCalendar(1)" id="toButton" disabled=true>To</button>
 
 
-
-  <div id = "day-start"> <button class="button-green" onclick="displayCalendar()" id="fromButton">From</button> </div>
-
-
-<div id = "day-end"> <button class="button-green" onclick="displayCalendar()" id="toButton">To</button></div>
+  
 
 </div>
-
+<div id="day-start"> </div>
+<div id="day-end"> </div>
 
 <div class="calendar" id = "calendar-original" hidden="true">
   <div class="calendar-header">
@@ -88,7 +93,7 @@ Insert Spindle SN <input type = "text" id ="request" maxlength="10" required pla
   </div>
   <div class="month-list" id = "month-list"></div>
 </div>
-<button class="button-green" id="resetFilters" onclick="resetFilters()">Reset filters</button>
+<button class="button-red" id="resetFilters" onclick="resetFilters()">Reset filters</button>
 
 <div id="dstCalendar">
  
@@ -146,12 +151,12 @@ Insert Spindle SN <input type = "text" id ="request" maxlength="10" required pla
 </div>
 
 <button id = 'cerca' class = 'button-blue' onClick='redirectView()'>Search</button>
-<button id = 'clearSelected' class = 'button-green' onClick='clearSelectedSpindles()'>Clear</button>
+<button id = 'clearSelected' class = 'button-red' onClick='clearSelectedSpindles()'>Clear</button>
 
 
 <script>
 
-
+localStorage.setItem("resetClicked", JSON.stringify(0))
 
 function clearSelectedSpindles(){
 
@@ -275,13 +280,11 @@ function selectAll(type){
 
 function resetFilters(){
 
-  resetCalendar()
-
-  document.getElementById("day-start").innerHTML = "<h5>From</h5>"
-  document.getElementById("day-end").innerHTML = "<h5>To</h5>"
+  localStorage.setItem("resetClicked", JSON.stringify(1))
   document.getElementById("request").value = ""
+  document.getElementById("day-start").innerHTML = ""
+  document.getElementById("day-end").innerHTML = ""
   //document.getElementById("daButton").disabled = false
-
   sn_and_date = JSON.parse(localStorage.getItem("sn_and_date"))
 
   clearAvailableSpindles()
@@ -300,14 +303,27 @@ function resetFilters(){
 }
 
 
-        function displayCalendar(){ 
+        function displayCalendar(flag) { // 0 vuol dire che ho cliccato "From", 1 vuol dire che ho cliccato "To"
 
 
 
-          var calendar = document.getElementById("calendar-original")
-          calendar.hidden = false;
-         
-      }
+            var calendar = document.getElementById("calendar-original")
+            var dayStart = document.getElementById("day-start")
+            var dayEnd = document.getElementById("day-end")
+            calendar.hidden = false;
+            //Migliorare popup
+            if(flag == 0) calendar.style = "margin-left: 10px;"
+            else calendar.style = "margin-left: 80px;"
+            if (flag == 0) {
+              document.getElementById("fromButton").disabled = true
+              document.getElementById("toButton").disabled = false
+              if (dayStart.innerHTML.length < 10) {
+                 document.getElementById("fromButton").disabled = false
+
+              }
+            }
+            
+          }
 
         function redirectView(){
             
