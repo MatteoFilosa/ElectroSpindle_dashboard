@@ -38,6 +38,25 @@ html * {
     }
 }
 
+#gradientPlaceholder{
+    position: absolute;
+    left:1000px;
+    top:100px;
+}
+#legendHelper {
+    position: absolute;
+    left: 1000px;
+    top: 100px;
+}
+
+#tableHeader{
+    background-color: whitesmoke;
+}
+
+#tableContainer{
+    display: inline-block;
+}
+
 #spindleRow{
 
     border: 1px grey;

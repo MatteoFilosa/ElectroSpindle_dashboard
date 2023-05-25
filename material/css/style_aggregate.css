@@ -3,7 +3,15 @@ html * {
     font-family: Roboto !important;
 }
 
+#analyticsDiv {
+    position: absolute;
+    left: 700px;
+    top: 40px;
+    display: flex;
+    column-gap: 20px;
+    justify-content: space-between;
 
+}
 
 
 text.shadow {

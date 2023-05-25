@@ -35,8 +35,10 @@
 </select>
 <div id="selectedValues"></div>
 
-<button id="featuresBtn" class="button-blue" style="left: 550px; top: -25px;" onclick="features()">Features</button>
-<button id="analytics_2" class="button-blue" style="left: 550px; top: -25px;">Analytics</button>
+
+<div id = "analyticsDiv">
+  <button id="featuresBtn" class="button-green"  onclick="features()">Features</button>
+</div>
 <div id = "svg-div">
   <div class="grid-container" id = "grid-container">
   </div>
@@ -57,6 +59,45 @@
 <div id = "features" style = "float: right"></div>
 
 <script>
+
+  function analytics(button) {
+
+      var selectedFeature = button.innerHTML;
+      console.log(selectedFeature);
+      localStorage.setItem("selectedFeature", JSON.stringify(selectedFeature))
+
+      var to_add = document.getElementById("selectedValues").childNodes
+      var selectedAttributes = []
+
+      for (let i = 0; i <= to_add.length; i++) {
+
+        if (to_add[i] != undefined) {
+
+          if ((to_add[i].id != null) && (to_add[i].checked == true)) {
+
+
+            selectedAttributes.push(to_add[i].id)
+          }
+        }
+      }
+
+      localStorage.setItem("selectedAttributes", JSON.stringify(selectedAttributes))
+
+      console.log(selectedAttributes)
+      if (selectedAttributes.length > 0) window.open('analytics.html', '_blank');
+      else alert("Select at least one attribute to continue.")
+    }
+
+  d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics", function (data) {
+
+      for (let i = 0; i < data.length; i++) {
+
+        document.getElementById("analyticsDiv").innerHTML += "<button class = 'button-blue' onclick = 'analytics(this)'>" + data[i] + "</button>"
+      }
+
+
+
+    })
 
   function sleep(time) {
       return new Promise((resolve) => setTimeout(resolve, time));

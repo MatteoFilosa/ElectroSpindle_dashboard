@@ -10,17 +10,79 @@
 
 <body>
     <header>
-        <h1>Analytics</h1>
+        <h1 id = "capa">Analytics</h1>
     </header>
+<div id = "tableContainer">
+<div id = "gradientPlaceholder">0&nbsp;&nbsp;&nbsp;</div><div id = "legendHelper" >1&nbsp;&nbsp;&nbsp;</div>
 
-    <div id = "heatmapContainer"></div>
+
+    <table id="heatMap">
+
+    </table>
+
+</div>
 
     <script>
+
+        function getColorFromHeatmapScale(normalizedValue) {
+                // Scala di colori per la heatmap (esempio)
+                const colorScale = [
+                    { value: 0.0, color: [255, 255, 255] }, // Bianco
+                    { value: 0.2, color: [255, 210, 210] }, // Rosso chiaro
+                    { value: 0.4, color: [255, 151, 151] }, // Rosso medio
+                    { value: 0.6, color: [255, 83, 83] },   // Rosso scuro
+                    { value: 0.8, color: [255, 11, 11] },   // Rosso intenso
+                    { value: 1.0, color: [153, 0, 0] }      // Rosso profondo
+                ];
+
+                // Trova il colore corrispondente nel colorScale
+                for (let i = 0; i < colorScale.length - 1; i++) {
+                    if (normalizedValue >= colorScale[i].value && normalizedValue <= colorScale[i + 1].value) {
+                        const startColor = colorScale[i].color;
+                        const endColor = colorScale[i + 1].color;
+                        const startValue = colorScale[i].value;
+                        const endValue = colorScale[i + 1].value;
+
+                        // Interpolazione lineare per ottenere il colore
+                        const t = (normalizedValue - startValue) / (endValue - startValue);
+                        const interpolatedColor = interpolateColor(startColor, endColor, t);
+
+                        return rgbToHex(interpolatedColor);
+                    }
+                }
+
+                return '#ffffff'; // Colore di fallback (bianco) se il valore normalizzato non rientra nella scala
+            }
+
+            // Funzione di interpolazione lineare per il colore
+            function interpolateColor(startColor, endColor, t) {
+                const interpolatedColor = [];
+
+                for (let i = 0; i < startColor.length; i++) {
+                    const startValue = startColor[i];
+                    const endValue = endColor[i];
+                    const interpolatedValue = Math.round(startValue + (endValue - startValue) * t);
+                    interpolatedColor.push(interpolatedValue);
+                }
+
+                return interpolatedColor;
+            }
+
+            // Funzione per convertire un colore RGB in esadecimale
+            function rgbToHex(color) {
+                const [r, g, b] = color;
+                const redHex = r.toString(16).padStart(2, '0');
+                const greenHex = g.toString(16).padStart(2, '0');
+                const blueHex = b.toString(16).padStart(2, '0');
+                return `#${redHex}${greenHex}${blueHex}`;
+            }
 
         var selectedAttributes = JSON.parse(localStorage.getItem("selectedAttributes"))
         var selectedFeature = JSON.parse(localStorage.getItem("selectedFeature"))
         var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
         var selectedSpindle = sn_and_date[0][0]
+       
+       
         var request = ""
 
         for(let i = 0; i < selectedAttributes.length; i++){
@@ -34,15 +96,231 @@
             else request += selectedAttributes[i]
             
         }
-        console.log("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=" + selectedFeature + "")
 
-        d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle  + "?fields=" + request + "&analitycs=" + selectedFeature +"", function (data) {
+        var heatMap = document.getElementById("heatMap")
 
-            console.log(data.pearson)
-            // Estrai i nomi delle relazioni e i valori di correlazione
+        if(sn_and_date.length == 1){ //caso singleView
+
+            d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=" + selectedFeature + "", function (data) {
+                
+                if(selectedFeature == "pearson"){ //caso Pearson
+
+                    document.getElementById("gradientPlaceholder").innerHTML += "<img src = 'images/gradient.png'>"
+                    console.log(data)
+                    document.getElementById("capa").innerHTML += ": Pearson"
+
+                    var tableRow = "<tr>";
+                        tableRow +="<th id='tableHeader' style='background-color: lightgrey;' >Attributes</th>"
+                    for (let i = 0; i < data.pearson.columns.length; i++) { //settare header
+                        tableRow += "<th id = 'tableHeader'>" + data.pearson.columns[i] + "</th>";
+                    }
+
+                    tableRow += "</tr>";
+                    heatMap.innerHTML += tableRow;
+
+                    for (let i = 0; i < data.pearson.matrix.length; i++){
+
+                        var tableRow = "<tr>";
+                        tableRow += "<th style='background-color: whitesmoke;'>" + data.pearson.columns[i] + "</th>"
+
+                        for (let j = 0; j < data.pearson.matrix[i].length; j++) {
+                            console.log(data.pearson.matrix[i][j], data.pearson.matrix[i].length);
+
+                            // Calcola un valore normalizzato tra 0 e 1 in base al valore di data.pearson.matrix[i][j]
+                            let normalizedValue = (data.pearson.matrix[i][j]);
+
+                            // Calcola il colore in base al valore normalizzato utilizzando una scala di colori adatta per la heatmap
+                            let color = getColorFromHeatmapScale(normalizedValue);
+
+                            console.log(normalizedValue)
+
+                            // Crea il table header con il colore specificato
+                            tableRow += "<th id='tableValue' style='background-color:" + color + "'>" + data.pearson.matrix[i][j] + "</th>";
+                        }
+
+                        tableRow += "</tr>";
+                        heatMap.innerHTML += tableRow;
+                        
+                    }
+
+                }
+                
+
+
+            });
+
+            if(selectedFeature != "pearson"){ // Caso basic statistics
+
+                d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=basic%20statistics", function (data) {
+                    console.log(data)
+                    document.getElementById("capa").innerHTML += ": Average, sigma"
+
+                    var tableRow = "<tr>";
+
+                    tableRow += "<th id = 'tableHeader' style='background-color: lightgrey;' >Attributes</th>";
+                    tableRow += "<th id = 'tableHeader'>Average</th>";
+                    tableRow += "<th id = 'tableHeader'>Sigma</th>";
+
+                    tableRow += "</tr>";
+                    heatMap.innerHTML += tableRow;
+
+                    for (let i = 0; i < selectedAttributes.length; i++) {
+
+                        var tableRow = "<tr>";
+
+                            
+
+                        
+                           
+
+                            // Calcola un valore normalizzato tra 0 e 1 in base al valore di data.pearson.matrix[i][j]
+                            let normalizedValue = (eval("data['basic statistics']." + selectedAttributes[i] + ".average"));
+
+                            // Calcola il colore in base al valore normalizzato utilizzando una scala di colori adatta per la heatmap
+                           
+
+                           
+
+                            // Crea il table header con il colore specificato
+                            tableRow += "<th style='background-color: whitesmoke;' >" + selectedAttributes[i] +"</th><th id='tableValue'>" + (eval("data['basic statistics']." + selectedAttributes[i] + ".average")); + "</th>";
+
+                            normalizedValue = (eval("data['basic statistics']." + selectedAttributes[i] + ".sigma"));
+
+                            // Calcola il colore in base al valore normalizzato utilizzando una scala di colori adatta per la heatmap
+                            
+
+                            // Crea il table header con il colore specificato
+                            tableRow += "<th id='tableValue'>" + (eval("data['basic statistics']." + selectedAttributes[i] + ".sigma")); + "</th>";
+
+                            tableRow += "</tr>";
+                            heatMap.innerHTML += tableRow;
+
+                    }
+
+
+                })
+
+            }
+
+        }
+
+        else{ //caso aggregateView
+            if (selectedFeature == "pearson") { //Pearson
+
+                document.getElementById("gradientPlaceholder").innerHTML += "<img src = 'images/gradient.png'>"
+            document.getElementById("capa").innerHTML += ": Pearson"
+
+            for (let u = 0; u < sn_and_date.length; u++) {
+                selectedSpindle = sn_and_date[u][0];
+                var heatMapId = "heatMap" + selectedSpindle;
+
+                // Creazione del nuovo elemento table
+                var heatMap = document.createElement("table");
+                heatMap.id = heatMapId;
+                document.getElementById("tableContainer").appendChild(heatMap);
+
+                console.log(heatMapId);
+
+                d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=" + selectedFeature + "", function (data) {
+
+                    if (selectedFeature == "pearson") { //caso Pearson
+                        console.log(data);
+                        
+
+                        var tableRow = "<br><br><br>" + sn_and_date[u][0] + "<tr>"; //Spaziatura tra tabelle
+                            tableRow += "<th style = 'background-color: lightgrey;'>Attributes</th>"
+                        for (let i = 0; i < data.pearson.columns.length; i++) { //settare header
+                            tableRow += "<th id='tableHeader'>" + data.pearson.columns[i] + "</th>";
+                        }
+
+                        tableRow += "</tr>";
+                        heatMap.innerHTML += tableRow;
+
+                        for (let i = 0; i < data.pearson.matrix.length; i++) {
+                            var tableRow = "<tr>";
+                            tableRow += "<th style = 'background-color: whitesmoke;'>" + selectedAttributes[i] + "</th>"
+                            for (let j = 0; j < data.pearson.matrix[i].length; j++) {
+                                console.log(data.pearson.matrix[i][j], data.pearson.matrix[i].length);
+
+                                // Calcola un valore normalizzato tra 0 e 1 in base al valore di data.pearson.matrix[i][j]
+                                let normalizedValue = (data.pearson.matrix[i][j]);
+
+                                // Calcola il colore in base al valore normalizzato utilizzando una scala di colori adatta per la heatmap
+                                let color = getColorFromHeatmapScale(normalizedValue);
+
+                                console.log(normalizedValue);
+
+                                // Crea il table header con il colore specificato
+                                tableRow += "<th id='tableValue' style='background-color:" + color + "'>" + data.pearson.matrix[i][j] + "</th>";
+                            }
+
+                            tableRow += "</tr>";
+                            heatMap.innerHTML += tableRow;
+                        }
+                    }
+                });
+            }
+        }
+
+        else{
+            document.getElementById("capa").innerHTML += ": Average, sigma"
+            for (let u = 0; u < sn_and_date.length; u++) {
+
+                    selectedSpindle = sn_and_date[u][0];
+                    d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=basic%20statistics", function (data) {
+                        console.log(data)
+                        
+
+                        var tableRow = "<br><br><br>" + sn_and_date[u][0] +"<tr>";
+
+                        tableRow += "<th id = 'tableHeader' style='background-color: lightgrey;' >Attributes</th>";
+                        tableRow += "<th id = 'tableHeader'>Average</th>";
+                        tableRow += "<th id = 'tableHeader'>Sigma</th>";
+                        
+
+                        tableRow += "</tr>";
+                        heatMap.innerHTML += tableRow;
+
+                        for (let i = 0; i < selectedAttributes.length; i++) {
+
+                            var tableRow = "<tr>";
+
+
+
+
+                            // Calcola un valore normalizzato tra 0 e 1 in base al valore di data.pearson.matrix[i][j]
+                            let normalizedValue = (eval("data['basic statistics']." + selectedAttributes[i] + ".average"));
+
+                            // Calcola il colore in base al valore normalizzato utilizzando una scala di colori adatta per la heatmap
+
+
+
+
+                            // Crea il table header con il colore specificato
+                            tableRow += "<th style='background-color: whitesmoke;'>"+ selectedAttributes[i] + "</th><th id='tableValue'>" + (eval("data['basic statistics']." + selectedAttributes[i] + ".average")); + "</th>";
+
+                            normalizedValue = (eval("data['basic statistics']." + selectedAttributes[i] + ".sigma"));
+
+                            // Calcola il colore in base al valore normalizzato utilizzando una scala di colori adatta per la heatmap
+
+
+                            // Crea il table header con il colore specificato
+                            tableRow += "<th id='tableValue'>" + (eval("data['basic statistics']." + selectedAttributes[i] + ".sigma")); + "</th>";
+
+                            tableRow += "</tr>";
+                            heatMap.innerHTML += tableRow;
+
+                        }
+
+
+                    })
+                }
+                
+        }
+
             
-        });
-
+        }
+        
 
 
 
