@@ -13,8 +13,10 @@
         <h1 id = "capa">Analytics</h1>
     </header>
 <div id = "tableContainer">
-<div id = "gradientPlaceholder"></div>
-
+<div id = "gradientPlaceholder" hidden>
+    0
+</div>
+<div id = "gradientHelper" hidden>1</div>
 
     <table id="heatMap">
 
@@ -105,7 +107,9 @@
                 
                 if(selectedFeature == "pearson"){ //caso Pearson
 
-                    document.getElementById("gradientPlaceholder").innerHTML += "0&nbsp;&nbsp;&nbsp;</div><div id = 'legendHelper' >1&nbsp;&nbsp;&nbsp;<img src = 'images/gradient.png'>"
+                    document.getElementById("gradientPlaceholder").innerHTML += "<img src = 'images/gradient.png'>"
+                    document.getElementById("gradientPlaceholder").hidden = ""
+                    document.getElementById("gradientHelper").hidden = ""
                     console.log(data)
                     document.getElementById("capa").innerHTML += ": Pearson"
 
@@ -208,6 +212,8 @@
             if (selectedFeature == "pearson") { //Pearson
 
             document.getElementById("gradientPlaceholder").innerHTML += "<img src = 'images/gradient.png'>"
+            document.getElementById("gradientPlaceholder").hidden = ""
+            document.getElementById("gradientHelper").hidden = ""
             document.getElementById("capa").innerHTML += ": Pearson"
 
             for (let u = 0; u < sn_and_date.length; u++) {
