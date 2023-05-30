@@ -51,15 +51,9 @@
   <option value="" disabled selected>Select attribute</option>
 </select>
 <div id = "selectedValues"></div>
-
-
-<!--Step 2-->
-<div id = "svg-div">
- <!--<div id="loader"></div>-->
-
-</div>
-
 <div id="tooltip"></div>
+
+<button id="clear" onclick="clearSvg()" class="button-red">Clear all</button>
 
 <div id = "problems-found">
 
@@ -85,19 +79,16 @@
 
 
 <div id = "coordinates"></div>
-<button id = "clear" onclick="clearSvg()" class = "button-red">Clear all</button>
 
-<div class="container">
-  <div class="row">
+
+<div class="container" id = "svg-div">
+  <div class="row" id = "svg-row">
+    <!--
     <div class="col-sm">
       One of three columns
     </div>
-    <div class="col-sm">
-      One of three columns
-    </div>
-    <div class="col-sm">
-      One of three columns
-    </div>
+    -->
+
   </div>
 </div>
 
@@ -143,173 +134,6 @@
     else alert("Select at least one attribute to continue.")
   }
  
-  function zoomIn(new_svg, selectedGroup, width, height, min, max, dataset){
-
-
-        //new_svg.selectAll('text').attr("transform", "translate(0," + height + ")") trasla correttamente il testo
-        new_svg.selectAll('g').remove()
-        new_svg.selectAll('path').remove()
-        new_svg.selectAll('dot').remove()
-        new_svg.style("width", 1310 * counter_zoom + "px")
-
-
-        counter_zoom += 1
-
-        var g = new_svg.append("g")
-          .attr("transform", "translate(" + 100 + "," + 100 + ")")
-          .attr("id", function (d, i) { return "g" + selectedGroup })
-
-        var xScale = d3.scaleLinear().domain([0, 43100]).range([0, width * counter_zoom]),
-          yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
-
-
-
-        g.append("g")
-          .attr("transform", "translate(0," + height + ")")
-          .attr("id", function (d, i) { return "xAxis" + selectedGroup })
-          .call(d3.axisBottom(xScale));
-
-        g.append("g")
-          .attr("id", function (d, i) { return "yAxis" + selectedGroup })
-          .call(d3.axisLeft(yScale));
-
-        new_svg.append('g')
-          .selectAll("dot")
-          .data(dataset)
-          .enter()
-          .append("circle")
-          .attr("cx", function (d) { return xScale(d[0]); })
-          .attr("cy", function (d) { return yScale(d[1]); })
-          .attr("r", 3)
-          .attr("transform", "translate(" + 100 + "," + 100 + ")")
-          .style("fill", "#CC0000")
-          .attr("id", function (d, i) { return "dot" + selectedGroup })
-          .on("mouseover", function (d, i) {
-            displayTooltip(d, i, selectedGroup, event)
-          })
-          .on("mouseout", function (d, i) { hideTooltip() })
-
-        // Step 8        
-
-        var line = d3.line()
-          .x(function (d) { return xScale(d[0]); })
-          .y(function (d) { return yScale(d[1]); })
-          .curve(d3.curveMonotoneX)
-
-        new_svg.append("path")
-          .datum(dataset)
-          .attr("class", "line")
-          .attr("transform", "translate(" + 100 + "," + 100 + ")")
-          .attr("d", line)
-          .style("fill", "none")
-          .style("stroke", "#CC0000")
-          .style("stroke-width", "2")
-          .attr("id", function (d, i) { return "path" + selectedGroup });
-
-           new_svg.on("wheel", function () {
-      var deltaY = d3.event.deltaY;
-      if (deltaY < 0) {
-        // WheelIn (rotazione in avanti)
-        zoomIn(new_svg, selectedGroup, width, height, min, max, dataset);
-      } else if (deltaY > 0) {
-        // WheelOut (rotazione all'indietro)
-        zoomOut(new_svg, selectedGroup, width, height, min, max, dataset);
-      }
-    });
-
-    var toSave = width*counter_zoom
-
-       localStorage.setItem("currentCoordinates", JSON.stringify(toSave))
-
-      }
-
-    function zoomOut(new_svg, selectedGroup, width, height, min, max, dataset){
-      var curr_width = JSON.parse(localStorage.getItem("currentCoordinates"))
-
-      if(curr_width > 200){
-
-      
-      console.log(curr_width)
-
-
-
-      //new_svg.selectAll('text').attr("transform", "translate(0," + height + ")") trasla correttamente il testo
-      new_svg.selectAll('g').remove()
-      new_svg.selectAll('path').remove()
-      new_svg.selectAll('dot').remove()
-      new_svg.style("width", curr_width - 200 * counter_zoom_out + "px")
-
-      counter_zoom_out += 1
-
-
-      var g = new_svg.append("g")
-        .attr("transform", "translate(" + 100 + "," + 100 + ")")
-        .attr("id", function (d, i) { return "g" + selectedGroup })
-
-      var xScale = d3.scaleLinear().domain([0, 43100]).range([0, curr_width - 200 * counter_zoom_out]),
-        yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
-
-
-
-      g.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .attr("id", function (d, i) { return "xAxis" + selectedGroup })
-        .call(d3.axisBottom(xScale));
-
-      g.append("g")
-        .attr("id", function (d, i) { return "yAxis" + selectedGroup })
-        .call(d3.axisLeft(yScale));
-
-      new_svg.append('g')
-        .selectAll("dot")
-        .data(dataset)
-        .enter()
-        .append("circle")
-        .attr("cx", function (d) { return xScale(d[0]); })
-        .attr("cy", function (d) { return yScale(d[1]); })
-        .attr("r", 3)
-        .attr("transform", "translate(" + 100 + "," + 100 + ")")
-        .style("fill", "#CC0000")
-        .attr("id", function (d, i) { return "dot" + selectedGroup })
-        .on("mouseover", function (d, i) {
-          displayTooltip(d, i, selectedGroup, event)
-        })
-        .on("mouseout", function (d, i) { hideTooltip() })
-
-      // Step 8        
-
-      var line = d3.line()
-        .x(function (d) { return xScale(d[0]); })
-        .y(function (d) { return yScale(d[1]); })
-        .curve(d3.curveMonotoneX)
-
-      new_svg.append("path")
-        .datum(dataset)
-        .attr("class", "line")
-        .attr("transform", "translate(" + 100 + "," + 100 + ")")
-        .attr("d", line)
-        .style("fill", "none")
-        .style("stroke", "#CC0000")
-        .style("stroke-width", "2")
-        .attr("id", function (d, i) { return "path" + selectedGroup });
-
-         new_svg.on("wheel", function () {
-        var deltaY = d3.event.deltaY;
-        if (deltaY < 0) {
-          // WheelIn (rotazione in avanti)
-          zoomIn(new_svg, selectedGroup, width, height, min, max, dataset);
-        } else if (deltaY > 0) {
-          // WheelOut (rotazione all'indietro)
-          zoomOut(new_svg, selectedGroup, width, height, min, max, dataset);
-        }
-      });
-
-      var toSave = curr_width - 200 * counter_zoom_out
-      localStorage.setItem("currentCoordinates", JSON.stringify(toSave))
-      
-      }
-    }
-  
 
 
   function sleep(time) {
@@ -344,15 +168,14 @@
         .text(function (d) { return d; }) // text showed in the menu
         .attr("value", function (d) { return d; }) // corresponding value returned by the button
 
-        var coordinates = -750,  colorSelector = 0, selectedValues = [], globalData = []
-        localStorage.setItem("currentCoordinates", JSON.stringify(coordinates))
+        var  colorSelector = 0, selectedValues = [], globalData = []
         var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
 
 
         var globalData = []
         for (let i = 0; i < allGroup.length; i++) {
 
-            d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=100&points=0&columns=" + allGroup[i], function (data) {
+            d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=0&factor=100&points=0&columns=" + allGroup[i], function (data) {
               
               globalData[i] = data
               
@@ -375,14 +198,15 @@
 
           
           var data = globalData
-          console.log(data)
 
-          if(document.getElementById("aggregato").checked == true) newGraph("", data,   coordinates, 1, 0)
+
+          if(document.getElementById("aggregato").checked == true) newGraph("", data, 1, 0)
 
           else { //vuol dire che devo rendere visibili gli attributi di prima
 
             var to_add = document.getElementById("selectedValues").childNodes
-            var count = -1
+            var toAvoid = []
+           
             colorSelector -= 1
             for (let i = 0; i <= to_add.length; i++) {
               
@@ -390,23 +214,30 @@
 
                 if ((to_add[i].id != null) && (to_add[i].checked == true)) {
 
-                  count ++;
+               
                   var tmp = to_add[i].id
-              
                   
-       
-                  d3.select("#svg" + tmp).attr("visibility", "visible")
+                  
+           
+                  
+                  
+                  //d3.select("#svg" + tmp).attr("visibility", "visible")
                 
 
-                  if(d3.select("#svg" + tmp).size() == 0){
-                    newGraph(tmp, data,   (400*count), 0, 3)
+                  if((d3.select("#svg" + tmp).size() == 0) && (toAvoid.includes(tmp) == false)){
+                    
+                    newGraph(tmp, data, 2)
+                    
+                    
                   }
                 }
+                toAvoid.push(tmp)
+                console.log(toAvoid)
 
               }
               
             }
-            d3.select("#svg_default").attr("visibility", "hidden")
+            d3.select("#svg_default").remove()
           }
 
 
@@ -486,30 +317,22 @@
                 document.getElementById("selectedValues").innerHTML = ""
                 document.getElementById("aggregato").checked = false
                 document.getElementById("selectMenu").selectedIndex = 0; 
-                counter_zoom = 0
-                counter_zoom_out = 0
 
                 d3.select("#svg_default").remove()    //attr("visibility", "hidden");
 
-                for (let i = 0; i <= allGroup.length; i ++){
+                document.getElementById("svg-div").remove()
+                var svgDiv = document.createElement("div")
+                svgDiv.classList.add("container");
+                svgDiv.id = "svg-div";
+                document.body.appendChild(svgDiv);
+                document.getElementById("svg-div").innerHTML +=  "<div class='row' id='svg-row'>"
 
-                    var tmp = allGroup[i]
-                   
-                    d3.select("#svg" + tmp).selectAll("circle").remove();
-                    d3.select("#svg" + tmp).selectAll("path").remove();
-                    d3.select("#svg" + tmp).selectAll("text").remove();
-                    d3.select("#svg" + tmp).selectAll("g").remove();
-                    //document.getElementById("svg" + i).remove();
-                    
-                }
-   
-                coordinates = - 400
-                localStorage.setItem("currentCoordinates", JSON.stringify(coordinates))
+
                 localStorage.removeItem("selectedValues");
                 }
 
 
-    function newGraph(selectedGroup, data,  coordinates, aggregato){
+    function newGraph(selectedGroup, data, aggregato){
 
       var selectedIndex = 0
 
@@ -540,7 +363,7 @@
 
             ///Variabili 
 
-            coordinates = JSON.parse(localStorage.getItem("currentCoordinates")), colorSelector = 0
+            colorSelector = 0
             
             d3.select("#svg_default").attr("visibility", "visible");
 
@@ -582,7 +405,7 @@
               var scalaAggiuntiva = 0
               if (document.getElementById("svg_default") != null) document.getElementById("svg_default").remove()
               var valori = JSON.parse(localStorage.getItem("selectedValues"))
-              document.getElementById("svg-div").innerHTML += "<svg width='1000' height='800' id ='svg_default'></svg>"
+              document.getElementById("svg-div").innerHTML = "<div class='row' id = 'svg-row'><svg width='1000' height='800' id ='svg_default'></svg></div>"
               var new_svg = d3.select("#svg_default")
               var g = new_svg.append("g")
                 .attr("transform", "translate(" + 100 + "," + 100 + ")");
@@ -621,16 +444,7 @@
 
               var container = document.getElementById('svg-div');
 
-            new_svg.on("wheel", function () {
-              var deltaY = d3.event.deltaY;
-              if (deltaY < 0) {
-                // WheelIn (rotazione in avanti)
-                zoomIn(new_svg, selectedGroup, width, height, min, max, dataset);
-              } else if (deltaY > 0) {
-                // WheelOut (rotazione all'indietro)
-                zoomOut(new_svg, selectedGroup, width, height, min, max, dataset);
-              }
-            });
+           
 
               for (let j = 0; j < valori.length; j++) { //Serve per scalare gli assi correttamente
 
@@ -954,7 +768,7 @@
 
 
 
-        else if (aggregato == 0){ //Caso NON aggregato
+        else if ((aggregato == 0) || (aggregato == 2)){ //Caso NON aggregato
 
          
        
@@ -997,7 +811,7 @@
 
           //Creazione grafico
 
-          document.getElementById("svg-div").innerHTML += '<svg width="800" height="510" id="svg' + selectedGroup +'"></svg>'
+          document.getElementById("svg-div").innerHTML += '<div class="col-sm"><svg width="800" height="510" id="svg' + selectedGroup +'"></svg></div>'
             var svg_to_select = "#svg" + selectedGroup
 
             var new_svg = d3.select(svg_to_select),
@@ -1005,39 +819,14 @@
                 width = new_svg.attr("width") - margin, //300
                 height = new_svg.attr("height") - margin //200
 
-             // nel caso io cancelli tutto nell'opzione sovrapponi, adesso metto i nuovi svg dalla coordinata 0+400 anziché dalle vecchie.
 
-            coordinates = JSON.parse(localStorage.getItem("currentCoordinates"))
-            console.log(coordinates)
-
-            var tmp =  document.getElementById("svg" + selectedGroup)
-            tmp.style.position = 'absolute';
-            tmp.style.top = '200px';
-            tmp.style.left = coordinates + "px"
-
-   
     
+
+         
             var g = new_svg.append("g")
         .attr("transform", "translate(" + 100 + "," + 100 + ")")
         .attr("id", function (d, i) { return "g" + selectedGroup })
     
-
-       
-         
-            new_svg.on("wheel", function () {
-              var deltaY = d3.event.deltaY;
-              if (deltaY < 0) {
-                // WheelIn (rotazione in avanti)
-                zoomIn(new_svg, selectedGroup, width, height, min, max, dataset);
-              } else if (deltaY > 0) {
-                // WheelOut (rotazione all'indietro)
-                zoomOut(new_svg, selectedGroup, width, height, min, max, dataset);
-              }
-            });
-
-             
-
-        
 
           new_svg.append('text')
             .attr('x', width/2 + 100)
@@ -1120,8 +909,11 @@
             // codice finale
             //if (aggregato == 0) document.getElementById("selectedValues").style.visibility = "hidden"
        
-            if (aggregato != 1) document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedGroup +'" onchange = "modifyElement('+ selectedGroup +')" checked>' + "<label for='" + selectedGroup + "' id = 'label" + selectedGroup + "'>" + selectedGroup + "</label>" 
-            selectedValues.push(selectedGroup)
+            if ((aggregato != 1) && (aggregato != 2)) {
+              console.log("col")
+              document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedGroup +'" onchange = "modifyElement('+ selectedGroup +')" checked>' + "<label for='" + selectedGroup + "' id = 'label" + selectedGroup + "'>" + selectedGroup + "</label>" 
+            }
+              selectedValues.push(selectedGroup)
             localStorage.setItem("selectedValues", JSON.stringify(selectedValues))
 
             //d3.select("#loader").attr("hidden", true);
@@ -1146,11 +938,8 @@
 
     if (checkBoxAggregato.checked == false){ //se Aggregato non è checkato, cancella tutto per fare spazio al nuovo grafico sullo stesso svg
 
-        coordinates = JSON.parse(localStorage.getItem("currentCoordinates"))
-        coordinates += 750
-        console.log(coordinates)
-        localStorage.setItem("currentCoordinates", JSON.stringify(coordinates))
-        newGraph(selectedOption, data, coordinates, 0, 0)
+   
+        newGraph(selectedOption, data, 0, 0)
     
 
     }
@@ -1161,7 +950,7 @@
       document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption +'" onchange = "modifyElement('+ selectedOption +')" checked>' + "<label for='" + selectedOption + "' id = 'label" + selectedOption + "'>" + selectedOption + "</label>" 
       localStorage.setItem("selectedOption", JSON.stringify(selectedOption))
       //modifyElement(selectedOption, 1)
-      newGraph(selectedOption, data,   coordinates, 1, 1)
+      newGraph(selectedOption, data, 1, 1)
  
     }
 
