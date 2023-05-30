@@ -40,9 +40,11 @@
   <button id="featuresBtn" class="button-green"  onclick="features()">Features</button>
 </div>
 <div id = "svg-div">
-  <div class="grid-container" id = "grid-container">
+  <div class="row" id="svg-row">
+  
   </div>
 </div>
+
 <div id="tooltip"></div>
 
 
@@ -417,15 +419,16 @@
 
           var selectedOption = nodes[i].id
          
-
+        document.getElementById("svg-div").innerHTML += "<div class='row' id='svg-row" + count + "'>"
+        
         for (let j = 0; j < sn_and_date.length; j++) {
 
           current_spindle = sn_and_date[j][0]
           
           count += 1
-          document.getElementById("svg-div").innerHTML += "<div class='grid-container' id='grid-container" + count + "'>"
+          
 
-          document.getElementById("grid-container" + count).innerHTML += "<svg width='800' height='510' id ='svg" + selectedOption + "_" + j + "'></svg>"
+          document.getElementById("svg-row" + count).innerHTML += "<svg width='800' height='510' id ='svg" + selectedOption + "_" + j + "'></svg>"
 
           
 
