@@ -239,7 +239,7 @@
 
           document.getElementById("row" + allGroup[i]).remove() //rimuovo le cose de prima
 
-          //document.getElementById("svg-div").innerHTML += "<div class='row d-flex justify-content-between' id='row d-flex justify-content-between" + allGroup[i] + "'>" // Ricorda: una row d-flex justify-content-between per attributo
+          //document.getElementById("svg-div").innerHTML += "<div class='row no-wrap' id='row d-flex justify-content-between" + allGroup[i] + "'>" // Ricorda: una row d-flex justify-content-between per attributo
 
           document.getElementById("svg-div").innerHTML += "<svg width='1000' height='800' class ='svg_aggregate' id ='svg_aggregate_" + allGroup[i] + "'></svg></div>" // per ogni attributo ho un grafico
             var new_svg = d3.select("#svg_aggregate_" + allGroup[i])
@@ -425,11 +425,11 @@
 
           var selectedOption = nodes[i].id
 
-        document.getElementById("svg-div").innerHTML += "<div class='row d-flex justify-content-between' id='row" + selectedOption + "'>"
+        document.getElementById("svg-div").innerHTML += "<div class='row no-wrap' id='row" + selectedOption + "'>"
 
         
          
-        //document.getElementById("svg-div").innerHTML += "<div class='row d-flex justify-content-between' id='row d-flex justify-content-between" + count + "'>"
+        //document.getElementById("svg-div").innerHTML += "<div class='row no-wrap' id='row d-flex justify-content-between" + count + "'>"
         
         for (let j = 0; j < sn_and_date.length; j++) {
 
@@ -440,7 +440,7 @@
           
           
 
-          document.getElementById("row" + selectedOption).innerHTML += "<div class = 'col-sm-6' style = 'max-width: 30%'><svg width='800' height='510' id ='svg" + selectedOption + "_" + j + "'></svg></div>"
+          document.getElementById("row" + selectedOption).innerHTML += "<div class = 'col-sm-2' style = 'max-width: 70%'><svg width='800' height='510' id ='svg" + selectedOption + "_" + j + "'></svg></div>"
 
           
 
@@ -635,7 +635,7 @@
     
     document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption + '" onchange = "modifyElement(' + selectedOption + ')" checked>' + "<label for='" + selectedOption + "' id = 'label" + selectedOption + "'>"+ selectedOption +"</label>" 
   
-    document.getElementById("svg-div").innerHTML += "<div class='row d-flex justify-content-between' id='row" + selectedOption + "'>"
+    document.getElementById("svg-div").innerHTML += "<div class='row no-wrap' id='row" + selectedOption + "'>"
     
     
     //Per ogni spindle devo aggiungere un grafichetto
@@ -644,7 +644,7 @@
         
     current_spindle = sn_and_date[i][0]   
         
-        document.getElementById("row" + selectedOption).innerHTML += "<div class = 'col-sm-6' style = 'max-width: 30%'><svg width='800' height='510' id ='svg" + selectedOption + "_" + i +"'></svg></div>"
+        document.getElementById("row" + selectedOption).innerHTML += "<div class = 'col-sm-2' style = 'max-width: 70%'><svg width='800' height='510' id ='svg" + selectedOption + "_" + i +"'></svg></div>"
         
             
             var svg = d3.select("#svg" + selectedOption + "_" + i),

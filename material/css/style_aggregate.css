@@ -13,9 +13,10 @@ html * {
 
 }
 
-.col-sm-6{
-    max-width: 0%;
+.row.no-wrap {
+    flex-wrap: nowrap;
 }
+
 
 #svg-div{
     margin-left: 20px;
