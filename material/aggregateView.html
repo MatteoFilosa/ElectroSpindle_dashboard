@@ -1,34 +1,36 @@
 <!doctype html>
 <html>
 <head>
-    <!---Step 2-->
+
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <title>Multiple spindles visualization</title>
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-
     <link rel="stylesheet" href="css/style_aggregate.css"></link>
-    <script>
-    //inizializzazione array di colori per i grafici
-        var colors = [ "#CC0000",
-  '#ff7f50','#87cefa','#da70d6','#32cd32','#6495ed',
-  '#ff69b4','#ba55d3','#cd5c5c','#cc5500','#40e0d0'
-    ];
-//
 
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    <!--Bootstrap-->
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    
 </head>
 
 
 <body>
 <h1>Multiple spindles visualization</h1>
-<!-- <Body background="images/PROVA.png" background-repeat="no-repeat” background-size="cover”>  -->
-<!--<Body background="images/test.png" background-repeat="no-repeat” background-size="cover”></Body>-->
+
 
 <input type = "checkbox" id ="aggregato" class = "checkbox" onchange ="aggregate()"> Aggregate
-<!--<input type = "checkbox" id ="tamb" class = "checkbox" onchange ="modifyElement('tamb')" checked> Tamb
-<input typddde = "checkbox" id ="tba" class = "checkbox" onchange ="modifyElement('tba')" checked> Tba -->
+
 
 <select id="selectMenu" >
   <option value="" disabled selected>Select attribute</option>
@@ -37,12 +39,10 @@
 
 
 <div id = "analyticsDiv">
-  <button id="featuresBtn" class="button-green"  onclick="features()">Features</button>
+  <button id="featuresBtn" class="button-blue"  onclick="features()">Features</button>
 </div>
-<div id = "svg-div">
-  <div class="row" id="svg-row">
+<div class = "container" id = "svg-div">
   
-  </div>
 </div>
 
 <div id="tooltip"></div>
@@ -57,10 +57,16 @@
 <br>
 
 
-<div id = "coordinates"></div>
 <div id = "features" style = "float: right"></div>
 
 <script>
+
+      //inizializzazione array di colori per i grafici
+        var colors = ["#CC0000",
+          '#ff7f50', '#87cefa', '#da70d6', '#32cd32', '#6495ed',
+          '#ff69b4', '#ba55d3', '#cd5c5c', '#cc5500', '#40e0d0'
+        ];
+//
 
   function analytics(button) {
 
@@ -177,15 +183,9 @@
     selectedGroup = selectedGroup.id
     document.getElementById(selectedGroup).remove()
     document.getElementById("label" + selectedGroup).remove()
-    if (selectedGroup == "Time") selectedGroup = "time"
+  
 
-    for (let i = 0; i < sn_and_date.length; i++) {
-
-      d3.select("#svg" + selectedGroup + "_" + i).remove();
-      
-
-
-    }
+    document.getElementById("row" + selectedGroup).remove()
   }
 
    function displayTooltip(d, i, selectedGroup, event) {
@@ -237,7 +237,11 @@
           //Disegno prima un svg generico di quell'attributo...
           max = 0, min = 1000000
 
-          document.getElementById("svg-div").innerHTML += "<svg width='1000' height='800' class ='svg_aggregate' id ='svg_aggregate_" + allGroup[i] + "'></svg>" // per ogni attributo ho un grafico
+          document.getElementById("row" + allGroup[i]).remove() //rimuovo le cose de prima
+
+          //document.getElementById("svg-div").innerHTML += "<div class='row d-flex justify-content-between' id='row d-flex justify-content-between" + allGroup[i] + "'>" // Ricorda: una row d-flex justify-content-between per attributo
+
+          document.getElementById("svg-div").innerHTML += "<svg width='1000' height='800' class ='svg_aggregate' id ='svg_aggregate_" + allGroup[i] + "'></svg></div>" // per ogni attributo ho un grafico
             var new_svg = d3.select("#svg_aggregate_" + allGroup[i])
             var g = new_svg.append("g")
               .attr("class", "axis")
@@ -405,7 +409,9 @@
 
       else if (document.getElementById("aggregato").checked == false){
 
-        document.getElementById("selectMenu").disabled = "false"
+        //CASO TOLGO SPUNTA DA AGGREGATO
+
+        document.getElementById('selectMenu').removeAttribute("disabled");
 
         d3.selectAll(".svg_aggregate").remove()
         count = 0
@@ -418,17 +424,23 @@
         if ((document.getElementById(nodes[i].id) != null) && (nodes[i].id.includes("label") == false )) {
 
           var selectedOption = nodes[i].id
+
+        document.getElementById("svg-div").innerHTML += "<div class='row d-flex justify-content-between' id='row" + selectedOption + "'>"
+
+        
          
-        document.getElementById("svg-div").innerHTML += "<div class='row' id='svg-row" + count + "'>"
+        //document.getElementById("svg-div").innerHTML += "<div class='row d-flex justify-content-between' id='row d-flex justify-content-between" + count + "'>"
         
         for (let j = 0; j < sn_and_date.length; j++) {
 
           current_spindle = sn_and_date[j][0]
           
           count += 1
+
+          
           
 
-          document.getElementById("svg-row" + count).innerHTML += "<svg width='800' height='510' id ='svg" + selectedOption + "_" + j + "'></svg>"
+          document.getElementById("row" + selectedOption).innerHTML += "<div class = 'col-sm-6' style = 'max-width: 30%'><svg width='800' height='510' id ='svg" + selectedOption + "_" + j + "'></svg></div>"
 
           
 
@@ -553,20 +565,24 @@
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 16)
-              .text(sn_and_date[j][1]);
+              .text(sn_and_date[j][0]);
 
 
 
 
         }
-        document.getElementById("svg-div").innerHTML += "</div>"
+        
+        
 
-        //document.getElementById("grid-container").innerHTML += "</div>" //chiusura riga
+        
 
       }
       
 
   }
+  
+  document.getElementById("svg-div").innerHTML += "</div>"
+  
 }
 }
 
@@ -606,7 +622,7 @@
     //var aggregato = 0
     var count = 0
     
-    //ECCOCI!
+    //CASO NON AGGREGATO; AGGIUNTA NORMALE DI SVG
 
     d3.select("#selectMenu").on("change", function(d) {
 
@@ -619,7 +635,7 @@
     
     document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption + '" onchange = "modifyElement(' + selectedOption + ')" checked>' + "<label for='" + selectedOption + "' id = 'label" + selectedOption + "'>"+ selectedOption +"</label>" 
   
-    document.getElementById("svg-div").innerHTML += "<div class='grid-container' id='grid-container" + count + "'>"
+    document.getElementById("svg-div").innerHTML += "<div class='row d-flex justify-content-between' id='row" + selectedOption + "'>"
     
     
     //Per ogni spindle devo aggiungere un grafichetto
@@ -628,7 +644,7 @@
         
     current_spindle = sn_and_date[i][0]   
         
-        document.getElementById("grid-container" + count).innerHTML += "<svg width='800' height='510' id ='svg" + selectedOption + "_" + i +"'></svg>"
+        document.getElementById("row" + selectedOption).innerHTML += "<div class = 'col-sm-6' style = 'max-width: 30%'><svg width='800' height='510' id ='svg" + selectedOption + "_" + i +"'></svg></div>"
         
             
             var svg = d3.select("#svg" + selectedOption + "_" + i),
@@ -761,7 +777,7 @@
     }
     document.getElementById("svg-div").innerHTML += "</div>"
 
-    //document.getElementById("grid-container").innerHTML += "</div>" //chiusura riga
+    
   })
         
         

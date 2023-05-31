@@ -13,16 +13,18 @@ html * {
 
 }
 
+.col-sm-6{
+    max-width: 0%;
+}
+
+#svg-div{
+    margin-left: 20px;
+}
 
 text.shadow {
     stroke: black;
     stroke-width: 0.6px;
     opacity: 0.8s;
-}
-
-.grid-container {
-    display: inline-flex;
-
 }
 
 
@@ -98,11 +100,7 @@ input[type=checkbox] {
     top: 0px;
 }
 
-#svg3 {
-    position: absolute;
-    left: 800px;
-    top: 200px;
-}
+
 
 .button-blue {
     background-color: #0095ff;
