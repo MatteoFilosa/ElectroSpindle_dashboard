@@ -2,11 +2,25 @@ html * {
     font-size: 1em !important;
     font-family: Roboto !important;
 }
+
+body {
+    margin-left: 20px;
+    /* Puoi impostare il valore del margine desiderato */
+}
     text.shadow {
         stroke: black;
         stroke-width: 0.6px;
         opacity: 0.8s;
     }
+
+         .row.no-wrap {
+             flex-wrap: nowrap;
+         }
+
+                 #svg-div {
+                     margin-left: 20px;
+                 }
+        
 
         #loader {
             border: 16px solid #f3f3f3;
@@ -31,278 +45,7 @@ html * {
                     }
                 }
 
-    svg {
-        position: absolute;
-        left: 0px;
-        top: 130px;
-    }
-
-    #svg_tba {
-        position: absolute;
-        left: 400px;
-        top: 130px;
-    }
-
-    #svg_tba0 {
-
-        position: absolute;
-        left: 0px;
-        top: 400px;
-
-    }
-
-    #svg_tamb1 {
-
-        position: absolute;
-        left: 400px;
-        top: 130px;
-
-    }
-
-    #svg_tba1 {
-
-        position: absolute;
-        left: 400px;
-        top: 400px;
-
-    }
-
-    #svg_tamb2 {
-
-        position: absolute;
-        left: 800px;
-        top: 130px;
-
-    }
-
-    #svg_tba2 {
-
-        position: absolute;
-        left: 800px;
-        top: 400px;
-
-    }
-
-    #svg_tamb3 {
-
-        position: absolute;
-        left: 1200px;
-        top: 130px;
-
-    }
-
-    #svg_tba3 {
-
-        position: absolute;
-        left: 1200px;
-        top: 400px;
-
-    }
-
-    #svg_tamb4 {
-
-        position: absolute;
-        left: 1600px;
-        top: 130px;
-
-    }
-
-    #svg_tba4 {
-
-        position: absolute;
-        left: 1600px;
-        top: 400px;
-
-    }
-
-
-    #svg_tamb5 {
-
-        position: absolute;
-        left: 2000px;
-        top: 130px;
-
-    }
-
-    #svg_tba5 {
-
-        position: absolute;
-        left: 2000px;
-        top: 400px;
-
-    }
-
-    #svg_tamb6 {
-
-        position: absolute;
-        left: 2400px;
-        top: 130px;
-
-    }
-
-    #svg_tba6 {
-
-        position: absolute;
-        left: 2400px;
-        top: 400px;
-
-    }
-
-    #svg_tamb7 {
-
-        position: absolute;
-        left: 2800px;
-        top: 130px;
-
-    }
-
-    #svg_tba7 {
-
-        position: absolute;
-        left: 2800px;
-        top: 400px;
-
-    }
-
-    #svg_tamb8 {
-
-        position: absolute;
-        left: 3200px;
-        top: 130px;
-
-    }
-
-    #svg_tba8 {
-
-        position: absolute;
-        left: 3200px;
-        top: 400px;
-
-    }
-
-    #svg_tamb9 {
-
-        position: absolute;
-        left: 3600px;
-        top: 130px;
-
-    }
-
-    #svg_tba9 {
-
-        position: absolute;
-        left: 3600px;
-        top: 400px;
-
-    }
-
-    #svg_tamb10 {
-
-        position: absolute;
-        left: 4000px;
-        top: 130px;
-
-    }
-
-    #svg_tba10 {
-
-        position: absolute;
-        left: 4000px;
-        top: 400px;
-
-    }
-
-    #svg_tamb11 {
-
-        position: absolute;
-        left: 4400px;
-        top: 130px;
-
-    }
-
-    #svg_tba11 {
-
-        position: absolute;
-        left: 4400px;
-        top: 400px;
-
-    }
-
-    #svg_tamb12 {
-
-        position: absolute;
-        left: 4800px;
-        top: 130px;
-
-    }
-
-    #svg_tba12 {
-
-        position: absolute;
-        left: 4800px;
-        top: 400px;
-
-    }
-
-    #svg_tamb13 {
-
-        position: absolute;
-        left: 4800px;
-        top: 130px;
-
-    }
-
-    #svg_tba13 {
-
-        position: absolute;
-        left: 4800px;
-        top: 400px;
-
-    }
-
-    #svg_tamb14 {
-
-        position: absolute;
-        left: 5200px;
-        top: 130px;
-
-    }
-
-    #svg_tba14 {
-
-        position: absolute;
-        left: 5200px;
-        top: 400px;
-
-    }
-
-    #svg_tamb15 {
-
-        position: absolute;
-        left: 5600px;
-        top: 130px;
-
-    }
-
-    #svg_tba15 {
-
-        position: absolute;
-        left: 5600px;
-        top: 400px;
-
-    }
-
-
-    #coordinates {
-
-        position: absolute;
-        left: 8px;
-        top: 140px;
-    }
-
-    #legenda {
-        clear: both
-    }
+   
 
     .input-color {
         position: relative;
