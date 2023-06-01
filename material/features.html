@@ -71,6 +71,8 @@
     var datasetLastTba = [];
     var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
     var allGroup = ["Tamb", "Tba", "Itot", "Qtir", "Speed_S3_BUS", "Speed_Sync", "Tdut2", "Tdut3", "VibANT_Sync", "Step"]
+    document.getElementById('selectMenu').setAttribute("disabled", "disabled")
+    document.getElementById('selectedValues').setAttribute("hidden", "true")
 
     d3.select("#selectMenuFeatures")
       .selectAll('myOptions')
@@ -146,6 +148,7 @@
     d3.select("#selectMenu").on("change", function (d) {
 
       var selectedOption = d3.select(this).property("value")
+
       document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption + '" onchange = "modifyElement(' + selectedOption + ')" checked>' + "<label for='" + selectedOption + "' id = 'label" + selectedOption + "'>" + selectedOption + "</label>"
       valori.push(selectedOption)
       console.log(valori)
@@ -163,9 +166,9 @@
         });
       }
 
-      if(document.getElementById("selectMenuFeatures").value != "Select feature"){ // Il selectMenu è stato cambiato quando già una feature è stata selezionata: creiamo un nuovo grafico!
+      // Il selectMenu è stato cambiato quando già una feature è stata selezionata: creiamo un nuovo grafico!
         
-
+       
         sleep(1000).then(() => { //Necessaria perché d3.json è asincrono...sì si possono usare anche le promesse ma questa va bene uguale
 
         var count = 0, min = 100000, max = 0, current_dataset = []
@@ -285,7 +288,7 @@
 
         })
 
-      }
+      
      
       document.getElementById("svg-row").innerHTML += "</div>"
 
@@ -300,6 +303,8 @@
     d3.select("#selectMenuFeatures").on("change", function (d) {
 
       var selectedFeature = d3.select(this).property("value")
+      document.getElementById('selectMenu').removeAttribute("disabled");
+      document.getElementById('selectedValues').removeAttribute("hidden");
       document.getElementById("selectedFeatures").innerHTML += '<input type = "checkbox" id = "' + selectedFeature + '" onchange = "modifyFeature(' + selectedFeature + ')" checked>' + "<label for='" + selectedFeature + "' id = 'label" + selectedFeature + "'>" + selectedFeature + "</label>"
 
     for (let u = 0; u < valori.length; u++) { //Per ogni valore, creo un grafico, ma prima devo scremare il dataset con l'attributo che mi interesssa

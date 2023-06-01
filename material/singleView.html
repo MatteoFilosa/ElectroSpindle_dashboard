@@ -108,6 +108,12 @@
 
   function analytics(button) {
 
+   
+
+
+    
+
+
       var selectedFeature = button.innerHTML;
       console.log(selectedFeature);
       localStorage.setItem("selectedFeature", JSON.stringify(selectedFeature))
@@ -140,11 +146,11 @@
       return new Promise((resolve) => setTimeout(resolve, time));
     }
 
-  function displayTooltip(d, i, selectedGroup, event) {
+  function displayTooltip(d) {
       document.getElementById("tooltip").style.visibility = "visible"
      
       var tooltip = document.getElementById("tooltip")
-      tooltip.innerHTML = selectedGroup + ": " + d[1]
+      tooltip.innerHTML = d
       tooltip.style.position = "absolute"
       tooltip.style.top = (event.screenY - 80) + "px"
       tooltip.style.left = (event.screenX - 80) + "px"
@@ -600,12 +606,7 @@
                       .attr("transform", "translate(" + 100 + "," + 100 + ")")
                       .style("fill", colors[colorSelector])
                       .attr("id", function (d, i) { return "dot" + valori[j] })
-                      
-                      .on("mouseover", function (d, i) {
-                     
-                        displayTooltip(d, i, valori[j], event)
-                      })
-                      .on("mouseout", function (d, i) { hideTooltip() })
+
 
                     var line = d3.line()
                       .x(function (d) { return xScale(d[0]); })
@@ -732,11 +733,7 @@
                     .attr("transform", "translate(" + 100 + "," + 100 + ")")
                     .style("fill", colors[colorSelector])
                     .attr("id", function (d, i) { return "dot" + valori[j] })
-                    .on("mouseover", function (d, i) {
-                 
-                      displayTooltip(d, i, valori[j], event)
-                    })
-                    .on("mouseout", function (d, i) { hideTooltip() })
+                    
 
                   var line = d3.line()
                     .x(function (d) { return xScale(d[0]); })
@@ -879,9 +876,7 @@
             .attr("transform", "translate(" + 100 + "," + 100 + ")")
             .style("fill", "#CC0000")
             .attr("id", function(d,i){ return "dot" + selectedGroup})
-            .on("mouseover", function (d, i) { 
-              displayTooltip(d, i, selectedGroup, event) })
-            .on("mouseout", function (d, i) { hideTooltip() })
+     
             
 
             // Step 8        
@@ -918,15 +913,21 @@
 
             //d3.select("#loader").attr("hidden", true);
 
+            var svgElements = d3.selectAll("svg").selectAll("g").selectAll("dot"); //ogni volta, riaggungo gli eventi agli svg, perché sennò si cancellano
+
+            svgElements.on("mouseover", function () {
+              var data = d3.select(this).data();
+              console.log("Valore: " + data);
+            });
+
 
         }
 
   d3.select("#selectMenu").on("change", function(d) {
 
-
+       
       
-      //if(selectedOption != undefined) document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption +'" onchange = "modifyElement('+ selectedOption +')" checked>' + selectedOption + "</checkbox>"
-      //document.getElementById("selectedOption").style.visibility = "hidden"
+      
       var checkBoxAggregato = document.getElementById("aggregato");
       var data = globalData
     
