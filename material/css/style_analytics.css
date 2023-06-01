@@ -49,12 +49,22 @@ html * {
     top: 100px;
 }
 
-#tableHeader{
+#tableHeaderColumn{
+    background-color: whitesmoke;
+}
+
+#tableHeaderRow {
     background-color: whitesmoke;
 }
 
 #tableContainer{
     display: inline-block;
+}
+
+#tableValue {
+    border-width: 2px;
+    border-style: solid;
+    border-color: black;
 }
 
 #spindleRow{
