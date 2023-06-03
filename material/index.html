@@ -180,8 +180,34 @@ function saveSpindle(sn){
 
   sn_and_date = JSON.parse(localStorage.getItem("sn_and_date"))
   var to_write = ""
+  var firstElement = document.getElementById(sn)
+  //var secondElement = document.getElementById(sn)
 
   if(document.getElementById(sn).checked == true){
+
+    var nodes = document.getElementById('selectedSpindles').childNodes;
+
+
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].id == "spindleRow") {
+          var myNode = nodes[i]
+          var nodesToSelect = myNode.childNodes
+          for (let j = 0; j < nodesToSelect.length; j++) {
+
+            if(nodesToSelect[j].id == sn){
+
+              return //Se trovo un dupicato me ne vado proprio
+
+            }
+            
+          }
+        }
+      }
+
+
+    
+
+    
 
     for(let i = 0; i < sn_and_date.length; i++){
       if(sn_and_date[i][0] == sn) to_write = "<span id = 'spindlesSpan'>" + sn + "</span>" + "<span id = 'spindlesSpan'>" + "ES951" + "</span>" + "<span id = 'spindlesSpan'>" + sn_and_date[i][1] + "</span>"
@@ -380,39 +406,9 @@ function resetFilters(){
           var sn_and_date = []
           var datasetDataInizio = []
           var datasetDataFine = []
-        d3.json("http://arca.diag.uniroma1.it:8082/data/breakin?pagination=20&fromItem=0", function(data) {
-
-
         
-        
-    
-            document.getElementById("loader").remove()
-            for(let i = 0; i< data.results.length; i++){
 
-                tmp_date = data.results[i]["Date_start"]
-                tmp_sn = data.results[i]["Serial Number"]
-        
-                tmp_date = tmp_date.slice(0, -9)
-              
-
-                datasetDataInizio.push(tmp_date);
-                datasetDataFine.push(tmp_date);
-             
-                sn_and_date.push([tmp_sn, tmp_date])
-                var to_write = "<span id = 'spindlesSpan'>" + data.results[i]["Serial Number"] + "</span>" + "<span id = 'spindlesSpan'>" + "ES951" + "</span>" + "<span id = 'spindlesSpan'>" + tmp_date + "</span>"
-                document.getElementById("availableSpindles").innerHTML +=  "<div id = 'spindleRow'><input type = 'checkbox' class = 'checkbox-spindles' + id = '"+ data.results[i]["Serial Number"] +"' + onclick = saveSpindle("+ data.results[i]["Serial Number"] +")>"+ "<label for='" + data.results[i]["Serial Number"] +"'>"+ to_write + "</label></div>" 
-                
-                
-            }
-             
-            
-            localStorage.setItem("sn_and_date", JSON.stringify(sn_and_date))
-       
-            document.getElementById("availableSpindles").innerHTML += "<div id = 'loader'></div>"
- 
-        })
-
-        d3.json("http://arca.diag.uniroma1.it:8082/data/breakin?pagination=256&fromItem=20", function (data) {
+        d3.json("http://arca.diag.uniroma1.it:8082/data/breakin?pagination=256&fromItem=0", function (data) {
 
 
             document.getElementById("loader").remove()

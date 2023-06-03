@@ -15,8 +15,7 @@
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="css/style_single.css"></link>
     <script>
-    //inizializzazione array di colori per i grafici
-      var counter_zoom = 1, counter_zoom_out = 1
+ 
 
     const colors = [
         "#0074D9", // blu
@@ -606,6 +605,7 @@
                       .attr("transform", "translate(" + 100 + "," + 100 + ")")
                       .style("fill", colors[colorSelector])
                       .attr("id", function (d, i) { return "dot" + valori[j] })
+                      .attr("class", "punto");
 
 
                     var line = d3.line()
@@ -733,6 +733,7 @@
                     .attr("transform", "translate(" + 100 + "," + 100 + ")")
                     .style("fill", colors[colorSelector])
                     .attr("id", function (d, i) { return "dot" + valori[j] })
+                    .attr("class", "punto");
                     
 
                   var line = d3.line()
@@ -876,6 +877,7 @@
             .attr("transform", "translate(" + 100 + "," + 100 + ")")
             .style("fill", "#CC0000")
             .attr("id", function(d,i){ return "dot" + selectedGroup})
+            .attr("class", "punto");
      
             
 
@@ -913,11 +915,12 @@
 
             //d3.select("#loader").attr("hidden", true);
 
-            var svgElements = d3.selectAll("svg").selectAll("g").selectAll("dot"); //ogni volta, riaggungo gli eventi agli svg, perché sennò si cancellano
+            var svgElements = d3.selectAll("g").selectAll(".punto") //ogni volta, riaggungo gli eventi agli svg, perché sennò si cancellano
 
+           
             svgElements.on("mouseover", function () {
-              var data = d3.select(this).data();
-              console.log("Valore: " + data);
+              var data = d3.select(this).datum();
+              console.log(data);
             });
 
 
