@@ -370,7 +370,7 @@
                                 var tableRow = "<tr>";
 
                                 if (selectedAttributes[i] == "Tdut2") {
-                                    consle.log("ok")
+                                    console.log("ok")
 
                                     tableRow += "<th id = 'tableHeaderRow' style='background-color: whitesmoke;' >" + "Tdut2" + "</th><th id='tableValue'>" + 55 + "</th>";
 
@@ -429,6 +429,9 @@
             }
 
             window.onload = loadAnalytics()
+
+           
+
             if (selectedFeature == "pearson") { //caso Pearson
 
                 document.getElementById("capa").innerHTML += ": Pearson"
