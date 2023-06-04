@@ -179,7 +179,9 @@
     document.getElementById("label" + selectedGroup).remove()
   
 
-    document.getElementById("row" + selectedGroup).remove()
+    if (document.getElementById("row" + selectedGroup) != null) document.getElementById("row" + selectedGroup).remove()
+
+    if(document.getElementById("svg_aggregate_" + selectedGroup)!= null) document.getElementById("svg_aggregate_" + selectedGroup).remove()
   }
 
    function displayTooltip(d, i, selectedGroup, event) {
