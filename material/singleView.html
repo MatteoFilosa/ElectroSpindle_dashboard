@@ -570,7 +570,7 @@
 
                     var dataset = []
 
-                    for (let i = 0; i < 433; i += 10) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+                    for (let i = 0; i < 433; i += 1) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
 
                       if (selectedGroup == "Tdut2") {
 
@@ -660,7 +660,7 @@
 
                   else{
 
-                    for (let i = 0; i < 433; i += 10) { //riscalo y per ogni valore
+                    for (let i = 0; i < 433; i += 1) { //riscalo y per ogni valore
 
                       if (my_data[i] < min) {
                         min = my_data[i]
@@ -702,7 +702,7 @@
                     var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
                     //var my_data = JSON.parse(tmp_data)
 
-                    for (let i = 0; i < 433; i += 10) {
+                    for (let i = 0; i < 433; i += 1) {
 
 
                       if(selectedGroup == "Tdut2") dataset.push([i + 1,255]);
@@ -773,7 +773,7 @@
          
        
 
-          for(let i = 0; i < 433; i += 10){ //SINGOLO. Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+          for(let i = 0; i < 433; i += 1){ //SINGOLO. Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
            
             if(selectedGroup == "Tdut2"){
 
@@ -945,7 +945,7 @@
     if (checkBoxAggregato.checked == false){ //se Aggregato non è checkato, cancella tutto per fare spazio al nuovo grafico sullo stesso svg
 
    
-        newGraph(selectedOption, data, 0, 0)
+        newGraph(selectedOption, data, 0)
     
 
     }
@@ -956,7 +956,7 @@
       document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption +'" onchange = "modifyElement('+ selectedOption +')" checked>' + "<label for='" + selectedOption + "' id = 'label" + selectedOption + "'>" + selectedOption + "</label>" 
       localStorage.setItem("selectedOption", JSON.stringify(selectedOption))
       //modifyElement(selectedOption, 1)
-      newGraph(selectedOption, data, 1, 1)
+      newGraph(selectedOption, data, 3)
  
     }
 

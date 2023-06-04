@@ -324,7 +324,7 @@
               console.log("First value of the first spindle:", firstValue);
              
               dataset.length = 0 //annulliamo il dataset ogni volta sennò diventa un misto 
-              for (let z = 0; z < 433; z+=10) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
+              for (let z = 0; z < 433; z+=1) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
 
               if (attributeValues[z] != undefined){
                 if (attributeValues[z] < min) {
@@ -465,7 +465,7 @@
             const firstValue = attributeValues[0];
             console.log("First value of the first spindle:", firstValue);
 
-            for (let i = 0; i < 433; i += 10) {
+            for (let i = 0; i < 433; i += 1) {
 
             
             if (attributeValues[i] != undefined) {
@@ -670,7 +670,7 @@
             const firstValue = attributeValues[0];
             console.log("First value of the first spindle:", firstValue);
             
-            for(let j = 0; j < 433; j+=10){
+            for(let j = 0; j < 433; j+=1){
 
       
           if (attributeValues[j] != undefined) {
