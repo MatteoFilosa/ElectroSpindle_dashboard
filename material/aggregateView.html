@@ -212,7 +212,7 @@
 
       if(document.getElementById("aggregato").checked == true){
 
-        document.getElementById('selectMenu').setAttribute("disabled", "disabled")
+        
 
         colorSelector = 0
       
@@ -405,7 +405,14 @@
 
         //CASO TOLGO SPUNTA DA AGGREGATO
 
-        document.getElementById('selectMenu').removeAttribute("disabled");
+        for (let i = 0; i <= allGroup.length; i++) {
+
+          var tmp = allGroup[i]
+
+          d3.select("#svg" + tmp).attr("visibility", "visible") //Serve per rendere visibili i div che aggiungo nel caso aggiungo grafici quando è già aggregato
+
+
+        }
 
         d3.selectAll(".svg_aggregate").remove()
         count = 0
@@ -620,11 +627,12 @@
 
     d3.select("#selectMenu").on("change", function(d) {
 
+    if (document.getElementById("aggregato").checked == false) {
   
 
     count += 1
     var selectedOption = d3.select(this).property("value")
-    //if (document.getElementById("aggregato").checked == true) aggregato = 1
+    
     //else aggregato = 0
     
     document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption + '" onchange = "modifyElement(' + selectedOption + ')" checked>' + "<label for='" + selectedOption + "' id = 'label" + selectedOption + "'>"+ selectedOption +"</label>" 
@@ -766,9 +774,195 @@
                     .style('font-size', 16)
                     .text(sn_and_date[i][0]);
 
-                
+                }
 
-    }
+                }
+        else if (document.getElementById("aggregato").checked == true){ //Caso aggiungo attributi da aggregato
+
+          var dataset = []
+          var selectedSpindles = JSON.parse(localStorage.getItem("selectedSpindles"))
+          var selectedOption = d3.select(this).property("value")
+
+          document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption + '" onchange = "modifyElement(' + selectedOption + ')" checked>' + "<label for='" + selectedOption + "' id = 'label" + selectedOption + "'>" + selectedOption + "</label>" 
+
+          //Replica codice aggregate
+
+
+
+              //Disegno prima un svg generico di quell'attributo...
+              max = 0, min = 1000000
+
+              
+
+              if(document.getElementById("row" + selectedOption)!= null) document.getElementById("row" + allGroup[i]).remove() //rimuovo le cose de prima
+
+              //document.getElementById("svg-div").innerHTML += "<div class='row no-wrap' id='row d-flex justify-content-between" + allGroup[i] + "'>" // Ricorda: una row d-flex justify-content-between per attributo
+
+              document.getElementById("svg-div").innerHTML += "<svg width='1000' height='800' class ='svg_aggregate' id ='svg_aggregate_" + selectedOption + "'></svg></div>" // per ogni attributo ho un grafico
+              var new_svg = d3.select("#svg_aggregate_" + selectedOption)
+              var g = new_svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+              var width = 500, height = 400
+
+              ///SETTING DEL TESTO
+
+              new_svg.selectAll('text').remove()
+
+              new_svg.append('text')
+                .attr('x', width / 2 + 100)
+                .attr('y', 80)
+                .attr('text-anchor', 'middle')
+                .style('font-family', 'Helvetica')
+                .style('font-size', 20)
+                .text(selectedOption + " Aggregate Chart");
+
+              // X label
+              new_svg.append('text')
+                .attr('x', width / 2 + 100)
+                .attr('y', height - 15 + 150)
+                .attr('text-anchor', 'middle')
+                .style('font-family', 'Helvetica')
+                .style('font-size', 12)
+                .text("Time");
+
+              // Y label
+              new_svg.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('transform', 'translate(40,' + height + ')rotate(-90)')
+                .style('font-family', 'Helvetica')
+                .style('font-size', 12)
+                .text(selectedOption);
+
+              for (let j = 0; j < selectedSpindles.length; j++) { //Poi, per ogni spindle facente parte di quell'attributo scalo al massimo e minimo e cancello i grafici di prima singoli
+
+                current_spindle = selectedSpindles[j][0]
+                console.log(selectedSpindles, selectedSpindles[j], selectedSpindles[j][0])
+                
+                //accrocco funzionante
+                const attributeArray = spindleArrays[current_spindle][selectedOption];
+
+                console.log(attributeArray, current_spindle, selectedOption)
+                const attributeValues = eval("attributeArray." + selectedOption);
+
+
+                const firstValue = attributeValues[0];
+                console.log("First value of the first spindle:", firstValue);
+
+
+                d3.select("#svg" + selectedOption + "_" + j).remove();
+
+                for (let z = 0; z < 433; z++) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
+
+                  if (attributeValues[z] != undefined) {
+                    if (attributeValues[z] < min) {
+                      min = attributeValues[z]
+
+                    }
+                    if (attributeValues[z] > max) {
+                      max = attributeValues[z]
+                    }
+
+
+                  }
+                }
+
+              }
+
+              console.log(min, max)
+              //e ora ho la mia scala definitiva...
+              xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
+                yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+
+
+
+
+              for (let j = 0; j < selectedSpindles.length; j++) { //Per ogni spindle facente parte di quell'attributo...
+
+                current_spindle = selectedSpindles[j][0]
+                const attributeArray = spindleArrays[current_spindle][selectedOption];
+                const attributeValues = eval("attributeArray." + selectedOption);
+
+
+                const firstValue = attributeValues[0];
+                console.log("First value of the first spindle:", firstValue);
+
+                dataset.length = 0 //annulliamo il dataset ogni volta sennò diventa un misto 
+                for (let z = 0; z < 433; z += 1) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
+
+                  if (attributeValues[z] != undefined) {
+                    if (attributeValues[z] < min) {
+                      min = attributeValues[z]
+
+                    }
+                    if (attributeValues[z] > max) {
+                      max = attributeValues[z]
+                    }
+
+                    dataset.push([z + 1, attributeValues[z], selectedSpindles[j][1]]);
+                    console.log(z + 1, attributeValues[z], selectedSpindles[j][1])
+                  }
+                }
+
+                console.log(dataset)
+
+                g.append("g")
+                  .attr("class", "axis")
+                  .attr("transform", "translate(0," + height + ")")
+                  .call(d3.axisBottom(xScale));
+
+
+
+                g.append("g")
+                  .attr("class", "axis")
+                  .call(d3.axisLeft(yScale));
+
+
+
+
+                new_svg.append('g')
+                  .selectAll("dot")
+                  .data(dataset)
+                  .enter()
+                  .append("circle")
+                  .attr("cx", function (d) { return xScale(d[0]); })
+                  .attr("cy", function (d) { return yScale(d[1]); })
+                  .attr("r", 3)
+                  .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                  .style("fill", colors[colorSelector])
+                  .attr("id", function (d, i) { return "dot" + selectedOption })
+                  .on("mouseover", function (d, i) { return displayTooltip(d, i, selectedOption, event) })
+                  .on("mouseout", function (d, i) { return hideTooltip() })
+
+                var line = d3.line()
+                  .x(function (d) { return xScale(d[0]); })
+                  .y(function (d) { return yScale(d[1]); })
+                  .curve(d3.curveMonotoneX)
+
+                new_svg.append("path")
+                  .datum(dataset)
+                  .attr("class", "line")
+                  .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                  .attr("d", line)
+                  .style("fill", "none")
+                  .style("stroke", colors[colorSelector])
+                  .style("stroke-width", "2")
+                  .attr("id", function (d, i) { return "path" + selectedOption });
+
+                if (colorSelector < colors.length) colorSelector += 1
+                else colorSelector = 0
+
+
+
+              }
+
+
+
+        } 
+    
+
+    
     document.getElementById("svg-div").innerHTML += "</div>"
 
     
