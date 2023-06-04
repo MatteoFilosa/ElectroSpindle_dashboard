@@ -180,9 +180,10 @@
         var globalData = []
         for (let i = 0; i < allGroup.length; i++) {
 
-            d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=0&factor=100&points=0&columns=" + allGroup[i], function (data) {
+            d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=100&points=0&columns=" + allGroup[i], function (data) {
               
               globalData[i] = data
+              console.log(data)
               
               
 
@@ -193,6 +194,7 @@
        sleep(1000).then(() => {
   
         console.log(globalData)
+        console.log(globalData[0].Tamb)
       
      
        })
@@ -353,8 +355,8 @@
 
       if(aggregato != 1){
 
-        var tmp_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
-        var my_data = JSON.parse(tmp_data)
+        var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
+        //var my_data = JSON.parse(tmp_data)
 
       }
       
@@ -470,8 +472,8 @@
                 if (selectedGroup == "VibANT_Sync") selectedIndex = 8
                 if (selectedGroup == "Step") selectedIndex = 9
 
-                var tmp_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
-                var my_data = JSON.parse(tmp_data)
+                var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
+                //var my_data = JSON.parse(tmp_data)
 
 
                 if(valori.includes("Tba") || valori.includes("Tamb") || valori.includes("Tdut2") || valori.includes("Tdut3") ){
@@ -481,7 +483,7 @@
 
 
 
-                    for (let i = 0; i < 43100; i += 10) { //Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+                    for (let i = 0; i < 433; i += 1) { //Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
 
                       if (selectedGroup == "Tdut2") {
 
@@ -506,7 +508,7 @@
                     }
 
        
-                    xScale = d3.scaleLinear().domain([0, 43100]).range([0, width]),
+                    xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
                     yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
                     localStorage.setItem("maxDefault", JSON.stringify(max))
@@ -568,7 +570,7 @@
 
                     var dataset = []
 
-                    for (let i = 0; i < 43100; i += 10) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+                    for (let i = 0; i < 433; i += 10) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
 
                       if (selectedGroup == "Tdut2") {
 
@@ -648,8 +650,8 @@
                   if (selectedGroup == "VibANT_Sync") selectedIndex = 8
                   if (selectedGroup == "Step") selectedIndex = 9
 
-                  var tmp_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
-                  var my_data = JSON.parse(tmp_data)
+                  var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
+                  //var my_data = JSON.parse(tmp_data)
 
                   if(selectedGroup == "Tdut2"){
                     min = 250
@@ -658,7 +660,7 @@
 
                   else{
 
-                    for (let i = 0; i < 43100; i += 10) { //riscalo y per ogni valore
+                    for (let i = 0; i < 433; i += 10) { //riscalo y per ogni valore
 
                       if (my_data[i] < min) {
                         min = my_data[i]
@@ -675,7 +677,7 @@
                   
 
 
-                  xScale = d3.scaleLinear().domain([0, 43100]).range([0, width]),
+                  xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
                   yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
                   }
 
@@ -697,10 +699,10 @@
                     if (selectedGroup == "VibANT_Sync") selectedIndex = 8
                     if (selectedGroup == "Step") selectedIndex = 9
 
-                    var tmp_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
-                    var my_data = JSON.parse(tmp_data)
+                    var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
+                    //var my_data = JSON.parse(tmp_data)
 
-                    for (let i = 0; i < 43100; i += 10) {
+                    for (let i = 0; i < 433; i += 10) {
 
 
                       if(selectedGroup == "Tdut2") dataset.push([i + 1,255]);
@@ -771,7 +773,7 @@
          
        
 
-          for(let i = 0; i < 43100; i += 10){ //SINGOLO. Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+          for(let i = 0; i < 433; i += 10){ //SINGOLO. Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
            
             if(selectedGroup == "Tdut2"){
 
@@ -802,7 +804,7 @@
         console.log(dataset)
 
        
-          xScale = d3.scaleLinear().domain([0, 43100]).range([0, width]),
+          xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
           yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
       
@@ -851,7 +853,7 @@
             .style('font-size', 12)
             .text(selectedGroup);
 
-            var xScale = d3.scaleLinear().domain([0, 43100]).range([0, width]),
+            var xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
                 yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
             g.append("g")

@@ -138,9 +138,11 @@
           d3.json(
             "http://arca.diag.uniroma1.it:8082/data/breakin/" +
             spindle +
-            "/raw_data?mode=0&factor=100&points=0&columns=" +
+            "/raw_data?mode=1&factor=100&points=0&columns=" +
             column,
             function (data) {
+
+              console.log(data)
               // Check if the data array for the current spindle exists
               if (!spindleArrays[spindle]) {
                 spindleArrays[spindle] = {};
@@ -148,15 +150,7 @@
 
               // Save the data array for the current column
               spindleArrays[spindle][column] = data;
-              if (j === 0 && column === "Tamb") {
-                // Parse the "Tamb" string into an array
-                const tambString = spindleArrays[spindle][column].Tamb;
-                const tambArray = JSON.parse(tambString);
-
-                // Access and print the first value of "Tamb" of the first spindle
-                const firstTambValue = tambArray[0];
-                console.log("First Tamb value of the first spindle:", firstTambValue);
-              }
+              
 
     
             }
@@ -284,8 +278,8 @@
               
               //accrocco funzionante
               const attributeArray = spindleArrays[current_spindle][selectedOption];
-              const attributeString = eval("attributeArray." + selectedOption);
-              const attributeValues = JSON.parse(attributeString);
+              const attributeValues = eval("attributeArray." + selectedOption);
+              
 
               const firstValue = attributeValues[0];
               console.log("First value of the first spindle:", firstValue);
@@ -293,7 +287,7 @@
 
               d3.select("#svg" + selectedOption + "_" + j).remove();
 
-              for (let z = 0; z < 43100; z++) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
+              for (let z = 0; z < 433; z++) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
               
                 if (attributeValues[z] != undefined) {
                 if (attributeValues[z] < min) {
@@ -312,7 +306,7 @@
 
         console.log(min, max)
         //e ora ho la mia scala definitiva...
-        xScale = d3.scaleLinear().domain([0, 43100]).range([0, width]),
+        xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
         yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);    
          
             
@@ -323,14 +317,14 @@
 
               current_spindle = selectedSpindles[j][0]
               const attributeArray = spindleArrays[current_spindle][selectedOption];
-              const attributeString = eval("attributeArray." + selectedOption);
-              const attributeValues = JSON.parse(attributeString);
+              const attributeValues = eval("attributeArray." + selectedOption);
+             
 
               const firstValue = attributeValues[0];
               console.log("First value of the first spindle:", firstValue);
              
               dataset.length = 0 //annulliamo il dataset ogni volta sennò diventa un misto 
-              for (let z = 0; z < 43100; z+=10) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
+              for (let z = 0; z < 433; z+=10) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
 
               if (attributeValues[z] != undefined){
                 if (attributeValues[z] < min) {
@@ -465,13 +459,13 @@
             var max = 0
 
             const attributeArray = spindleArrays[current_spindle][selectedOption];
-            const attributeString = eval("attributeArray." + selectedOption);
-            const attributeValues = JSON.parse(attributeString);
+            const attributeValues = eval("attributeArray." + selectedOption);
+          
 
             const firstValue = attributeValues[0];
             console.log("First value of the first spindle:", firstValue);
 
-            for (let i = 0; i < 43100; i += 10) {
+            for (let i = 0; i < 433; i += 10) {
 
             
             if (attributeValues[i] != undefined) {
@@ -491,7 +485,7 @@
 
 
 
-            xScale = d3.scaleLinear().domain([0, 43100]).range([0, width]),
+            xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
               yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
             var g = svg.append("g")
@@ -670,13 +664,13 @@
 
             //accrocco funzionante
             const attributeArray = spindleArrays[current_spindle][selectedOption];
-            const attributeString = eval("attributeArray." + selectedOption);
-            const attributeValues = JSON.parse(attributeString);
+            const attributeValues = eval("attributeArray." + selectedOption);
+            
 
             const firstValue = attributeValues[0];
             console.log("First value of the first spindle:", firstValue);
             
-            for(let j = 0; j < 43100; j+=10){
+            for(let j = 0; j < 433; j+=10){
 
       
           if (attributeValues[j] != undefined) {
@@ -696,7 +690,7 @@
 
             
    
-                xScale = d3.scaleLinear().domain([0, 43100]).range([0, width]),
+                xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
                 yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
                 var g = svg.append("g")
