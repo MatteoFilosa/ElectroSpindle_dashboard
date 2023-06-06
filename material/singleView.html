@@ -164,7 +164,7 @@
 
 
       var selectedFeature = button.innerHTML;
-      console.log(selectedFeature);
+
       localStorage.setItem("selectedFeature", JSON.stringify(selectedFeature))
       
       var to_add = document.getElementById("selectedValues").childNodes
@@ -184,7 +184,7 @@
 
     localStorage.setItem("selectedAttributes", JSON.stringify(selectedAttributes))
 
-    console.log(selectedAttributes)
+
     if(selectedAttributes.length > 0) window.open('analytics.html', '_blank');
     else alert("Select at least one attribute to continue.")
   }
@@ -241,10 +241,10 @@
 
           }
 
-       sleep(2000).then(() => {
+       sleep(1000).then(() => {
   
         console.log(globalData)
-        console.log(globalData[0].Tamb)
+        
       
      
        })
@@ -282,14 +282,14 @@
                 
 
                   if((d3.select("#svg" + tmp).size() == 0) && (toAvoid.includes(tmp) == false)){
-                    console.log("qq")
+             
                     newGraph(tmp, data, 3)
                     
                     
                   }
                 }
                 toAvoid.push(tmp)
-                console.log(toAvoid)
+               
 
               }
               
@@ -443,7 +443,8 @@
 
                 if ((to_add[i].id != null) && (to_add[i].checked == true)) {
 
-                  valori.push(to_add[i])
+                  valori.push(to_add[i].id)
+   
 
                 }
               }
@@ -453,7 +454,7 @@
 
               var scalaAggiuntiva = 0
               if (document.getElementById("svg_default") != null) document.getElementById("svg_default").remove()
-              var valori = JSON.parse(localStorage.getItem("selectedValues"))
+              //var valori = JSON.parse(localStorage.getItem("selectedValues"))
               document.getElementById("svg-div").innerHTML = "<div class='row' id = 'svg-row'><svg width='1000' height='800' id ='svg_default'></svg></div>"
               var new_svg = d3.select("#svg_default")
               var g = new_svg.append("g")
@@ -489,7 +490,7 @@
                 .style('font-size', 12)
                 .text("Aggregate values");
 
-                console.log(valori)
+  
 
               var container = document.getElementById('svg-div');
 
@@ -500,7 +501,7 @@
                 var selectedGroup = valori[j]
 
 
-                console.log(selectedGroup, j)
+              
 
                 var selectedIndex = 0
 
@@ -565,8 +566,7 @@
 
                       g.append("g")
                         .call(d3.axisRight(yScale))
-                        .attr("class", "asseDestro");
-                      console.log("sì")
+                        .attr("class", "asseDestro");          
                       d3.select(".asseDestro").attr("transform", "translate(500,0)")
                       d3.select(".asseDestro").selectAll("text").style("fill", colors[colorSelector])
                    
@@ -580,7 +580,7 @@
                         .attr("class", "asseSinistro");
                      
                         d3.select(".asseSinistro").selectAll("text").style("fill", colors[colorSelector])
-                      console.log("eo")
+   
                       
 
                     }
@@ -754,7 +754,7 @@
 
                     }
 
-                    console.log(selectedGroup)
+
  
                   g.append("g")
                     .attr("transform", "translate(0," + height + ")")
@@ -848,8 +848,6 @@
             } 
 
         }
-
-        console.log(dataset)
 
        
           xScale = d3.scaleLinear().domain([0, 216]).range([0, width]),
@@ -998,9 +996,7 @@
 
             }
 
-            console.log(dataset)
-
-
+    
             xScale = d3.scaleLinear().domain([0, 216]).range([0, width]),
               yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
@@ -1152,8 +1148,7 @@
               .style('font-size', 12)
               .text("Aggregate values");
 
-            console.log(valori)
-
+   
             var container = document.getElementById('svg-div');
 
 
@@ -1161,9 +1156,7 @@
             for (let j = 0; j < valori.length; j++) { //Serve per scalare gli assi correttamente
 
               var selectedGroup = valori[j]
-              console.log(selectedGroup)
 
-              
 
               var selectedIndex = 0
 
@@ -1229,7 +1222,7 @@
                     g.append("g")
                       .call(d3.axisRight(yScale))
                       .attr("class", "asseDestro");
-                    console.log("sì")
+
                     d3.select(".asseDestro").attr("transform", "translate(500,0)")
                     d3.select(".asseDestro").selectAll("text").style("fill", colors[colorSelector])
 
@@ -1243,7 +1236,7 @@
                       .attr("class", "asseSinistro");
 
                     d3.select(".asseSinistro").selectAll("text").style("fill", colors[colorSelector])
-                    console.log("eo")
+      
 
 
                   }
@@ -1417,8 +1410,6 @@
 
                 }
 
-                console.log(selectedGroup)
-
                 g.append("g")
                   .attr("transform", "translate(0," + height + ")")
                   .call(d3.axisBottom(xScale));
@@ -1477,7 +1468,7 @@
             //if (aggregato == 0) document.getElementById("selectedValues").style.visibility = "hidden"
        
             if ((aggregato != 1) && (aggregato != 2) && (aggregato != 3)) {
-              console.log("col")
+             
               document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedGroup +'" onchange = "modifyElement('+ selectedGroup +')" checked>' + "<label for='" + selectedGroup + "' id = 'label" + selectedGroup + "'>" + selectedGroup + "</label>" 
             }
               selectedValues.push(selectedGroup)
@@ -1488,11 +1479,7 @@
             var svgElements = d3.selectAll("g").selectAll(".punto") //ogni volta, riaggungo gli eventi agli svg, perché sennò si cancellano
 
            
-            svgElements.on("mouseover", function () {
-              var data = d3.select(this).datum();
-              console.log(data);
-            });
-
+            
 
         }
 
@@ -1525,7 +1512,7 @@
       localStorage.setItem("selectedOption", JSON.stringify(selectedOption))
       //modifyElement(selectedOption, 1)
       newGraph(selectedOption, data, 2)
-      console.log(selectedOption)
+     
  
     }
 

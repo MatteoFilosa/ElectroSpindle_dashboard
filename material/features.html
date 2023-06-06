@@ -53,9 +53,11 @@
   <script>
     function modifyElement(selectedOption) {
 
+      selectedOption = selectedOption.id
 
-      d3.select("#svg_last_tba").remove()
+      d3.select("#svgLast" + selectedOption).remove()
       document.getElementById(selectedOption).remove()
+      document.getElementById("col" + selectedOption).remove()
       document.getElementById("label" + selectedOption).remove()
 
 
@@ -120,7 +122,7 @@
             var tmp = valori[u];
             dataset.push([valori[u], i + 1, data.lastValue[tmp], sn_and_date[i][0]]);
 
-            console.log(valori[u], i + 1, data.lastValue[tmp], sn_and_date[i][0], tmp);
+           
 
 
           });
@@ -133,9 +135,6 @@
 
     
 
-    function modifyElement(selectedOption){
-
-    }
 
     function modifyFeature(selectedFeature) {
       //TODO
@@ -155,11 +154,8 @@
       for (let i = 0; i < sn_and_date.length; i++) { //Popoliamo il dataset globale con quest'ultimo dataset
         d3.json('http://arca.diag.uniroma1.it:8082/data/breakin/' + sn_and_date[i][0] + '/features_values?columns=' + selectedOption + '&feature=lastValue', { crossOrigin: "anonymous" }).then( function (data) {
 
-          var tmp = "Last " + selectedOption;
-          dataset.push([selectedOption, i + 1, data[tmp], sn_and_date[i][0]]);
           
-          console.log(selectedOption, i + 1, data[tmp], sn_and_date[i][0])
-          console.log(dataset);
+          dataset.push([selectedOption, i + 1, data.lastValue[selectedOption], sn_and_date[i][0]]);
 
 
         });
@@ -168,7 +164,7 @@
       // Il selectMenu è stato cambiato quando già una feature è stata selezionata: creiamo un nuovo grafico!
         
        
-        sleep(1500).then(() => { //Necessaria perché d3.json è asincrono...sì si possono usare anche le promesse ma questa va bene uguale
+        sleep(1000).then(() => { //Necessaria perché la chiamata è asincrona...sì si possono usare anche le promesse ma questa va bene uguale
 
         var count = 0, min = 100000, max = 0, current_dataset = []
         for (let i = 0; i < dataset.length; i++) {
@@ -192,7 +188,7 @@
 
 
 
-        document.getElementById("svg-row").innerHTML += '<div class="col-sm-2" style = "max-width: 70%"><svg width="800" height="510" id="svgLast' + selectedOption + '"></svg></div>'
+        document.getElementById("svg-row").innerHTML += '<div class="col-sm-2" style = "max-width: 70%" id="col' + selectedOption + '" ><svg width="800" height="510" id="svgLast' + selectedOption + '"></svg></div>'
         var svg_to_select = "#svgLast" + selectedOption
 
         var new_svg = d3.select(svg_to_select),
@@ -330,7 +326,7 @@
       
 
 
-      document.getElementById("svg-row").innerHTML += '<div class="col-sm-2" style = "max-width: 70%"><svg width="800" height="510" id="svgLast' + valori[u] + '"></svg></div>'
+      document.getElementById("svg-row").innerHTML += '<div class="col-sm-2" style = "max-width: 70%" id="col' + valori[u] + '" ><svg width="800" height="510" id="svgLast' + valori[u] + '"></svg></div>'
       var svg_to_select = "#svgLast" + valori[u]
 
       var new_svg = d3.select(svg_to_select),
