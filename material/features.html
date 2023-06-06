@@ -408,14 +408,17 @@
       document.getElementById('selectedValues').removeAttribute("hidden");
       document.getElementById("selectedFeatures").innerHTML += '<input type = "checkbox" id = "' + selectedFeature + '" onchange = "modifyFeature(' + selectedFeature + ')" checked>' + "<label for='" + selectedFeature + "' id = 'label" + selectedFeature + "'>" + selectedFeature + "</label>"
 
+      
+
     for (let u = 0; u < valori.length; u++) { //Per ogni valore, creo un grafico, ma prima devo scremare il dataset con l'attributo che mi interesssa
 
-      var current_dataset = [], count = 0, min = 100000, max = 0
+      var count = 0, sum = 0, average = 0, sigma = 0, sigmaCount = 0, upperSigma = 0, lowerSigma = 0, min = 100000, max = 0, current_dataset = [], averageArray = [], upperSigmaArray = [], lowerSigmaArray = []
       for (let i = 0; i < dataset.length; i++){
         console.log(dataset[i][0])
         if(dataset[i][0] == valori[u]){
           count++
           current_dataset.push([count, dataset[i][2]])
+          sum += parseFloat(dataset[i][2])
         }
       }
 
@@ -423,6 +426,51 @@
         if(current_dataset[i][1] > max) max = current_dataset[i][1]
 
         if(current_dataset[i][1] < min) min = current_dataset[i][1]
+      }
+
+      average = sum / count
+
+      for (let i = 0; i <= current_dataset.length; i++) {
+        averageArray.push([i, average])
+      }
+
+      for (let i = 0; i < current_dataset.length; i++) {
+        console.log(current_dataset[i][1])
+        sigmaCount += Math.pow((current_dataset[i][1] - average), 2)
+
+      }
+
+      sigma = sigmaCount / current_dataset.length
+      upperSigma = average + sigma * 3
+      lowerSigma = average - sigma * 3
+
+      console.log(sigmaCount, sigma, upperSigma, lowerSigma)
+      for (let i = 0; i <= current_dataset.length; i++) {
+        upperSigmaArray.push([i, upperSigma])
+      }
+
+      for (let i = 0; i <= current_dataset.length; i++) {
+        lowerSigmaArray.push([i, lowerSigma])
+      }
+
+
+
+      for (let i = 0; i < averageArray.length; i++) {
+        if (averageArray[i][1] > max) max = averageArray[i][1]
+
+        if (averageArray[i][1] < min) min = averageArray[i][1]
+      }
+
+      for (let i = 0; i < upperSigmaArray.length; i++) {
+        if (upperSigmaArray[i][1] > max) max = upperSigmaArray[i][1]
+
+        if (upperSigmaArray[i][1] < min) min = upperSigmaArray[i][1]
+      }
+
+      for (let i = 0; i < lowerSigmaArray.length; i++) {
+        if (lowerSigmaArray[i][1] > max) max = lowerSigmaArray[i][1]
+
+        if (lowerSigmaArray[i][1] < min) min = lowerSigmaArray[i][1]
       }
 
       //Dare più visibilità alle feature
@@ -525,87 +573,51 @@
         .style('fill', "#ff8c00")
         .text("■ μ - 3σ")
 
-        d3.json('http://arca.diag.uniroma1.it:8082/data/breakin/analytics/2019010810?fields=' + valori[u] + '&analitycs=basic%20statistics', { crossOrigin: "anonymous" }).then(function (data) {
-
-        var average = (eval("data['basic statistics']." + valori[u] + ".average"))
-        var sigma = (eval("data['basic statistics']." + valori[u] + ".sigma"))
-        var upperSigma = 3 * sigma
-        var lowerSigma = sigma / 3
-        var averageArray = [], upperSigmaArray = [], lowerSigmaArray = []
-
         var average_line = d3.line()
-          .x(function (d) { return xScale(d[0]); })
-          .y(function (d) { return yScale(d[1]); })
-          .curve(d3.curveMonotoneX)
+        .x(function (d) { return xScale(d[0]); })
+        .y(function (d) { return yScale(d[1]); })
+        .curve(d3.curveMonotoneX)
 
-        var upperSigma_line = d3.line()
-          .x(function (d) { return xScale(d[0]); })
-          .y(function (d) { return yScale(d[1]); })
-          .curve(d3.curveMonotoneX)
+      var upperSigma_line = d3.line()
+        .x(function (d) { return xScale(d[0]); })
+        .y(function (d) { return yScale(d[1]); })
+        .curve(d3.curveMonotoneX)
 
-        var lowerSigma_line = d3.line()
-          .x(function (d) { return xScale(d[0]); })
-          .y(function (d) { return yScale(d[1]); })
-          .curve(d3.curveMonotoneX)
+      var lowerSigma_line = d3.line()
+        .x(function (d) { return xScale(d[0]); })
+        .y(function (d) { return yScale(d[1]); })
+        .curve(d3.curveMonotoneX)
 
-
-
-
-        for (let i = 0; i <= sn_and_date.length; i++) {
-
-          averageArray.push([i, average])
-
-        }
-
-        for (let i = 0; i <= sn_and_date.length; i++) {
-
-          upperSigmaArray.push([i, upperSigma])
-
-        }
-
-        for (let i = 0; i <= sn_and_date.length; i++) {
-
-          lowerSigmaArray.push([i, lowerSigma])
-
-        }
+      new_svg.append("path")
+        .datum(averageArray)
+        .attr("class", "line")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .attr("d", average_line)
+        .style("fill", "none")
+        .style("stroke", "#CC0000")
+        .style("stroke-width", "2")
 
 
-        new_svg.append("path")
-          .datum(averageArray)
-          .attr("class", "line")
-          .attr("transform", "translate(" + 100 + "," + 100 + ")")
-          .attr("d", average_line)
-          .style("fill", "none")
-          .style("stroke", "#CC0000")
-          .style("stroke-width", "2")
+      new_svg.append("path")
+        .datum(upperSigmaArray)
+        .attr("class", "line")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .attr("d", upperSigma_line)
+        .style("fill", "none")
+        .style("stroke", "#006400")
+        .style("stroke-width", "2")
 
 
-        new_svg.append("path")
-          .datum(upperSigmaArray)
-          .attr("class", "line")
-          .attr("transform", "translate(" + 100 + "," + 100 + ")")
-          .attr("d", upperSigma_line)
-          .style("fill", "none")
-          .style("stroke", "#006400")
-          .style("stroke-width", "2")
+      new_svg.append("path")
+        .datum(lowerSigmaArray)
+        .attr("class", "line")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .attr("d", lowerSigma_line)
+        .style("fill", "none")
+        .style("stroke", "#ff8c00")
+        .style("stroke-width", "2")
 
-        //lower variance line
-        var lower_variance_line = d3.line()
-          .x(function (d) { return xScale(d[0]); })
-          .y(function (d) { return yScale(d[1]); })
-          .curve(d3.curveMonotoneX)
-
-
-        new_svg.append("path")
-          .datum(lowerSigmaArray)
-          .attr("class", "line")
-          .attr("transform", "translate(" + 100 + "," + 100 + ")")
-          .attr("d", lowerSigma_line)
-          .style("fill", "none")
-          .style("stroke", "#ff8c00")
-          .style("stroke-width", "2")
-
-      })
+        
 
 
       }
