@@ -289,7 +289,7 @@
 
               d3.select("#svg" + selectedOption + "_" + j).remove();
 
-              for (let z = 0; z < 433; z++) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
+              for (let z = 0; z < 217; z++) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
               
                 if (attributeValues[z] != undefined) {
                 if (attributeValues[z] < min) {
@@ -308,7 +308,7 @@
 
         console.log(min, max)
         //e ora ho la mia scala definitiva...
-        xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
+        xScale = d3.scaleLinear().domain([0, 216]).range([0, width]),
         yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);    
          
             
@@ -326,7 +326,7 @@
               console.log("First value of the first spindle:", firstValue);
              
               dataset.length = 0 //annulliamo il dataset ogni volta sennò diventa un misto 
-              for (let z = 0; z < 433; z+=1) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
+              for (let z = 0; z < 217; z+=1) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
 
               if (attributeValues[z] != undefined){
                 if (attributeValues[z] < min) {
@@ -474,7 +474,7 @@
             const firstValue = attributeValues[0];
             console.log("First value of the first spindle:", firstValue);
 
-            for (let i = 0; i < 433; i += 1) {
+            for (let i = 0; i < 217; i += 1) {
 
             
             if (attributeValues[i] != undefined) {
@@ -494,7 +494,7 @@
 
 
 
-            xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
+            xScale = d3.scaleLinear().domain([0, 216]).range([0, width]),
               yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
             var g = svg.append("g")
@@ -680,7 +680,7 @@
             const firstValue = attributeValues[0];
             console.log("First value of the first spindle:", firstValue);
             
-            for(let j = 0; j < 433; j+=1){
+            for(let j = 0; j < 217; j+=1){
 
       
           if (attributeValues[j] != undefined) {
@@ -700,7 +700,7 @@
 
             
    
-                xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
+                xScale = d3.scaleLinear().domain([0, 216]).range([0, width]),
                 yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
                 var g = svg.append("g")
@@ -854,7 +854,7 @@
 
                 d3.select("#svg" + selectedOption + "_" + j).remove();
 
-                for (let z = 0; z < 433; z++) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
+                for (let z = 0; z < 217; z++) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
 
                   if (attributeValues[z] != undefined) {
                     if (attributeValues[z] < min) {
@@ -873,7 +873,7 @@
 
               console.log(min, max)
               //e ora ho la mia scala definitiva...
-              xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
+              xScale = d3.scaleLinear().domain([0, 216]).range([0, width]),
                 yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
 
@@ -891,7 +891,7 @@
                 console.log("First value of the first spindle:", firstValue);
 
                 dataset.length = 0 //annulliamo il dataset ogni volta sennò diventa un misto 
-                for (let z = 0; z < 433; z += 1) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
+                for (let z = 0; z < 217; z += 1) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
 
                   if (attributeValues[z] != undefined) {
                     if (attributeValues[z] < min) {

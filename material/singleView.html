@@ -16,6 +16,52 @@
     <link rel="stylesheet" href="css/style_single.css"></link>
     <script>
 
+
+      /* //////TEST////////
+
+      let data = [], width = 600, height = 400, numPoints = 100;
+
+        let zoom = d3.zoom()
+          .on('zoom', handleZoom);
+
+        function handleZoom(e) {
+          d3.select('svg g')
+            .attr('transform', e.transform);
+        }
+
+        function initZoom() {
+          d3.select('svg')
+            .call(zoom);
+        }
+
+        function updateData() {
+          data = [];
+          for (let i = 0; i < numPoints; i++) {
+            data.push({
+              id: i,
+              x: Math.random() * width,
+              y: Math.random() * height
+            });
+          }
+        }
+
+        function update() {
+          d3.select('svg g')
+            .selectAll('circle')
+            .data(data)
+            .join('circle')
+            .attr('cx', function (d) { return d.x; })
+            .attr('cy', function (d) { return d.y; })
+            .attr('r', 3);
+        }
+
+        initZoom();
+        updateData();
+        update();
+
+
+        ///FINE TEST//// */
+
       function rimuoviDuplicati(array) {
           return Array.from(new Set(array));
         }
@@ -479,7 +525,7 @@
 
 
 
-                    for (let i = 0; i < 433; i += 1) { 
+                    for (let i = 0; i < 217; i += 1) { 
                       if (selectedGroup == "Tdut2") {
 
                         dataset.push([i + 1, 255]);
@@ -503,7 +549,7 @@
                     }
 
        
-                    xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
+                    xScale = d3.scaleLinear().domain([0, 216]).range([0, width]),
                     yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
                     localStorage.setItem("maxDefault", JSON.stringify(max))
@@ -565,7 +611,7 @@
 
                     var dataset = []
 
-                    for (let i = 0; i < 433; i += 1) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+                    for (let i = 0; i < 217; i += 1) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
 
                       if (selectedGroup == "Tdut2") {
 
@@ -655,7 +701,7 @@
 
                   else{
 
-                    for (let i = 0; i < 433; i += 1) { //riscalo y per ogni valore
+                    for (let i = 0; i < 217; i += 1) { //riscalo y per ogni valore
 
                       if (my_data[i] < min) {
                         min = my_data[i]
@@ -672,7 +718,7 @@
                   
 
 
-                  xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
+                  xScale = d3.scaleLinear().domain([0, 216]).range([0, width]),
                   yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
                   }
 
@@ -697,7 +743,7 @@
                     var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
                     //var my_data = JSON.parse(tmp_data)
 
-                    for (let i = 0; i < 433; i += 1) {
+                    for (let i = 0; i < 217; i += 1) {
 
 
                       if(selectedGroup == "Tdut2") dataset.push([i + 1,255]);
@@ -775,7 +821,7 @@
             }
        
 
-          for(let i = 0; i < 433; i += 1){ //SINGOLO. Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+          for(let i = 0; i < 217; i += 1){ //SINGOLO. Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
            
             if(selectedGroup == "Tdut2"){
 
@@ -806,7 +852,7 @@
         console.log(dataset)
 
        
-          xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
+          xScale = d3.scaleLinear().domain([0, 216]).range([0, width]),
           yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
       
@@ -855,7 +901,7 @@
             .style('font-size', 12)
             .text(selectedGroup);
 
-            var xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
+            var xScale = d3.scaleLinear().domain([0, 216]).range([0, width]),
                 yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
             g.append("g")
@@ -924,7 +970,7 @@
 
             var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
           
-            for (let i = 0; i < 433; i += 1) { //SINGOLO.
+            for (let i = 0; i < 217; i += 1) { //SINGOLO.
 
               if (selectedGroup == "Tdut2") {
 
@@ -955,7 +1001,7 @@
             console.log(dataset)
 
 
-            xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
+            xScale = d3.scaleLinear().domain([0, 216]).range([0, width]),
               yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
 
@@ -1004,7 +1050,7 @@
               .style('font-size', 12)
               .text(selectedGroup);
 
-            var xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
+            var xScale = d3.scaleLinear().domain([0, 216]).range([0, width]),
               yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
             g.append("g")
@@ -1142,7 +1188,7 @@
 
 
 
-                  for (let i = 0; i < 433; i += 1) {
+                  for (let i = 0; i < 217; i += 1) {
                     if (selectedGroup == "Tdut2") {
 
                       dataset.push([i + 1, 255]);
@@ -1166,7 +1212,7 @@
                   }
 
 
-                  xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
+                  xScale = d3.scaleLinear().domain([0, 216]).range([0, width]),
                     yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
                   localStorage.setItem("maxDefault", JSON.stringify(max))
@@ -1228,7 +1274,7 @@
 
                   var dataset = []
 
-                  for (let i = 0; i < 433; i += 1) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+                  for (let i = 0; i < 217; i += 1) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
 
                     if (selectedGroup == "Tdut2") {
 
@@ -1318,7 +1364,7 @@
 
                 else {
 
-                  for (let i = 0; i < 433; i += 1) { //riscalo y per ogni valore
+                  for (let i = 0; i < 217; i += 1) { //riscalo y per ogni valore
 
                     if (my_data[i] < min) {
                       min = my_data[i]
@@ -1335,7 +1381,7 @@
 
 
 
-                xScale = d3.scaleLinear().domain([0, 432]).range([0, width]),
+                xScale = d3.scaleLinear().domain([0, 216]).range([0, width]),
                   yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
               }
 
@@ -1360,7 +1406,7 @@
                 var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
                 //var my_data = JSON.parse(tmp_data)
 
-                for (let i = 0; i < 433; i += 1) {
+                for (let i = 0; i < 217; i += 1) {
 
 
                   if (selectedGroup == "Tdut2") dataset.push([i + 1, 255]);
