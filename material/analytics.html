@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
     <title>Analytics</title>
     <link rel="stylesheet" type="text/css" href="css/style_analytics.css"> 
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
@@ -167,7 +167,7 @@
 
             if (sn_and_date.length == 1) { //caso singleView
 
-                d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=" + selectedFeature + "", function (data) {
+                d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=" + selectedFeature + "", { crossOrigin: "anonymous" }).then( function (data) {
 
                     if (selectedFeature == "pearson") { //caso Pearson
                         
@@ -217,7 +217,7 @@
 
                 if (selectedFeature != "pearson") { // Caso basic statistics
 
-                    d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=basic%20statistics", function (data) {
+                    d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=basic%20statistics", { crossOrigin: "anonymous" }).then( function (data) {
                       
 
                         var tableRow = "<tr>";
@@ -303,7 +303,7 @@
 
                         console.log(heatMapId);
 
-                        d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=" + selectedFeature + "", function (data) {
+                        d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=" + selectedFeature + "", { crossOrigin: "anonymous" }).then( function (data) {
 
                             if (selectedFeature == "pearson") { //caso Pearson
                                 console.log(data);
@@ -351,7 +351,7 @@
                     for (let u = 0; u < sn_and_date.length; u++) {
 
                         selectedSpindle = sn_and_date[u][0];
-                        d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=basic%20statistics", function (data) {
+                        d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=basic%20statistics", { crossOrigin: "anonymous" }).then( function (data) {
                             console.log(data)
 
 

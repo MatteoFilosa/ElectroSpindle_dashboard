@@ -2,7 +2,7 @@
 <html>
 <head>
 
-    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
     <title>Multiple spindles visualization</title>
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
@@ -96,7 +96,7 @@
       else alert("Select at least one attribute to continue.")
     }
 
-  d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics", function (data) {
+  d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics", { crossOrigin: "anonymous" }).then( function (data) {
 
       for (let i = 0; i < data.length; i++) {
 
@@ -139,7 +139,7 @@
             "http://arca.diag.uniroma1.it:8082/data/breakin/" +
             spindle +
             "/raw_data?mode=1&factor=100&points=0&columns=" +
-            column,
+            column, { crossOrigin: "anonymous" }).then(
             function (data) {
 
               console.log(data)
