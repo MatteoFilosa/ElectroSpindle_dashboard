@@ -161,12 +161,51 @@
         });
       }
 
+      for (let i = 0; i < sn_and_date.length; i++){
+        d3.json('http://arca.diag.uniroma1.it:8082/data/breakin/analytics/' + sn_and_date[i][0] + '?fields=' + selectedOption + '&analitycs=basic%20statistics', { crossOrigin: "anonymous" }).then(function (data) {
+        
+          var average = (eval("data['basic statistics']." + selectedOption + ".average"))
+          var sigma = (eval("data['basic statistics']." + selectedOption + ".sigma"))
+          console.log(average, sigma, selectedOption)
+          var upperSigma = 3 * sigma
+          var lowerSigma = sigma / 3
+          var average_array = [], upperSigmaArray = [], lowerSigmaArray = []
+
+          average_array.push([selectedOption, i + 1, average, sn_and_date[i][0]]);
+          upperSigmaArray.push([selectedOption, i + 1, upperSigma, sn_and_date[i][0]]);
+          lowerSigmaArray.push([selectedOption, i + 1, lowerSigma, sn_and_date[i][0]]);
+
+        })
+      }
+
+      console.log(average_array, upperSigmaArray, lowerSigmaArray)
       // Il selectMenu è stato cambiato quando già una feature è stata selezionata: creiamo un nuovo grafico!
         
        
         sleep(1000).then(() => { //Necessaria perché la chiamata è asincrona...sì si possono usare anche le promesse ma questa va bene uguale
 
+        
         var count = 0, min = 100000, max = 0, current_dataset = []
+        
+
+          /* for (let i = 0; i <= sn_and_date.length; i++) {
+
+            average_array.push([i, average])
+
+          }
+
+          for (let i = 0; i <= sn_and_date.length; i++) {
+
+            upperSigmaArray.push([i, upperSigma])
+
+          }
+
+          for (let i = 0; i <= sn_and_date.length; i++) {
+
+            lowerSigmaArray.push([i, lowerSigma])
+
+          } */
+
         for (let i = 0; i < dataset.length; i++) {
           console.log(dataset[i][0])
           if (dataset[i][0] == selectedOption) {
@@ -180,6 +219,24 @@
 
           if (current_dataset[i][1] < min) min = current_dataset[i][1]
         }
+
+        for (let i = 0; i < average_array.length; i++) {
+            if (average_array[i][1] > max) max = average_array[i][1]
+
+            if (average_array[i][1] < min) min = average_array[i][1]
+          }
+
+        for (let i = 0; i < upperSigmaArray.length; i++) {
+            if (upperSigmaArray[i][1] > max) max = upperSigmaArray[i][1]
+
+            if (upperSigmaArray[i][1] < min) min = upperSigmaArray[i][1]
+          }
+
+        for (let i = 0; i < lowerSigmaArray.length; i++) {
+            if (lowerSigmaArray[i][1] > max) max = lowerSigmaArray[i][1]
+
+            if (lowerSigmaArray[i][1] < min) min = lowerSigmaArray[i][1]
+          }
 
         //Dare più visibilità alle feature
 
@@ -281,15 +338,72 @@
           .style('fill', "#ff8c00")
           .text("■ μ - 3σ")
 
+          
+
+            
+
+            var average_line = d3.line()
+              .x(function (d) { return xScale(d[0]); })
+              .y(function (d) { return yScale(d[1]); })
+              .curve(d3.curveMonotoneX)
+
+            var upperSigma_line = d3.line()
+              .x(function (d) { return xScale(d[0]); })
+              .y(function (d) { return yScale(d[1]); })
+              .curve(d3.curveMonotoneX)
+
+            var lowerSigma_line = d3.line()
+              .x(function (d) { return xScale(d[0]); })
+              .y(function (d) { return yScale(d[1]); })
+              .curve(d3.curveMonotoneX)
+
+
+
+
+          
+
+            console.log(average_array, upperSigmaArray, lowerSigmaArray)
+
+            new_svg.append("path")
+              .datum(average_array)
+              .attr("class", "line")
+              .attr("transform", "translate(" + 100 + "," + 100 + ")")
+              .attr("d", average_line)
+              .style("fill", "none")
+              .style("stroke", "#CC0000")
+              .style("stroke-width", "2")
+
+
+            new_svg.append("path")
+              .datum(upperSigmaArray)
+              .attr("class", "line")
+              .attr("transform", "translate(" + 100 + "," + 100 + ")")
+              .attr("d", upperSigma_line)
+              .style("fill", "none")
+              .style("stroke", "#006400")
+              .style("stroke-width", "2")
+
+     
+            new_svg.append("path")
+              .datum(lowerSigmaArray)
+              .attr("class", "line")
+              .attr("transform", "translate(" + 100 + "," + 100 + ")")
+              .attr("d", lowerSigma_line)
+              .style("fill", "none")
+              .style("stroke", "#ff8c00")
+              .style("stroke-width", "2")
+
+          })
+
+          document.getElementById("svg-row").innerHTML += "</div>"
+
+
+
         })
 
-      
-     
-      document.getElementById("svg-row").innerHTML += "</div>"
-
+        
 
       
-    })
     
 
 
@@ -419,11 +533,97 @@
         .style('fill', "#ff8c00")
         .text("■ μ - 3σ")
 
+        d3.json('http://arca.diag.uniroma1.it:8082/data/breakin/analytics/2019010810?fields=' + valori[u] + '&analitycs=basic%20statistics', { crossOrigin: "anonymous" }).then(function (data) {
+
+        var average = (eval("data['basic statistics']." + valori[u] + ".average"))
+        var sigma = (eval("data['basic statistics']." + valori[u] + ".sigma"))
+        var upperSigma = 3 * sigma
+        var lowerSigma = sigma / 3
+        var average_array = [], upperSigmaArray = [], lowerSigmaArray = []
+
+        var average_line = d3.line()
+          .x(function (d) { return xScale(d[0]); })
+          .y(function (d) { return yScale(d[1]); })
+          .curve(d3.curveMonotoneX)
+
+        var upperSigma_line = d3.line()
+          .x(function (d) { return xScale(d[0]); })
+          .y(function (d) { return yScale(d[1]); })
+          .curve(d3.curveMonotoneX)
+
+        var lowerSigma_line = d3.line()
+          .x(function (d) { return xScale(d[0]); })
+          .y(function (d) { return yScale(d[1]); })
+          .curve(d3.curveMonotoneX)
+
+
+
+
+        for (let i = 0; i <= sn_and_date.length; i++) {
+
+          average_array.push([i, average])
+
+        }
+
+        for (let i = 0; i <= sn_and_date.length; i++) {
+
+          upperSigmaArray.push([i, upperSigma])
+
+        }
+
+        for (let i = 0; i <= sn_and_date.length; i++) {
+
+          lowerSigmaArray.push([i, lowerSigma])
+
+        }
+
+
+        new_svg.append("path")
+          .datum(average_array)
+          .attr("class", "line")
+          .attr("transform", "translate(" + 100 + "," + 100 + ")")
+          .attr("d", average_line)
+          .style("fill", "none")
+          .style("stroke", "#CC0000")
+          .style("stroke-width", "2")
+
+
+        new_svg.append("path")
+          .datum(upperSigmaArray)
+          .attr("class", "line")
+          .attr("transform", "translate(" + 100 + "," + 100 + ")")
+          .attr("d", upperSigma_line)
+          .style("fill", "none")
+          .style("stroke", "#006400")
+          .style("stroke-width", "2")
+
+        //lower variance line
+        var lower_variance_line = d3.line()
+          .x(function (d) { return xScale(d[0]); })
+          .y(function (d) { return yScale(d[1]); })
+          .curve(d3.curveMonotoneX)
+
+
+        new_svg.append("path")
+          .datum(lowerSigmaArray)
+          .attr("class", "line")
+          .attr("transform", "translate(" + 100 + "," + 100 + ")")
+          .attr("d", lowerSigma_line)
+          .style("fill", "none")
+          .style("stroke", "#ff8c00")
+          .style("stroke-width", "2")
+
+      })
 
 
       }
 
+
+      
+
       document.getElementById("svg-row").innerHTML += "</div>"
+
+
 
     })
 
