@@ -44,6 +44,7 @@
   <div id="selectedValues"></div>
   <br>
   <div id="coordinates"></div>
+  <button id="clear" onclick="clearSvg()" class="button-red">Clear all</button>
 <div class="container" id="svg-div">
   <div class="row no-wrap" id="svg-row">
 
@@ -51,6 +52,25 @@
   </div>
 </div>
   <script>
+
+    function clearSvg() {
+
+
+        document.getElementById("selectedValues").innerHTML = ""
+    
+        document.getElementById("selectMenu").selectedIndex = 0;
+
+        document.getElementById("svg-div").remove()
+        var svgDiv = document.createElement("div")
+        svgDiv.classList.add("container");
+        svgDiv.id = "svg-div";
+        document.body.appendChild(svgDiv);
+        document.getElementById("svg-div").innerHTML += "<div class='row no-wrap' id='svg-row'>"
+
+
+        localStorage.removeItem("selectedValues");
+      }
+
     function modifyElement(selectedOption) {
 
       selectedOption = selectedOption.id
