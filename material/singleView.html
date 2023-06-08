@@ -7,7 +7,7 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <!--D3.js-->
+
     <script src="https://d3js.org/d3.v6.min.js"></script>
 
     <title>Single spindle visualization</title>
@@ -16,51 +16,18 @@
     <link rel="stylesheet" href="css/style_single.css"></link>
     <script>
 
+      function showPopup(message, isSuccess) {
+          var popup = document.getElementById("popup");
+          popup.textContent = message;
+          popup.className = "popup" + (isSuccess ? " success" : " error");
+          popup.style.display = "block";
 
-      /* //////TEST////////
-
-      let data = [], width = 600, height = 400, numPoints = 100;
-
-        let zoom = d3.zoom()
-          .on('zoom', handleZoom);
-
-        function handleZoom(e) {
-          d3.select('svg g')
-            .attr('transform', e.transform);
+          // Nascondi il popup dopo 3 secondi
+          setTimeout(function () {
+            popup.style.display = "none";
+          }, 3000);
         }
 
-        function initZoom() {
-          d3.select('svg')
-            .call(zoom);
-        }
-
-        function updateData() {
-          data = [];
-          for (let i = 0; i < numPoints; i++) {
-            data.push({
-              id: i,
-              x: Math.random() * width,
-              y: Math.random() * height
-            });
-          }
-        }
-
-        function update() {
-          d3.select('svg g')
-            .selectAll('circle')
-            .data(data)
-            .join('circle')
-            .attr('cx', function (d) { return d.x; })
-            .attr('cy', function (d) { return d.y; })
-            .attr('r', 3);
-        }
-
-        initZoom();
-        updateData();
-        update();
-
-
-        ///FINE TEST//// */
 
       function rimuoviDuplicati(array) {
           return Array.from(new Set(array));
@@ -91,17 +58,24 @@
 
 <body class="mx-4">
 <h1>Single spindle visualization</h1>
-<!-- <Body background="images/PROVA.png" background-repeat="no-repeat” background-size="cover”>  -->
-<!--<Body background="images/test.png" background-repeat="no-repeat” background-size="cover”></Body>-->
+
+
+
 <div id ="selectedSpindles"></div>
 <input type = "checkbox" id ="aggregato" class = "checkbox" onclick="aggregateHelper()" > Aggregate
+
 
 <select id="selectMenu">
   <option value="" disabled selected>Select attribute</option>
 </select>
 <div id = "selectedValues"></div>
 <div id="tooltip"></div>
+<br>
 
+<div id = "downsamplePlaceholder">Insert downsample (current: 100)</div> <input type="text" id="downsample" maxlength="3" required placeholder="Downsample">
+<button class='button-blue' id="downsampleBtn">Confirm</button>
+<div id="popup" class="popup"></div>
+<br><br>
 <button id="clear" onclick="clearSvg()" class="button-red">Clear all</button>
 
 <div id = "problems-found">
@@ -222,6 +196,8 @@
         .append('option')
         .text(function (d) { return d; }) // text showed in the menu
         .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+
 
         var  colorSelector = 0, selectedValues = [], globalData = []
         var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
@@ -391,6 +367,7 @@
 
 
     function newGraph(selectedGroup, data, aggregato){
+      console.log(data, globalData)
 
       var selectedIndex = 0
 
@@ -410,6 +387,8 @@
         //var my_data = JSON.parse(tmp_data)
 
       }
+
+      var dataLength = globalData[1].Tba.length // un qualunque attributo tanto la lunghezza sempre quella è
       
 
       var dataset = [];
@@ -470,11 +449,22 @@
 
               new_svg.append('text')
                 .attr('x', width / 2 + 100)
-                .attr('y', 80)
+                .attr('y', 45)
                 .attr('text-anchor', 'middle')
                 .style('font-family', 'Helvetica')
                 .style('font-size', 20)
                 .text("Aggregate chart");
+
+              var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 65)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text("Downsample: " + numbersOnly);
 
               // X label
               new_svg.append('text')
@@ -521,6 +511,8 @@
                 var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
                 //var my_data = JSON.parse(tmp_data)
 
+               
+
 
                 if(valori.includes("Tba") || valori.includes("Tamb") || valori.includes("Tdut2") || valori.includes("Tdut3") ){
                   if (valori.includes("Itot") || valori.includes("Qtir") || valori.includes("Speed_S3_BUS") || valori.includes("Speed_Sync") || valori.includes("VibANT_Sync")){ //scale non omogenee
@@ -529,7 +521,7 @@
 
 
 
-                    for (let i = 0; i < 217; i += 1) { 
+                    for (let i = 0; i < dataLength; i += 1) { 
                       if (selectedGroup == "Tdut2") {
                         var time_tmp = time[i].toFixed(3)
                         dataset.push([time_tmp, 255]);
@@ -616,7 +608,7 @@
 
                     var dataset = []
 
-                    for (let i = 0; i < 217; i += 1) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+                    for (let i = 0; i < dataLength; i += 1) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
 
                       if (selectedGroup == "Tdut2") {
 
@@ -710,7 +702,7 @@
 
                   else{
 
-                    for (let i = 0; i < 217; i += 1) { //riscalo y per ogni valore
+                    for (let i = 0; i < dataLength; i += 1) { //riscalo y per ogni valore
 
                       if (my_data[i] < min) {
                         min = my_data[i]
@@ -752,7 +744,7 @@
                     var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
                     //var my_data = JSON.parse(tmp_data)
 
-                    for (let i = 0; i < 217; i += 1) {
+                    for (let i = 0; i < dataLength; i += 1) {
                       var time_tmp = time[i].toFixed(3)
 
                       if(selectedGroup == "Tdut2") dataset.push([time_tmp,255]);
@@ -831,7 +823,7 @@
             }
        
 
-          for(let i = 0; i < 217; i += 1){ //SINGOLO. Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+          for(let i = 0; i < dataLength; i += 1){ //SINGOLO. Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
            
             if(selectedGroup == "Tdut2"){
 
@@ -887,11 +879,22 @@
 
           new_svg.append('text')
             .attr('x', width/2 + 100)
-            .attr('y', 80)
+            .attr('y', 45)
             .attr('text-anchor', 'middle')
             .style('font-family', 'Helvetica')
             .style('font-size', 20)
             .text(selectedGroup + " Chart");
+
+            var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 65)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text("Downsample: " + numbersOnly);
         
             // X label
             new_svg.append('text')
@@ -909,6 +912,8 @@
             .style('font-family', 'Helvetica')
             .style('font-size', 12)
             .text(selectedGroup);
+
+            
 
             var tmp_x = time[time.length - 1].toFixed(3)
             xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
@@ -980,7 +985,7 @@
 
             var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
           
-            for (let i = 0; i < 217; i += 1) { //SINGOLO.
+            for (let i = 0; i < dataLength; i += 1) { //SINGOLO.
 
               if (selectedGroup == "Tdut2") {
 
@@ -1036,11 +1041,22 @@
 
             new_svg.append('text')
               .attr('x', width / 2 + 100)
-              .attr('y', 80)
+              .attr('y', 45)
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 20)
               .text(selectedGroup + " Chart");
+
+            var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 65)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text("Downsample: " + numbersOnly);
 
             // X label
             new_svg.append('text')
@@ -1139,11 +1155,22 @@
 
             new_svg.append('text')
               .attr('x', width / 2 + 100)
-              .attr('y', 80)
+              .attr('y', 45)
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 20)
               .text("Aggregate chart");
+
+            var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 65)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text("Downsample: " + numbersOnly);
 
             // X label
             new_svg.append('text')
@@ -1195,7 +1222,7 @@
 
 
 
-                  for (let i = 0; i < 217; i += 1) {
+                  for (let i = 0; i < dataLength; i += 1) {
                     if (selectedGroup == "Tdut2") {
 
                       var time_tmp = time[i].toFixed(3)
@@ -1283,7 +1310,7 @@
 
                   var dataset = []
 
-                  for (let i = 0; i < 217; i += 1) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+                  for (let i = 0; i < dataLength; i += 1) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
 
                     if (selectedGroup == "Tdut2") {
                       var time_tmp = time[i].toFixed(3)
@@ -1374,7 +1401,7 @@
 
                 else {
 
-                  for (let i = 0; i < 217; i += 1) { //riscalo y per ogni valore
+                  for (let i = 0; i < dataLength; i += 1) { //riscalo y per ogni valore
 
                     if (my_data[i] < min) {
                       min = my_data[i]
@@ -1417,7 +1444,7 @@
                 var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
                 //var my_data = JSON.parse(tmp_data)
 
-                for (let i = 0; i < 217; i += 1) {
+                for (let i = 0; i < dataLength; i += 1) {
 
                   var time_tmp = time[i].toFixed(3)
 
@@ -1502,6 +1529,41 @@
 
         }
 
+   d3.select("#downsampleBtn").on("click", function (d) {
+
+    
+
+    var downsample = d3.select("#downsample").property("value")
+
+    if(downsample % 2 != 0){
+      showPopup("Inserire solo numeri pari!", false);
+      document.getElementById("downsample").value = ""
+       return;
+      
+    } 
+    showPopup("Downsample cambiato con successo!", true);
+   
+    document.getElementById("downsamplePlaceholder").innerHTML = "Insert downsample (current: " + downsample + ")"
+
+    globalData = []
+     for (let i = 0; i < allGroup.length; i++) {
+
+       d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=+" + downsample/2 + "&points=0&columns=" + allGroup[i], { crossOrigin: "anonymous" }).then(function (data) {
+
+         globalData[i] = data
+         console.log(data)
+
+
+
+       })
+
+     }
+
+     console.log(globalData)
+   })
+
+
+
   d3.select("#selectMenu").on("change", function(d) {
 
        
@@ -1518,7 +1580,7 @@
 
     if (checkBoxAggregato.checked == false){ //se Aggregato non è checkato, cancella tutto per fare spazio al nuovo grafico sullo stesso svg
 
-   
+        console.log(data)
         newGraph(selectedOption, data, 0)
     
 
