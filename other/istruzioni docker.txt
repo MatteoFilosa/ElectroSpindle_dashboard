@@ -1,0 +1,26 @@
+
+
+---AGGIORNARE DOCKER----
+
+rm -r ElectroSpindle_dashboard
+
+git clone https://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@github.com/MatteoFilosa/ElectroSpindle_dashboard.git
+
+docker stop 23a48f990a98 ---> stoppa lo specifico container
+
+docker rm 23a48f990a98  ---->rimuove specifico container
+
+cd ElectroSpindle_dashboard
+
+docker build -t electrospindle_dashboard .
+
+docker run -d --name electrospinde_dashboard_ -p 7777:80 electrospindle_dashboard
+
+
+
+-----MISC COMMANDS-----
+
+docker ps  ------> vedere i container che runnano, serve per vedere il codice del container
+
+
+docker ps --filter "id=<codice_container>" --format "{{.Names}}"
