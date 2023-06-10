@@ -37,16 +37,19 @@
 </select>
 <div id="selectedValues"></div>
 
-
+<div id="downsamplePlaceholder">Insert downsample (current: 100)</div> <input type="text" id="downsample" maxlength="3" required placeholder="Downsample">
+<br><br>
 <div id = "analyticsDiv">
   <button id="featuresBtn" class="button-blue"  onclick="features()">Features</button>
 </div>
+<div id="popup" class="popup"></div>
 <button id="clear" onclick="clearSvg()" class="button-red">Clear all</button>
 <div class = "container" id = "svg-div">
   
 </div>
 
 <div id="tooltip"></div>
+
 
 
 
@@ -64,6 +67,18 @@
           '#ff7f50', '#87cefa', '#da70d6', '#32cd32', '#6495ed',
           '#ff69b4', '#ba55d3', '#cd5c5c', '#cc5500', '#40e0d0'
         ];
+
+  function showPopup(message, isSuccess) {
+      var popup = document.getElementById("popup");
+      popup.textContent = message;
+      popup.className = "popup" + (isSuccess ? " success" : " error");
+      popup.style.display = "block";
+
+      // Nascondi il popup dopo 3 secondi
+      setTimeout(function () {
+        popup.style.display = "none";
+      }, 3000);
+    }
 
   
   function clearSvg() {
@@ -267,11 +282,23 @@
 
             new_svg.append('text')
               .attr('x', width / 2 + 100)
-              .attr('y', 80)
+              .attr('y', 55)
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 20)
               .text(allGroup[i] + " Aggregate Chart");
+
+
+            var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 75)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text( "Downsample: " + numbersOnly);
 
             // X label
             new_svg.append('text')
@@ -560,12 +587,24 @@
               .attr("id", function (d, i) { return "path_" + j + "_" + selectedOption });
 
             svg.append('text')
-              .attr('x', width / 2 + 100)
-              .attr('y', 80)
-              .attr('text-anchor', 'middle')
-              .style('font-family', 'Helvetica')
-              .style('font-size', 20)
-              .text(selectedOption + ' chart');
+            .attr('x', width / 2 + 100)
+            .attr('y', 55)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 20)
+            .text(selectedOption + " chart");
+
+
+          var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+          var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+          svg.append('text')
+            .attr('x', width / 2 + 100)
+            .attr('y', 75)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 20)
+            .text("Downsample: " + numbersOnly);
 
             // X label
             svg.append('text')
@@ -587,7 +626,7 @@
             //SN
             svg.append('text')
               .attr('x', width / 2 + 100)
-              .attr('y', 15)
+              .attr('y', 12)
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 16)
@@ -597,7 +636,7 @@
 
             svg.append('text')
                     .attr('x', width/2 + 100)
-                    .attr('y', 35)
+                    .attr('y', 30)
                     .attr('text-anchor', 'middle')
                     .style('font-family', 'Helvetica')
                     .style('font-size', 16)
@@ -774,12 +813,24 @@
                     .attr("id", function(d,i){ return "path_" + i + "_" + selectedOption});
 
                 svg.append('text')
-                    .attr('x', width/2 + 100)
-                    .attr('y', 80)
-                    .attr('text-anchor', 'middle')
-                    .style('font-family', 'Helvetica')
-                    .style('font-size', 20)
-                    .text(selectedOption + ' chart');
+            .attr('x', width / 2 + 100)
+            .attr('y', 55)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 20)
+            .text(selectedOption + " chart");
+
+
+          var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+          var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+          svg.append('text')
+            .attr('x', width / 2 + 100)
+            .attr('y', 75)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 20)
+            .text("Downsample: " + numbersOnly);
         
                 // X label
                 svg.append('text')
@@ -801,7 +852,7 @@
                 //SN
                 svg.append('text')
                     .attr('x', width/2 + 100)
-                    .attr('y', 15)
+                    .attr('y', 12)
                     .attr('text-anchor', 'middle')
                     .style('font-family', 'Helvetica')
                     .style('font-size', 16)
@@ -810,7 +861,7 @@
 
                 svg.append('text')
                     .attr('x', width/2 + 100)
-                    .attr('y', 35)
+                    .attr('y', 30)
                     .attr('text-anchor', 'middle')
                     .style('font-family', 'Helvetica')
                     .style('font-size', 16)
@@ -852,12 +903,24 @@
               new_svg.selectAll('text').remove()
 
               new_svg.append('text')
-                .attr('x', width / 2 + 100)
-                .attr('y', 80)
-                .attr('text-anchor', 'middle')
-                .style('font-family', 'Helvetica')
-                .style('font-size', 20)
-                .text(selectedOption + " Aggregate Chart");
+            .attr('x', width / 2 + 100)
+            .attr('y', 55)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 20)
+            .text(selectedOption + "Aggregate chart");
+
+
+          var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+          var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+          new_svg.append('text')
+            .attr('x', width / 2 + 100)
+            .attr('y', 75)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 20)
+            .text("Downsample: " + numbersOnly);
 
               // X label
               new_svg.append('text')
@@ -1013,6 +1076,67 @@
 
     
   })
+
+
+  d3.select("#downsample").on("input", function (d) {
+
+
+
+      var downsample = d3.select("#downsample").property("value")
+
+      if (downsample.length >= 2) {
+
+        if (downsample % 2 != 0) {
+          showPopup("Inserire solo numeri pari!", false);
+          document.getElementById("downsample").value = ""
+          return;
+
+        }
+        showPopup("Downsample cambiato con successo!", true);
+
+        document.getElementById("downsamplePlaceholder").innerHTML = "Insert downsample (current: " + downsample + ")"
+
+        const spindleArrays = {};
+
+        for (let j = 0; j < selectedSpindles.length; j++) {
+          // Get the current selected spindle
+          const spindle = selectedSpindles[j][0];
+
+          for (let i = 0; i < allGroup.length; i++) {
+            const column = allGroup[i];
+
+            d3.json(
+              "http://arca.diag.uniroma1.it:8082/data/breakin/" +
+              spindle +
+              "/raw_data?mode=1&factor=" + downsample + "&points=0&columns=" +
+              column, { crossOrigin: "anonymous" }).then(
+                function (data) {
+
+
+                  // Check if the data array for the current spindle exists
+                  if (!spindleArrays[spindle]) {
+                    spindleArrays[spindle] = {};
+                  }
+
+                  // Save the data array for the current column
+                  spindleArrays[spindle][column] = data;
+
+
+
+                }
+              );
+          }
+        }
+
+        console.log(spindleArrays)
+
+      }
+
+      else return
+
+
+
+    })
         
         
         

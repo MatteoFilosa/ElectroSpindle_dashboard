@@ -73,7 +73,7 @@
 <br>
 
 <div id = "downsamplePlaceholder">Insert downsample (current: 100)</div> <input type="text" id="downsample" maxlength="3" required placeholder="Downsample">
-<button class='button-blue' id="downsampleBtn">Confirm</button>
+
 <div id="popup" class="popup"></div>
 <br><br>
 <button id="clear" onclick="clearSvg()" class="button-red">Clear all</button>
@@ -455,7 +455,7 @@
                 .style('font-size', 20)
                 .text("Aggregate chart");
 
-              var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
             var numbersOnly = downsampleText.match(/\d+/g).map(Number);
 
             new_svg.append('text')
@@ -1529,38 +1529,47 @@
 
         }
 
-   d3.select("#downsampleBtn").on("click", function (d) {
+   d3.select("#downsample").on("input", function (d) {
 
     
-
+   
     var downsample = d3.select("#downsample").property("value")
 
-    if(downsample % 2 != 0){
-      showPopup("Inserire solo numeri pari!", false);
-      document.getElementById("downsample").value = ""
-       return;
-      
-    } 
-    showPopup("Downsample cambiato con successo!", true);
-   
-    document.getElementById("downsamplePlaceholder").innerHTML = "Insert downsample (current: " + downsample + ")"
+    if(downsample.length >= 2){
 
-    globalData = []
-     for (let i = 0; i < allGroup.length; i++) {
+      if (downsample % 2 != 0) {
+        showPopup("Inserire solo numeri pari!", false);
+        document.getElementById("downsample").value = ""
+        return;
 
-       d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=+" + downsample/2 + "&points=0&columns=" + allGroup[i], { crossOrigin: "anonymous" }).then(function (data) {
+      }
+      showPopup("Downsample cambiato con successo!", true);
 
-         globalData[i] = data
-         console.log(data)
+      document.getElementById("downsamplePlaceholder").innerHTML = "Insert downsample (current: " + downsample + ")"
+
+      globalData = []
+      for (let i = 0; i < allGroup.length; i++) {
+
+        d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=+" + downsample / 2 + "&points=0&columns=" + allGroup[i], { crossOrigin: "anonymous" }).then(function (data) {
+
+          globalData[i] = data
+          console.log(data)
 
 
 
-       })
+        })
 
-     }
+      }
 
-     console.log(globalData)
-   })
+      console.log(globalData)
+
+    }
+
+    else return
+
+    
+  
+  })
 
 
 
