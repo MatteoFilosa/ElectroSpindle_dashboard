@@ -473,7 +473,7 @@
                 .attr('text-anchor', 'middle')
                 .style('font-family', 'Helvetica')
                 .style('font-size', 12)
-                .text("Time(ms)");
+                .text("Time(s)");
 
               // Y label
               new_svg.append('text')
@@ -903,7 +903,7 @@
             .attr('text-anchor', 'middle')
             .style('font-family', 'Helvetica')
             .style('font-size', 12)
-            .text("Time(ms)");
+            .text("Time(s)");
         
             // Y label
             new_svg.append('text')
@@ -1065,7 +1065,7 @@
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 12)
-              .text("Time(ms)");
+              .text("Time(s)");
 
             // Y label
             new_svg.append('text')
@@ -1179,7 +1179,7 @@
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 12)
-              .text("Time(ms)");
+              .text("Time(s)");
 
             // Y label
             new_svg.append('text')
@@ -1531,42 +1531,111 @@
 
    d3.select("#downsample").on("input", function (d) {
 
-    
-   
-    var downsample = d3.select("#downsample").property("value")
+    sleep(1000).then(() => {
 
-    if(downsample.length >= 2){
+       
+      var downsample = d3.select("#downsample").property("value")
 
-      if (downsample % 2 != 0) {
-        showPopup("Inserire solo numeri pari!", false);
-        document.getElementById("downsample").value = ""
-        return;
+      if (downsample.length >= 2) {
 
-      }
-      showPopup("Downsample cambiato con successo!", true);
+        if (downsample % 2 != 0) {
+          showPopup("Inserire solo numeri pari!", false);
+          document.getElementById("downsample").value = ""
+          return;
 
-      document.getElementById("downsamplePlaceholder").innerHTML = "Insert downsample (current: " + downsample + ")"
+        }
+        
 
-      globalData = []
-      for (let i = 0; i < allGroup.length; i++) {
+        document.getElementById("downsamplePlaceholder").innerHTML = "Insert downsample (current: " + downsample + ")"
 
-        d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=+" + downsample / 2 + "&points=0&columns=" + allGroup[i], { crossOrigin: "anonymous" }).then(function (data) {
+        
+          
+        
 
-          globalData[i] = data
-          console.log(data)
+        globalData = []
+        for (let i = 0; i < allGroup.length; i++) {
+
+          d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=+" + downsample / 2 + "&points=0&columns=" + allGroup[i], { crossOrigin: "anonymous" }).then(function (data) {
+
+            globalData[i] = data
+            console.log(data)
 
 
 
+          })
+
+        }
+        var toRedraw = [], data = globalData
+
+        if (document.getElementById("aggregato").checked == false) {
+
+        for (let i = 0; i < allGroup.length; i++) { //Ridisegnamo dinamicamente :-) 
+
+          if (document.getElementById("svg" + allGroup[i]) != null) toRedraw.push(allGroup[i])
+
+        }
+
+        clearSvg()
+
+        sleep(1000).then(() => {
+
+        for (let i = 0; i < toRedraw.length; i++) { 
+
+          newGraph(toRedraw[i], data, 0)
+
+        }
+
+        console.log(globalData)
+        showPopup("Downsample cambiato con successo!", true);
         })
 
       }
 
-      console.log(globalData)
+      else{
+
+        var toRedraw = [], sleeper = 1
+
+        if(downsample >= 26) sleeper = 1.5
+
+        for (let i = 0; i < allGroup.length; i++) { //Ridisegnamo dinamicamente :-) 
+
+            if (document.getElementById("path" + allGroup[i]) != null) toRedraw.push(allGroup[i])
+
+          }
+
+        clearSvg()
+
+          sleep(1000 * sleeper).then(() => {
+
+            for (let i = 0; i < toRedraw.length; i++) {
+
+              newGraph(toRedraw[i], data, 0)
+
+            }
+
+            newGraph("", data, 1, 0)
+            document.getElementById("aggregato").checked = true
+
+            console.log(globalData)
+            showPopup("Downsample cambiato con successo!", true);
+          })
+
+
+
+      }
 
     }
+        
 
-    else return
+      else return
 
+
+
+     })
+
+    
+   
+    
     
   
   })
@@ -1575,15 +1644,24 @@
 
   d3.select("#selectMenu").on("change", function(d) {
 
-       
+
+      
+      
       
       
       var checkBoxAggregato = document.getElementById("aggregato");
       var data = globalData
     
       var selectedOption = d3.select(this).property("value")
-      //d3.select(this).attr("disabled", "true")
 
+      
+      if (document.getElementById("dot" + selectedOption) != null) {
+
+        if(document.getElementById("svg_default") == null) showPopup("È già presente un grafico con questo attributo!", false)
+        else showPopup("Hai già selezionato questo attributo per il grafico aggregato!", false)
+        return
+
+      } 
 
       localStorage.setItem("selectedOption", JSON.stringify(selectedOption));
 
