@@ -23,7 +23,17 @@
   '#ff69b4','#ba55d3','#cd5c5c','#ffa500','#40e0d0'
     ];
 
-    
+    function showPopup(message, isSuccess) {
+        var popup = document.getElementById("popup");
+        popup.textContent = message;
+        popup.className = "popup" + (isSuccess ? " success" : " error");
+        popup.style.display = "block";
+
+        // Nascondi il popup dopo 3 secondi
+        setTimeout(function () {
+          popup.style.display = "none";
+        }, 3000);
+      }
         
     
     </script>
@@ -42,7 +52,7 @@
  
 Insert Spindle SN <input type = "text" id ="request" maxlength="10" required placeholder="Serial Number"> 
 
-
+<div id="popup" class="popup"></div>
 
 <h5>Pick Date</h5>
 
@@ -422,7 +432,7 @@ function resetFilters(){
 
             if(selected_sn.length == 0){
 
-                alert("Seleziona almeno uno spindle per continuare!")
+                showPopup("Seleziona almeno uno spindle per continuare!", false)
                 return;
             } 
             else if(selected_sn.length == 1) window.open('singleView.html', '_blank');
@@ -621,7 +631,7 @@ function resetFilters(){
 
           }
 
-          
+          if((document.getElementById("day-start").innerHTML>= 10)) showPopup("Date filtered correctly!", true)
 
         })
 
@@ -684,11 +694,15 @@ function resetFilters(){
             }
 
             }
+
+            if (document.getElementById("availableSpindles").innerHTML.length <= 128) showPopup("No spindles found!", false)
+            else showPopup("Spindles filtered correcly!", true)
+            console.log(document.getElementById("availableSpindles").innerHTML.length)
     
 
             });
 
-
+            
             
             })
     
