@@ -205,11 +205,10 @@ function sleep (time) {
 
 function saveSpindle(sn){
 
-
+  console.log("ok")
   sn_and_date = JSON.parse(localStorage.getItem("sn_and_date"))
-  var to_write = ""
-  var firstElement = document.getElementById(sn)
-  //var secondElement = document.getElementById(sn)
+  var to_write = "", toCheck = []
+
 
   if(document.getElementById(sn).checked == true){
 
@@ -222,9 +221,10 @@ function saveSpindle(sn){
           var nodesToSelect = myNode.childNodes
           for (let j = 0; j < nodesToSelect.length; j++) {
 
+            if(nodesToSelect[j].checked == true) toCheck.push(nodesToSelect[j].id)
             if(nodesToSelect[j].id == sn + "_selected"){
 
-              return //Se trovo un dupicato me ne vado proprio
+              return //Se trovo un duplicato me ne vado proprio
 
             }
             
@@ -233,23 +233,24 @@ function saveSpindle(sn){
       }
 
 
-    
-
-    
 
     for(let i = 0; i < sn_and_date.length; i++){
       if(sn_and_date[i][0] == sn) to_write = "<span id = 'spindlesSpan'>" + sn + "</span>" + "<span id = 'spindlesSpan'>" + "ES951" + "</span>" + "<span id = 'spindlesSpan'>" + sn_and_date[i][1] + "</span>"
+      
 
     }
     
-    document.getElementById("selectedSpindles").innerHTML += "<div id = 'spindleRow'> <input type = 'checkbox' class = 'checkbox-spindles' id = '" + sn + "_selected' checked onchange = 'deselectAvailable(" + sn + ")'><label for = '" +sn +"'>" + to_write + "</label></div>" 
-    document.getElementById("selectAll1").checked = true
+    document.getElementById("selectedSpindles").innerHTML += "<div id = 'spindleRow'> <input type = 'checkbox' class = 'checkbox-spindles' id = '" + sn + "_selected' onchange = 'deselectAvailable(" + sn + ")'><label for = '" +sn +"'>" + to_write + "</label></div>" 
+    
+    
+    document.getElementById(sn + "_selected").checked = true
+    for(let i = 0; i < toCheck.length; i++){
+      document.getElementById(toCheck[i]).checked = true
+    }
 
   }
 
-  else{
-    //document.getElementById(sn + "_selected").checked = false
-  }
+
   
 }
 
