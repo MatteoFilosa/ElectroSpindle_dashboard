@@ -27,19 +27,30 @@
 
     <script>
 
-        var selectedAttributes = JSON.parse(localStorage.getItem("selectedAttributes"))
-        var selectedFeature = JSON.parse(localStorage.getItem("selectedFeature"))
-        var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
-        var selectedSpindle = sn_and_date[0][0]
 
+        var selectedSpindlesBasic = JSON.parse(localStorage.getItem("selectedSpindlesBasic"))
+            if (selectedSpindlesBasic != null) {
+
+                var sn_and_date = selectedSpindlesBasic
+                var selectedAttributes = JSON.parse(localStorage.getItem("selectedAttributesBasic"))
+                localStorage.removeItem("selectedSpindlesBasic");
+                localStorage.removeItem("selectedAttributesBasic");
+
+            }
+
+            else {
+
+                var selectedAttributes = JSON.parse(localStorage.getItem("selectedAttributes"))
+                var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
+                localStorage.setItem("selectedSpindlesBasic", JSON.stringify(sn_and_date))
+                localStorage.setItem("selectedAttributesBasic", JSON.stringify(selectedAttributes))
+
+            }
+
+        var selectedSpindle = sn_and_date[0][0]
         var allGroup = ["Tamb", "Tba", "Itot", "Qtir", "Speed_S3_BUS", "Speed_Sync", "Tdut2", "Tdut3", "VibANT_Sync", "Step"]
 
-        if(selectedFeature == "pearson"){
-            const index = allGroup.indexOf("Tdut2");
-            if (index > -1) { // only splice array when item is found
-                allGroup.splice(index, 1); // 2nd parameter means remove one item only
-            }
-        }
+       
 
         d3.select("#selectMenu")
                 .selectAll('myOptions')
@@ -48,9 +59,6 @@
                 .append('option')
                 .text(function (d) { return d; }) // text showed in the menu
                 .attr("value", function (d) { return d; }) // corresponding value returned by the button
-
-        console.log(selectedFeature)
-
 
         d3.select("#selectMenu").on("change", function (d) {
 
@@ -167,55 +175,6 @@
 
             if (sn_and_date.length == 1) { //caso singleView
 
-                d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=" + selectedFeature + "", { crossOrigin: "anonymous" }).then( function (data) {
-
-                    if (selectedFeature == "pearson") { //caso Pearson
-                        
-
-                        console.log(data)
-                        var tableRow = "<tr>";
-                        tableRow += "<th id='tableHeaderColumn' style='background-color: lightgrey;' >Attributes</th>"
-                        for (let i = 0; i < data.pearson.columns.length; i++) { //settare header
-                            tableRow += "<th id = 'tableHeaderColumn'>" + data.pearson.columns[i] + "</th>";
-                        }
-
-                        tableRow += "</tr>";
-                        heatMap.innerHTML += tableRow;
-
-                        for (let i = 0; i < data.pearson.matrix.length; i++) {
-
-                            var tableRow = "<tr>";
-                            tableRow += "<th id = 'tableHeaderRow' style='background-color: whitesmoke;'>" + data.pearson.columns[i] + "</th>"
-
-                            for (let j = 0; j < data.pearson.matrix[i].length; j++) {
-                                console.log(data.pearson.matrix[i][j], data.pearson.matrix[i].length);
-
-                                // Calcola un valore normalizzato tra 0 e 1 in base al valore di data.pearson.matrix[i][j]
-                                let normalizedValue = (data.pearson.matrix[i][j]);
-
-                                normalizedValue = normalizedValue.toFixed(3)
-
-                                // Calcola il colore in base al valore normalizzato utilizzando una scala di colori adatta per la heatmap
-                                let color = getColorFromHeatmapScale(normalizedValue);
-
-                                console.log(normalizedValue)
-
-                                // Crea il table header con il colore specificato
-                                tableRow += "<th id='tableValue' style='background-color:" + color + "'>" + normalizedValue + "</th>";
-                            }
-
-                            tableRow += "</tr>";
-                            heatMap.innerHTML += tableRow;
-
-                        }
-
-                    }
-
-
-
-                });
-
-                if (selectedFeature != "pearson") { // Caso basic statistics
 
                     d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=basic%20statistics", { crossOrigin: "anonymous" }).then( function (data) {
                       
@@ -251,7 +210,7 @@
 
                             else{
 
-                                // Calcola un valore normalizzato tra 0 e 1 in base al valore di data.pearson.matrix[i][j]
+                                // Calcola un valore normalizzato tra 0 e 1 in base al valore di data.Basic.matrix[i][j]
                                 let normalizedValue = (eval("data['basic statistics']." + selectedAttributes[i] + ".average"));
 
                                 // Calcola il colore in base al valore normalizzato utilizzando una scala di colori adatta per la heatmap
@@ -283,70 +242,12 @@
 
                     })
 
-                }
+                
 
             }
 
             else { //caso aggregateView
-                if (selectedFeature == "pearson") { //Pearson
-
-                    
-
-                    for (let u = 0; u < sn_and_date.length; u++) {
-                        selectedSpindle = sn_and_date[u][0];
-                        var heatMapId = "heatMap" + selectedSpindle;
-
-                        // Creazione del nuovo elemento table
-                        var heatMap = document.createElement("table");
-                        heatMap.id = heatMapId;
-                        document.getElementById("tableContainer").appendChild(heatMap);
-
-                        console.log(heatMapId);
-
-                        d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=" + selectedFeature + "", { crossOrigin: "anonymous" }).then( function (data) {
-
-                            if (selectedFeature == "pearson") { //caso Pearson
-                                console.log(data);
-
-
-                                var tableRow = "<br><br><br>" + sn_and_date[u][0] + "<tr>"; //Spaziatura tra tabelle
-                                tableRow += "<th style = 'background-color: lightgrey;'>Attributes</th>"
-                                for (let i = 0; i < data.pearson.columns.length; i++) { //settare header
-                                    tableRow += "<th id='tableHeaderColumn'>" + data.pearson.columns[i] + "</th>";
-                                }
-
-                                tableRow += "</tr>";
-                                heatMap.innerHTML += tableRow;
-
-                                for (let i = 0; i < data.pearson.matrix.length; i++) {
-                                    var tableRow = "<tr>";
-                                    tableRow += "<th id = 'tableHeaderRow' style = 'background-color: whitesmoke;'>" + selectedAttributes[i] + "</th>"
-                                    for (let j = 0; j < data.pearson.matrix[i].length; j++) {
-                                        console.log(data.pearson.matrix[i][j], data.pearson.matrix[i].length);
-
-                                        // Calcola un valore normalizzato tra 0 e 1 in base al valore di data.pearson.matrix[i][j]
-                                        let normalizedValue = (data.pearson.matrix[i][j]);
-
-                                        normalizedValue = normalizedValue.toFixed(3)
-
-                                        // Calcola il colore in base al valore normalizzato utilizzando una scala di colori adatta per la heatmap
-                                        let color = getColorFromHeatmapScale(normalizedValue);
-
-                                        console.log(normalizedValue);
-
-                                        // Crea il table header con il colore specificato
-                                        tableRow += "<th id='tableValue' style='background-color:" + color + "'>" + normalizedValue + "</th>";
-                                    }
-
-                                    tableRow += "</tr>";
-                                    heatMap.innerHTML += tableRow;
-                                }
-                            }
-                        });
-                    }
-                }
-
-                else {
+                
 
                     for (let u = 0; u < sn_and_date.length; u++) {
 
@@ -385,7 +286,7 @@
 
                                 else{
 
-                                     // Calcola un valore normalizzato tra 0 e 1 in base al valore di data.pearson.matrix[i][j]
+                                     // Calcola un valore normalizzato tra 0 e 1 in base al valore di data.Basic.matrix[i][j]
                                     let normalizedValue = (eval("data['basic statistics']." + selectedAttributes[i] + ".average"));
 
                                     // Calcola il colore in base al valore normalizzato utilizzando una scala di colori adatta per la heatmap
@@ -410,10 +311,7 @@
                                     heatMap.innerHTML += tableRow;
 
                                 }
-
-
-
-                               
+                           
 
                             }
 
@@ -421,7 +319,7 @@
                         })
                     }
 
-                }
+                
 
 
             }
@@ -429,17 +327,8 @@
             }
 
             window.onload = loadAnalytics()
-
-           
-
-            if (selectedFeature == "pearson") { //caso Pearson
-
-                document.getElementById("capa").innerHTML += ": Pearson"
-            }
-
-            else{
-                document.getElementById("capa").innerHTML += ": Average, sigma"
-            }
+            document.getElementById("capa").innerHTML += ": Average, sigma"
+        
        
         
         

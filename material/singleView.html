@@ -72,7 +72,7 @@
 <div id="tooltip"></div>
 <br>
 
-<div id = "downsamplePlaceholder">Insert downsample (current: 100)</div> <input type="text" id="downsample" maxlength="3" required placeholder="Downsample">
+<div id = "downsamplePlaceholder">Insert downsample (current: 100)</div> <input type="text" id="downsample" maxlength="3" required placeholder="Downsample"> <button class="button-green" id="downsampleBtn">Apply</button>
 
 <div id="popup" class="popup"></div>
 <br><br>
@@ -159,8 +159,14 @@
     localStorage.setItem("selectedAttributes", JSON.stringify(selectedAttributes))
 
 
-    if(selectedAttributes.length > 0) window.open('analytics.html', '_blank');
-    else alert("Select at least one attribute to continue.")
+    if (selectedAttributes.length > 0) {
+      if (selectedFeature == "basic statistics") window.open('basic_statistics.html', '_blank');
+      if ((selectedFeature == "pearson") && (selectedAttributes.length == 1)) showPopup("Select at least two attributes to show the pearson correlation.", false)
+
+      else window.open('pearson.html', '_blank');
+
+    }
+    else showPopup("Select at least one attribute to continue.", false)
   }
  
 
@@ -1529,11 +1535,9 @@
 
         }
 
-   d3.select("#downsample").on("input", function (d) {
+   d3.select("#downsampleBtn").on("click", function (d) {
 
-    sleep(1000).then(() => {
 
-       
       var downsample = d3.select("#downsample").property("value")
 
       if (downsample.length >= 2) {
@@ -1630,12 +1634,6 @@
       else return
 
 
-
-     })
-
-    
-   
-    
     
   
   })

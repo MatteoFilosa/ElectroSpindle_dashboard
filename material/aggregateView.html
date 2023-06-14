@@ -37,7 +37,7 @@
 </select>
 <div id="selectedValues"></div>
 
-<div id="downsamplePlaceholder">Insert downsample (current: 100)</div> <input type="text" id="downsample" maxlength="3" required placeholder="Downsample">
+<div id="downsamplePlaceholder">Insert downsample (current: 100)</div> <input type="text" id="downsample" maxlength="3" required placeholder="Downsample"> <button class="button-green" id="downsampleBtn">Apply</button>
 <br><br>
 <div id = "analyticsDiv">
   <button id="featuresBtn" class="button-blue"  onclick="features()">Features</button>
@@ -125,8 +125,14 @@
 
       localStorage.setItem("selectedAttributes", JSON.stringify(selectedAttributes))
 
-      if (selectedAttributes.length > 0) window.open('analytics.html', '_blank');
-      else alert("Select at least one attribute to continue.")
+      if (selectedAttributes.length > 0){
+        if(selectedFeature == "basic statistics") window.open('basic_statistics.html', '_blank');
+        if ((selectedFeature == "pearson") && (selectedAttributes.length == 1)) showPopup("Select at least two attributes to show the pearson correlation.", false)
+
+        else window.open('pearson.html', '_blank');
+
+      } 
+      else showPopup("Select at least one attribute to continue.", false)
     }
 
   d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics", { crossOrigin: "anonymous" }).then( function (data) {
@@ -1096,9 +1102,7 @@
   })
 
 
-  d3.select("#downsample").on("input", function (d) {
-
-      sleep(1000).then(() => {
+  d3.select("#downsampleBtn").on("click", function (d) {
 
 
       console.log(spindleArrays);
@@ -1365,8 +1369,6 @@
 
       else return
 
-
-       })
     })
         
         
