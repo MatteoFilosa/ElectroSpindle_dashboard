@@ -168,6 +168,10 @@ Insert Spindle SN <input type = "text" id ="request" maxlength="10" required pla
 
 localStorage.setItem("resetClicked", JSON.stringify(0))
 
+  function rimuoviDuplicati(array) {
+    return Array.from(new Set(array));
+  }
+
   function deselectAvailable(sn) {
 
     document.getElementById(sn).checked = false
@@ -245,7 +249,7 @@ function saveSpindle(sn){
     
     document.getElementById(sn + "_selected").checked = true
     for(let i = 0; i < toCheck.length; i++){
-      document.getElementById(toCheck[i]).checked = true
+      document.getElementById(toCheck[i]).checked = true //Evitare strani comportamenti nel selectedspindles
     }
 
   }
@@ -265,8 +269,13 @@ function selectAll(type){
         if(nodes[i].id == "spindleRow"){
           var myNode = nodes[i]
           var nodesToSelect = myNode.childNodes
+          var id_string = nodesToSelect[1].id + "_selected"
+          if (id_string.includes("_selected_selected")) id_string.replace("_selected_selected", "_selected")
+          nodesToSelect[1].id = id_string
           for(let j = 0; j<nodesToSelect.length; j++){
             nodesToSelect[j].checked = true
+            
+            
           }
         }
       }
@@ -299,6 +308,8 @@ function selectAll(type){
           var nodesToSelect = myNode.childNodes
           for (let j = 0; j < nodesToSelect.length; j++) {
             nodesToSelect[j].checked = true
+            
+            
           }
         }
       }
@@ -312,8 +323,14 @@ function selectAll(type){
         if (nodes2[i].id == "spindleRow") {
           var myNode = nodes2[i]
           var nodesToSelect = myNode.childNodes
+          console.log("select2")
+          var id_string = nodesToSelect[0].id + "_selected"
+          if(id_string.includes("_selected_selected")) id_string.replace("_selected_selected", "_selected")
+          nodesToSelect[0].id = id_string
+          console.log(id_string, nodesToSelect, nodesToSelect[0].id)
           for (let j = 0; j < nodesToSelect.length; j++) {
             nodesToSelect[j].checked = true
+            
           }
         }
       }
@@ -328,6 +345,7 @@ function selectAll(type){
           var nodesToSelect = myNode.childNodes
           for (let j = 0; j < nodesToSelect.length; j++) {
             nodesToSelect[j].checked = false
+            
           }
         }
       }
@@ -338,7 +356,7 @@ function selectAll(type){
 }
 
 function resetFilters(){
-
+  document.getElementById("selectAll0").checked = false
   localStorage.setItem("resetClicked", JSON.stringify(1))
   document.getElementById("request").value = ""
   document.getElementById("day-start").innerHTML = ""
@@ -410,14 +428,17 @@ function resetFilters(){
 
                       for(let z = 0; z < nodesToPush.length; z++){
 
-                        var id_string = nodesToPush[1].id
-              
-
+                        var id_string = nodesToPush[0].id
+                        if(id_string == null) id_string = nodesToPush[1].id
                         var id_to_check = id_string.slice(0, -9);
 
-                        //console.log(nodesToPush[1].id)
-
-                        if ((id_to_check == tmp) && (nodesToPush[z].checked == true)) selected_sn.push(sn_and_date[i])
+                        console.log(nodesToPush[0].id)
+                       
+                        console.log(id_to_check, tmp, nodesToPush[z].checked)
+                        if ((id_to_check == tmp) && (nodesToPush[z].checked == true)){
+                          selected_sn.push(sn_and_date[i])
+                          console.log("ok2")
+                        } 
 
                       }
 
@@ -429,15 +450,18 @@ function resetFilters(){
    
             }
           }
+            selected_sn = rimuoviDuplicati(selected_sn)
             localStorage.setItem("selectedSpindles", JSON.stringify(selected_sn))
+            console.log(document.getElementById("selectedSpindles").innerHTML.length)
 
-            if(selected_sn.length == 0){
+            if (document.getElementById("selectedSpindles").innerHTML.length <= 188){
 
                 showPopup("Seleziona almeno uno spindle per continuare!", false)
                 return;
             } 
             else if(selected_sn.length == 1) window.open('singleView.html', '_blank');
             else if (selected_sn.length > 1) window.open('aggregateView.html', '_blank');
+            console.log(selected_sn, selected_sn.length)
             
         }
     
