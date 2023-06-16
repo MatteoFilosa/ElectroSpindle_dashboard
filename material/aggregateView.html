@@ -37,7 +37,7 @@
 </select>
 <div id="selectedValues"></div>
 
-<div id="downsamplePlaceholder">Insert downsample (current: 100)</div> <input type="text" id="downsample" maxlength="3" required placeholder="Downsample"> <button class="button-green" id="downsampleBtn">Apply</button>
+<div id="downsamplePlaceholder">Insert downsample (current: 100)</div> <input type="text" id="downsample" maxlength="3" required placeholder="Downsample"> <button class="button-green" id="downsampleBtn" onclick="restoreLoader()">Apply</button>
 <br><br>
 <div id = "analyticsDiv">
   <button id="featuresBtn" class="button-blue"  onclick="features()">Features</button>
@@ -47,7 +47,7 @@
 <div class = "container" id = "svg-div">
   
 </div>
-
+<p id = "loading">Loading data, please wait...</p><div id="loader"></div>
 <div id="tooltip"></div>
 
 
@@ -67,6 +67,23 @@
           '#ff7f50', '#87cefa', '#da70d6', '#32cd32', '#6495ed',
           '#ff69b4', '#ba55d3', '#cd5c5c', '#cc5500', '#40e0d0'
         ];
+
+  function restoreLoader(){
+
+    // Creazione del paragrafo
+    const loadingParagraph = document.createElement('p');
+    loadingParagraph.id = 'loading';
+    loadingParagraph.textContent = 'Loading data, please wait...';
+
+    // Creazione del div
+    const loaderDiv = document.createElement('div');
+    loaderDiv.id = 'loader';
+
+    // Aggiunta degli elementi al DOM
+    document.body.appendChild(loadingParagraph);
+    document.body.appendChild(loaderDiv);
+
+  }
         
 
   function showPopup(message, isSuccess) {
@@ -179,14 +196,11 @@
         // Get the current selected spindle
         const spindle = selectedSpindles[j][0];
 
-        for (let i = 0; i < allGroup.length; i++) {
-          const column = allGroup[i];
-
-          d3.json(
-            "http://arca.diag.uniroma1.it:8082/data/breakin/" +
-            spindle +
-            "/raw_data?mode=1&factor=100&points=0&columns=" +
-            column, { crossOrigin: "anonymous" }).then(
+        d3.json(
+          "http://arca.diag.uniroma1.it:8082/data/breakin/" +
+          spindle +
+          "/raw_data?mode=1&factor=100&points=0&columns=time",
+          { crossOrigin: "anonymous" }).then(
             function (data) {
 
 
@@ -196,9 +210,39 @@
               }
 
               // Save the data array for the current column
-              spindleArrays[spindle][column] = data;
+              spindleArrays[spindle]["time"] = data;
+
+
+
+            }
+          );
+
+        for (let i = 0; i < allGroup.length; i++) {
+          const column = allGroup[i];
+
+          d3.json(
+            "http://arca.diag.uniroma1.it:8082/data/breakin/" +
+            spindle +
+            "/raw_data?mode=1&factor=100&points=0&columns=" +
+            column, { crossOrigin: "anonymous" }).then(
+            function (data) {
+              
               
 
+              // Check if the data array for the current spindle exists
+              if (!spindleArrays[spindle]) {
+                spindleArrays[spindle] = {};
+              }
+
+              // Save the data array for the current column
+              spindleArrays[spindle][column] = data;
+              
+              if (i + 1 == allGroup.length){
+
+                if (document.getElementById("loader") != null) document.getElementById("loader").remove()
+                if (document.getElementById("loading") != null) document.getElementById("loading").remove()
+
+              } 
     
             }
           );
@@ -1120,7 +1164,7 @@
           return;
 
         }
-        showPopup("Downsample cambiato con successo!", true);
+        
 
         document.getElementById("downsamplePlaceholder").innerHTML = "Insert downsample (current: " + downsample + ")"
 
@@ -1129,6 +1173,27 @@
         for (let j = 0; j < selectedSpindles.length; j++) {
           // Get the current selected spindle
           const spindle = selectedSpindles[j][0];
+
+          d3.json(
+            "http://arca.diag.uniroma1.it:8082/data/breakin/" +
+            spindle +
+            "/raw_data?mode=1&factor=" + downsample + "&points=0&columns=time", 
+            { crossOrigin: "anonymous" }).then(
+              function (data) {
+
+
+                // Check if the data array for the current spindle exists
+                if (!spindleArrays[spindle]) {
+                  spindleArrays[spindle] = {};
+                }
+
+                // Save the data array for the current column
+                spindleArrays[spindle]["time"] = data;
+
+
+
+              }
+            );
 
           for (let i = 0; i < allGroup.length; i++) {
             const column = allGroup[i];
@@ -1149,8 +1214,14 @@
                   // Save the data array for the current column
                   spindleArrays[spindle][column] = data;
 
+                  if(i + 1 == allGroup.length){
 
+                    if(document.getElementById("loader")!=null) document.getElementById("loader").remove()
+                    if(document.getElementById("loading") != null) document.getElementById("loading").remove()
+                    showPopup("Downsample cambiato con successo!", true);
 
+                  }
+                  
                 }
               );
           }
@@ -1178,8 +1249,10 @@
         else clearSvg()
 
 
-
-        sleep(2000).then(() => {
+        var sleeper = selectedSpindles.length-1 //non se po fa altrimenti me spiaze
+        
+        
+        sleep(2000*sleeper).then(() => {
 
           for (let i = 0; i < toRedraw.length; i++) {
 
@@ -1360,7 +1433,7 @@
         })
       
         
-        showPopup("Downsample cambiato con successo!", true);
+        
      
         console.log(spindleArrays)
 

@@ -16,6 +16,23 @@
     <link rel="stylesheet" href="css/style_single.css"></link>
     <script>
 
+      function restoreLoader() {
+
+          // Creazione del paragrafo
+          const loadingParagraph = document.createElement('p');
+          loadingParagraph.id = 'loading';
+          loadingParagraph.textContent = 'Loading data, please wait...';
+
+          // Creazione del div
+          const loaderDiv = document.createElement('div');
+          loaderDiv.id = 'loader';
+
+          // Aggiunta degli elementi al DOM
+          document.body.appendChild(loadingParagraph);
+          document.body.appendChild(loaderDiv);
+
+        }
+
       function showPopup(message, isSuccess) {
           var popup = document.getElementById("popup");
           popup.textContent = message;
@@ -72,7 +89,7 @@
 <div id="tooltip"></div>
 <br>
 
-<div id = "downsamplePlaceholder">Insert downsample (current: 100)</div> <input type="text" id="downsample" maxlength="3" required placeholder="Downsample"> <button class="button-green" id="downsampleBtn">Apply</button>
+<div id = "downsamplePlaceholder">Insert downsample (current: 100)</div> <input type="text" id="downsample" maxlength="3" required placeholder="Downsample"> <button class="button-green" id="downsampleBtn" onclick = "restoreLoader()" >Apply</button>
 
 <div id="popup" class="popup"></div>
 <br><br>
@@ -114,7 +131,7 @@
 
   </div>
 </div>
-
+<p id="loading">Loading data, please wait...</p><div id="loader"></div>
 <script>
 
   
@@ -217,6 +234,14 @@
               
               globalData[i] = data
               console.log(data)
+
+              if (i + 1 == allGroup.length) {
+
+                if (document.getElementById("loader") != null) document.getElementById("loader").remove()
+                if (document.getElementById("loading") != null) document.getElementById("loading").remove()
+
+              } 
+
               
               
 
@@ -1526,7 +1551,7 @@
               selectedValues.push(selectedGroup)
             localStorage.setItem("selectedValues", JSON.stringify(selectedValues))
 
-            //d3.select("#loader").attr("hidden", true);
+
 
             var svgElements = d3.selectAll("g").selectAll(".punto") //ogni volta, riaggungo gli eventi agli svg, perché sennò si cancellano
 
@@ -1543,7 +1568,7 @@
       if (downsample.length >= 2) {
 
         if (downsample % 2 != 0) {
-          showPopup("Inserire solo numeri pari!", false);
+          showPopup("Insert only even numbers!", false);
           document.getElementById("downsample").value = ""
           return;
 
@@ -1563,7 +1588,14 @@
 
             globalData[i] = data
             console.log(data)
+            if (i + 1 == allGroup.length) {
 
+              if (document.getElementById("loader") != null) document.getElementById("loader").remove()
+              if (document.getElementById("loading") != null) document.getElementById("loading").remove()
+              showPopup("Downsample cambiato con successo!", true);
+
+            }
+      
 
 
           })
@@ -1581,7 +1613,7 @@
 
         clearSvg()
 
-        sleep(1000).then(() => {
+        sleep(2000).then(() => {
 
         for (let i = 0; i < toRedraw.length; i++) { 
 
@@ -1590,7 +1622,7 @@
         }
 
         console.log(globalData)
-        showPopup("Downsample cambiato con successo!", true);
+        
         })
 
       }
@@ -1681,6 +1713,13 @@
      
  
     }
+
+    
+
+      
+
+    
+    
 
 
 })
