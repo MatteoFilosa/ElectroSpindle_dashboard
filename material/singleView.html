@@ -1567,13 +1567,7 @@
 
       if (downsample.length >= 2) {
 
-        if (downsample % 2 != 0) {
-          showPopup("Insert only even numbers!", false);
-          document.getElementById("downsample").value = ""
-          return;
-
-        }
-        
+       
 
         document.getElementById("downsamplePlaceholder").innerHTML = "Insert downsample (current: " + downsample + ")"
 
@@ -1584,7 +1578,7 @@
         globalData = []
         for (let i = 0; i < allGroup.length; i++) {
 
-          d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=+" + downsample / 2 + "&points=0&columns=" + allGroup[i], { crossOrigin: "anonymous" }).then(function (data) {
+          d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=+" + downsample + "&points=0&columns=" + allGroup[i], { crossOrigin: "anonymous" }).then(function (data) {
 
             globalData[i] = data
             console.log(data)

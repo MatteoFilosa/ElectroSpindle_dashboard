@@ -1158,12 +1158,6 @@
 
       if (downsample.length >= 2) {
 
-        if (downsample % 2 != 0) {
-          showPopup("Inserire solo numeri pari!", false);
-          document.getElementById("downsample").value = ""
-          return;
-
-        }
         
 
         document.getElementById("downsamplePlaceholder").innerHTML = "Insert downsample (current: " + downsample + ")"
@@ -1218,7 +1212,7 @@
 
                     if(document.getElementById("loader")!=null) document.getElementById("loader").remove()
                     if(document.getElementById("loading") != null) document.getElementById("loading").remove()
-                    showPopup("Downsample cambiato con successo!", true);
+                    showPopup("Downsample changed successfully!", true);
 
                   }
                   
