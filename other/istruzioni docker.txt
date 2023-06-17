@@ -1,4 +1,6 @@
-
+arca.diag.uniroma1.it
+ivan_giacomoni
+Electrospindle40!
 
 ---AGGIORNARE DOCKER----
 
