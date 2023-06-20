@@ -1586,7 +1586,7 @@
 
               if (document.getElementById("loader") != null) document.getElementById("loader").remove()
               if (document.getElementById("loading") != null) document.getElementById("loading").remove()
-              showPopup("Downsample cambiato con successo!", true);
+              showPopup("Downsample changed successfully!", true);
 
             }
       
@@ -1647,7 +1647,7 @@
             document.getElementById("aggregato").checked = true
 
             console.log(globalData)
-            showPopup("Downsample cambiato con successo!", true);
+            showPopup("Downsample changed successfully!", true);
           })
 
 
@@ -1681,8 +1681,8 @@
       
       if (document.getElementById("dot" + selectedOption) != null) {
 
-        if(document.getElementById("svg_default") == null) showPopup("È già presente un grafico con questo attributo!", false)
-        else showPopup("Hai già selezionato questo attributo per il grafico aggregato!", false)
+        if(document.getElementById("svg_default") == null) showPopup("A graph with this attribute is already present!", false)
+        else showPopup("This attribute has already been selected for the aggregate view!", false)
         return
 
       } 
