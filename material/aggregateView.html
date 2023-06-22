@@ -32,7 +32,7 @@
 <input type = "checkbox" id ="aggregato" class = "checkbox" onchange ="aggregate()"> Aggregate
 
 
-<select id="selectMenu" >
+<select id="selectMenu" onchange = "restoreLoader()">
   <option value="" disabled selected>Select attribute</option>
 </select>
 <div id="selectedValues"></div>
@@ -47,7 +47,7 @@
 <div class = "container" id = "svg-div">
   
 </div>
-<p id = "loading">Loading data, please wait...</p><div id="loader"></div>
+
 <div id="tooltip"></div>
 
 
@@ -62,6 +62,7 @@
 
 <script>
 
+      localStorage.removeItem("spindleArrays")
       //inizializzazione array di colori per i grafici
         var colors = ["#CC0000",
           '#ff7f50', '#87cefa', '#da70d6', '#32cd32', '#6495ed',
@@ -188,77 +189,12 @@
       var virgola = ", "
       if(j+1 == selectedSpindles.length) virgola = ""
     document.getElementById("selectedSpindles").innerHTML += selectedSpindles[j][0] + virgola //+ ", Breakin date: " + selectedSpindles[j][1]
+    
     }
 
-    const spindleArrays = {};
-
-      for (let j = 0; j < selectedSpindles.length; j++) {
-        // Get the current selected spindle
-        const spindle = selectedSpindles[j][0];
-
-        d3.json(
-          "http://arca.diag.uniroma1.it:8082/data/breakin/" +
-          spindle +
-          "/raw_data?mode=1&factor=100&points=0&columns=time",
-          { crossOrigin: "anonymous" }).then(
-            function (data) {
-
-
-              // Check if the data array for the current spindle exists
-              if (!spindleArrays[spindle]) {
-                spindleArrays[spindle] = {};
-              }
-
-              // Save the data array for the current column
-              spindleArrays[spindle]["time"] = data;
-
-
-
-            }
-          );
-
-        for (let i = 0; i < allGroup.length; i++) {
-          const column = allGroup[i];
-
-          d3.json(
-            "http://arca.diag.uniroma1.it:8082/data/breakin/" +
-            spindle +
-            "/raw_data?mode=1&factor=100&points=0&columns=" +
-            column, { crossOrigin: "anonymous" }).then(
-            function (data) {
-              
-              
-
-              // Check if the data array for the current spindle exists
-              if (!spindleArrays[spindle]) {
-                spindleArrays[spindle] = {};
-              }
-
-              // Save the data array for the current column
-              spindleArrays[spindle][column] = data;
-              
-              if (i + 1 == allGroup.length){
-
-                if (document.getElementById("loader") != null) document.getElementById("loader").remove()
-                if (document.getElementById("loading") != null) document.getElementById("loading").remove()
-
-              } 
     
-            }
-          );
-        }
-      }
       
 
-      sleep(1000).then(() => {
-
-          
-        console.log(spindleArrays);
-
-        })
-      // Example usage of the data arrays
-      
-      
 
   
 
@@ -300,6 +236,8 @@
       var min = 100000
       var max = 0
       var selectedSpindles = JSON.parse(localStorage.getItem("selectedSpindles"))
+      var spindleArrays = JSON.parse(localStorage.getItem("spindleArrays"))
+      console.log(spindleArrays)
       
 
       if(document.getElementById("aggregato").checked == true){
@@ -381,9 +319,11 @@
               current_spindle = selectedSpindles[j][0]
               selectedOption = allGroup[i]
               
-              //accrocco funzionante
-              const attributeArray = spindleArrays[current_spindle][selectedOption];
-              const attributeValues = eval("attributeArray." + selectedOption);
+             
+              console.log(spindleArrays)
+             
+            var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
+            const timeArray = spindleArrays[current_spindle].time
               
 
     
@@ -414,35 +354,34 @@
             for (let j = 0; j < selectedSpindles.length; j++) { //Per ogni spindle facente parte di quell'attributo...
 
               current_spindle = selectedSpindles[j][0]
-              const attributeArray = spindleArrays[current_spindle][selectedOption];
-              const attributeValues = eval("attributeArray." + selectedOption);
+               var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
+              const timeArray = spindleArrays[current_spindle].time
 
-              const timeArray = spindleArrays[current_spindle]["time"];
-
-             
-              dataset.length = 0 //annulliamo il dataset ogni volta sennò diventa un misto 
-
-              var dataLength = attributeValues.length
-              for (let z = 0; z < dataLength; z+=1) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
-
-              var time_tmp = timeArray.time[z].toFixed(3)
-              if (attributeValues[z] != undefined){
-                if (attributeValues[z] < min) {
-                  min = attributeValues[z]
-
-                }
-                if (attributeValues[z] > max) {
-                  max = attributeValues[z]
-                }
-
-                dataset.push([time_tmp, attributeValues[z], selectedSpindles[j][1]]);
+            console.log(attributeValues)
+            console.log(timeArray)
    
-              }
+
+            var dataLength = attributeValues.length
+            for(let z = 0; z < dataLength; z+=1){
+
+              var time_tmp = timeArray[z].toFixed(3)
+              
+      
+          if (attributeValues[z] != undefined) {
+            if (attributeValues[z] < min){
+                min = attributeValues[z]
             }
+            if (attributeValues[z] > max){
+              max = attributeValues[z]
+            }    
+          dataset.push([time_tmp, attributeValues[z], selectedSpindles[j][1]]);
+
+          }
+        }
 
               //e ora ho la mia scala definitiva...
 
-              var tmp_x = timeArray.time[timeArray.time.length-1].toFixed(3)
+              var tmp_x = timeArray[timeArray.length-1].toFixed(3)
 
               xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
                 yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
@@ -763,11 +702,84 @@
 
     d3.select("#selectMenu").on("change", function(d) {
 
+   
+
+    var selectedOption = d3.select(this).property("value")
+    localStorage.setItem("selectedOption", JSON.stringify(selectedOption))
+    
+
+    var spindleArrays = JSON.parse(localStorage.getItem("spindleArrays"));
+    if(spindleArrays == null) spindleArrays = {}
+
+      for (let j = 0; j < selectedSpindles.length; j++) {
+        // Get the current selected spindle
+        const spindle = selectedSpindles[j][0];
+
+        d3.json(
+          "http://arca.diag.uniroma1.it:8082/data/breakin/" +
+          spindle +
+          "/raw_data?mode=1&factor=100&points=0&columns=time",
+          { crossOrigin: "anonymous" }).then(
+            function (data) {
+
+
+              // Check if the data array for the current spindle exists
+              if (!spindleArrays[spindle]) {
+                spindleArrays[spindle] = {};
+              }
+
+              // Save the data array for the current column
+              spindleArrays[spindle]["time"] = data.time;
+
+
+
+            }
+          );
+
+        
+          const column = selectedOption;
+
+          d3.json(
+            "http://arca.diag.uniroma1.it:8082/data/breakin/" +
+            spindle +
+            "/raw_data?mode=1&factor=100&points=0&columns=" +
+            column, { crossOrigin: "anonymous" }).then(
+              function (data) {
+
+
+
+                // Check if the data array for the current spindle exists
+                if (!spindleArrays[spindle]) {
+                  spindleArrays[spindle] = {};
+                }
+
+                // Save the data array for the current column
+                spindleArrays[spindle][column] = eval("data." + column);
+
+
+
+              }
+            );
+        
+      }
+      var sleeper = selectedSpindles.length/3
+      console.log(spindleArrays)
+      sleep(1000*sleeper).then(() => {
+
+        localStorage.setItem("spindleArrays", JSON.stringify(spindleArrays))
+
+         if (document.getElementById("loader") != null) document.getElementById("loader").remove()
+        if (document.getElementById("loading") != null) document.getElementById("loading").remove()
+        var selectedOption = JSON.parse(localStorage.getItem("selectedOption"))
+
+       
+     
+
     if (document.getElementById("aggregato").checked == false) {
   
 
     count += 1
-    var selectedOption = d3.select(this).property("value")
+    
     
   
     
@@ -782,7 +794,7 @@
 
     for(let i = 0; i < sn_and_date.length; i++){
 
-    
+    console.log(selectedOption)
         
     current_spindle = sn_and_date[i][0]   
         
@@ -805,17 +817,19 @@
     
             var min = 100000
             var max = 0
-            //accrocco funzionante
-            const attributeArray = spindleArrays[current_spindle][selectedOption];
-            const attributeValues = eval("attributeArray." + selectedOption);
+         
+    
 
-            const timeArray = spindleArrays[current_spindle]["time"];
-            
+            var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
+            const timeArray = spindleArrays[current_spindle].time
+
+            console.log(attributeValues)
+   
 
             var dataLength = attributeValues.length
             for(let j = 0; j < dataLength; j+=1){
 
-              var time_tmp = timeArray.time[j].toFixed(3)
+              var time_tmp = timeArray[j].toFixed(3)
       
           if (attributeValues[j] != undefined) {
             if (attributeValues[j] < min){
@@ -828,11 +842,13 @@
 
           }
         }
+
+        console.log(dataset, dataset[0].length, dataset[1].length)
    
             localStorage.setItem("max", JSON.stringify(max)); 
             localStorage.setItem("min", JSON.stringify(min)); 
 
-            var tmp_x = timeArray.time[timeArray.time.length - 1].toFixed(3)
+            var tmp_x = timeArray[timeArray.length - 1].toFixed(3)
             
    
                 xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
@@ -1145,13 +1161,33 @@
     
   })
 
+  
+    })
 
   d3.select("#downsampleBtn").on("click", function (d) {
 
+      var toRedraw = []
 
-      console.log(spindleArrays);
 
-   
+    for (let i = 0; i < allGroup.length; i++) { //Ridisegnamo dinamicamente :-) 
+
+      if (document.getElementById("svg" + allGroup[i] + "_0") != null) toRedraw.push(allGroup[i])
+
+    }
+
+    if (document.getElementById("aggregato").checked == true) {
+      for (let i = 0; i < allGroup.length; i++) { //Ridisegnamo dinamicamente :-) 
+
+        if (document.getElementById("path" + allGroup[i]) != null) toRedraw.push(allGroup[i])
+
+      }
+      clearSvg()
+      document.getElementById("aggregato").checked = true
+    }
+
+    else clearSvg()
+
+  
 
       var downsample = d3.select("#downsample").property("value")
       console.log(downsample)
@@ -1182,15 +1218,15 @@
                 }
 
                 // Save the data array for the current column
-                spindleArrays[spindle]["time"] = data;
+                spindleArrays[spindle]["time"] = data.time;
 
 
 
               }
             );
 
-          for (let i = 0; i < allGroup.length; i++) {
-            const column = allGroup[i];
+          for (let i = 0; i < toRedraw.length; i++) {
+            const column = toRedraw[i];
 
             d3.json(
               "http://arca.diag.uniroma1.it:8082/data/breakin/" +
@@ -1206,47 +1242,28 @@
                   }
 
                   // Save the data array for the current column
-                  spindleArrays[spindle][column] = data;
+                  spindleArrays[spindle][column] = eval("data." + column);
 
-                  if(i + 1 == allGroup.length){
+                 
 
-                    if(document.getElementById("loader")!=null) document.getElementById("loader").remove()
-                    if(document.getElementById("loading") != null) document.getElementById("loading").remove()
-                    showPopup("Downsample changed successfully!", true);
+                   
 
-                  }
+                  
                   
                 }
               );
           }
         }
-        var toRedraw = []
-
       
 
-        for (let i = 0; i < allGroup.length; i++) { //Ridisegnamo dinamicamente :-) 
 
-          if (document.getElementById("svg" + allGroup[i] + "_0") != null) toRedraw.push(allGroup[i])
+        var sleeper = selectedSpindles.length / 2
+    
 
-        }
-
-        if(document.getElementById("aggregato").checked == true){
-          for (let i = 0; i < allGroup.length; i++) { //Ridisegnamo dinamicamente :-) 
-
-            if (document.getElementById("path" + allGroup[i]) != null) toRedraw.push(allGroup[i])
-
-          }
-          clearSvg()
-          document.getElementById("aggregato").checked = true
-        }
-        
-        else clearSvg()
-
-
-        var sleeper = selectedSpindles.length-1 //non se po fa altrimenti me spiaze
-        
-        
-        sleep(2000*sleeper).then(() => {
+        sleep(1000*sleeper).then(() => {
+          showPopup("Downsample changed successfully!", true);
+          if (document.getElementById("loader") != null) document.getElementById("loader").remove()
+          if (document.getElementById("loading") != null) document.getElementById("loading").remove()
 
           for (let i = 0; i < toRedraw.length; i++) {
 
@@ -1288,17 +1305,16 @@
 
               var min = 100000
               var max = 0
-              //accrocco funzionante
-              const attributeArray = spindleArrays[current_spindle][selectedOption];
-              const attributeValues = eval("attributeArray." + selectedOption);
+              var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
+              const timeArray = spindleArrays[current_spindle].time
 
-              const timeArray = spindleArrays[current_spindle]["time"];
+              console.log(attributeValues)
+
 
               var dataLength = attributeValues.length
-
               for (let j = 0; j < dataLength; j += 1) {
 
-                var time_tmp = timeArray.time[j].toFixed(3)
+                var time_tmp = timeArray[j].toFixed(3)
 
                 if (attributeValues[j] != undefined) {
                   if (attributeValues[j] < min) {
@@ -1312,10 +1328,12 @@
                 }
               }
 
+              console.log(dataset, dataset[0].length, dataset[1].length)
+
               localStorage.setItem("max", JSON.stringify(max));
               localStorage.setItem("min", JSON.stringify(min));
 
-              var tmp_x = timeArray.time[timeArray.time.length - 1].toFixed(3)
+              var tmp_x = timeArray[timeArray.length - 1].toFixed(3)
 
 
               xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
