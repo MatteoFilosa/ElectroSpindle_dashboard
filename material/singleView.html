@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="css/style_single.css"></link>
     <script>
 
+      var globalData = []
+
       function restoreLoader() {
 
           // Creazione del paragrafo
@@ -226,36 +228,7 @@
         var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
 
 
-        var globalData = []
-        allGroup.push("time")
-        for (let i = 0; i < allGroup.length; i++) {
-
-            d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=100&points=0&columns=" + allGroup[i], { crossOrigin: "anonymous" }).then( function (data) {
-              
-              globalData[i] = data
-              console.log(data)
-
-              if (i + 1 == allGroup.length) {
-
-                if (document.getElementById("loader") != null) document.getElementById("loader").remove()
-                if (document.getElementById("loading") != null) document.getElementById("loading").remove()
-
-              } 
-
-              
-              
-
-            })
-
-          }
-
-       sleep(1000).then(() => {
-  
-        console.log(globalData)
-
- 
-     
-       })
+        
 
 
         function aggregateHelper(){
@@ -400,26 +373,8 @@
     function newGraph(selectedGroup, data, aggregato){
       console.log(data, globalData)
 
-      var selectedIndex = 0
 
-      if (selectedGroup == "Tba") selectedIndex = 1
-      if (selectedGroup == "Itot") selectedIndex = 2
-      if (selectedGroup == "Qtir") selectedIndex = 3
-      if (selectedGroup == "Speed_S3_BUS") selectedIndex = 4
-      if (selectedGroup == "Speed_Sync") selectedIndex = 5
-      if (selectedGroup == "Tdut2") selectedIndex = 6
-      if (selectedGroup == "Tdut3") selectedIndex = 7
-      if (selectedGroup == "VibANT_Sync") selectedIndex = 8
-      if (selectedGroup == "Step") selectedIndex = 9
-
-      if(aggregato != 1){
-
-        var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
-        //var my_data = JSON.parse(tmp_data)
-
-      }
-
-      var dataLength = globalData[1].Tba.length // un qualunque attributo tanto la lunghezza sempre quella è
+      var dataLength = globalData[1].length // un qualunque attributo tanto la lunghezza sempre quella è
       
 
       var dataset = [];
@@ -1668,45 +1623,60 @@
 
   d3.select("#selectMenu").on("change", function(d) {
 
-
-      
-      
-      
-      
-      var checkBoxAggregato = document.getElementById("aggregato");
-      var data = globalData
-    
       var selectedOption = d3.select(this).property("value")
 
-      
-      if (document.getElementById("dot" + selectedOption) != null) {
+      d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=100&points=0&columns=" + selectedOption + ",time", { crossOrigin: "anonymous" }).then(function (data) {
+      if (!globalData.hasOwnProperty(selectedOption)) {
+        globalData[selectedOption] = []; // Crea un nuovo array per la chiave se non esiste
+      }
+      globalData[selectedOption].push(eval("data." + selectedOption)); // Aggiungi il dato all'array associato alla chiave
+      console.log(globalData);
 
-        if(document.getElementById("svg_default") == null) showPopup("A graph with this attribute is already present!", false)
-        else showPopup("This attribute has already been selected for the aggregate view!", false)
-        return
+      if (document.getElementById("loader") != null) document.getElementById("loader").remove();
+      if (document.getElementById("loading") != null) document.getElementById("loading").remove();
 
-      } 
+      var checkBoxAggregato = document.getElementById("aggregato");
+        var data = globalData
 
-      localStorage.setItem("selectedOption", JSON.stringify(selectedOption));
 
-    if (checkBoxAggregato.checked == false){ //se Aggregato non è checkato, cancella tutto per fare spazio al nuovo grafico sullo stesso svg
 
-        console.log(data)
-        newGraph(selectedOption, data, 0)
+
+        if (document.getElementById("dot" + selectedOption) != null) {
+
+          if (document.getElementById("svg_default") == null) showPopup("A graph with this attribute is already present!", false)
+          else showPopup("This attribute has already been selected for the aggregate view!", false)
+          return
+
+        }
+
+        localStorage.setItem("selectedOption", JSON.stringify(selectedOption));
+
+        if (checkBoxAggregato.checked == false) { //se Aggregato non è checkato, cancella tutto per fare spazio al nuovo grafico sullo stesso svg
+
+          console.log(data)
+          newGraph(selectedOption, data, 0)
+
+
+        }
+
+        else if (checkBoxAggregato.checked == true) {
+
+
+          document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption + '" onchange = "modifyElement(' + selectedOption + ')" checked>' + "<label for='" + selectedOption + "' id = 'label" + selectedOption + "'>" + selectedOption + "</label>"
+          localStorage.setItem("selectedOption", JSON.stringify(selectedOption))
+          //modifyElement(selectedOption, 1)
+          newGraph(selectedOption, data, 2)
+
+
+        }
+    });
+
     
-
-    }
-
-    else if (checkBoxAggregato.checked == true){ 
-
-
-      document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption +'" onchange = "modifyElement('+ selectedOption +')" checked>' + "<label for='" + selectedOption + "' id = 'label" + selectedOption + "'>" + selectedOption + "</label>" 
-      localStorage.setItem("selectedOption", JSON.stringify(selectedOption))
-      //modifyElement(selectedOption, 1)
-      newGraph(selectedOption, data, 2)
-     
- 
-    }
+      
+      
+      
+      
+      
 
     
 
