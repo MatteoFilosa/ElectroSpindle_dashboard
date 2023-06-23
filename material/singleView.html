@@ -19,7 +19,7 @@
       var globalData = []
 
       function restoreLoader() {
-
+          console.log("Restoring loader")
           // Creazione del paragrafo
           const loadingParagraph = document.createElement('p');
           loadingParagraph.id = 'loading';
@@ -84,7 +84,7 @@
 <input type = "checkbox" id ="aggregato" class = "checkbox" onclick="aggregateHelper()" > Aggregate
 
 
-<select id="selectMenu">
+<select id="selectMenu" onchange = "restoreLoader()">
   <option value="" disabled selected>Select attribute</option>
 </select>
 <div id = "selectedValues"></div>
@@ -133,7 +133,7 @@
 
   </div>
 </div>
-<p id="loading">Loading data, please wait...</p><div id="loader"></div>
+
 <script>
 
   
@@ -374,15 +374,18 @@
       console.log(data, globalData)
 
 
-      var dataLength = globalData[1].length // un qualunque attributo tanto la lunghezza sempre quella è
+      var dataLength = globalData["time"][0].length // un qualunque attributo tanto la lunghezza sempre quella è
       
 
       var dataset = [];
       var min = 100000
       var max = 0
       var scaleCheck = 0
-      var time = eval("globalData[10].time")
-      
+      var time = globalData["time"][0]
+      console.log(time[0], dataLength)
+      if(document.getElementById("aggregato").checked != true) my_data = globalData[selectedGroup][0]
+      console.log(my_data)
+     
 
           if(aggregato == 1){ // Caso AGGREGATO
 
@@ -480,25 +483,11 @@
                 var selectedGroup = valori[j]
 
 
+
+                var my_data = globalData[selectedGroup][0]
+                var time = globalData["time"][0]
+
               
-
-                var selectedIndex = 0
-
-                if (selectedGroup == "Tba") selectedIndex = 1
-                if (selectedGroup == "Itot") selectedIndex = 2
-                if (selectedGroup == "Qtir") selectedIndex = 3
-                if (selectedGroup == "Speed_S3_BUS") selectedIndex = 4
-                if (selectedGroup == "Speed_Sync") selectedIndex = 5
-                if (selectedGroup == "Tdut2") selectedIndex = 6
-                if (selectedGroup == "Tdut3") selectedIndex = 7
-                if (selectedGroup == "VibANT_Sync") selectedIndex = 8
-                if (selectedGroup == "Step") selectedIndex = 9
-
-                var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
-                //var my_data = JSON.parse(tmp_data)
-
-               
-
 
                 if(valori.includes("Tba") || valori.includes("Tamb") || valori.includes("Tdut2") || valori.includes("Tdut3") ){
                   if (valori.includes("Itot") || valori.includes("Qtir") || valori.includes("Speed_S3_BUS") || valori.includes("Speed_Sync") || valori.includes("VibANT_Sync")){ //scale non omogenee
@@ -665,21 +654,11 @@
                 for (let j = 0; j < valori.length; j++) { 
 
                   var selectedGroup = valori[j]
+             
 
-                  var selectedIndex = 0
-
-                  if (selectedGroup == "Tba") selectedIndex = 1
-                  if (selectedGroup == "Itot") selectedIndex = 2
-                  if (selectedGroup == "Qtir") selectedIndex = 3
-                  if (selectedGroup == "Speed_S3_BUS") selectedIndex = 4
-                  if (selectedGroup == "Speed_Sync") selectedIndex = 5
-                  if (selectedGroup == "Tdut2") selectedIndex = 6
-                  if (selectedGroup == "Tdut3") selectedIndex = 7
-                  if (selectedGroup == "VibANT_Sync") selectedIndex = 8
-                  if (selectedGroup == "Step") selectedIndex = 9
-
-                  var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
-                  //var my_data = JSON.parse(tmp_data)
+                  var my_data = globalData[selectedGroup][0]
+                  var time = globalData["time"][0]
+                  console.log(time)
 
                   if(selectedGroup == "Tdut2"){
                     min = 250
@@ -715,20 +694,11 @@
 
                      var selectedGroup = valori[j]
 
-                    var selectedIndex = 0
+            
 
-                    if (selectedGroup == "Tba") selectedIndex = 1
-                    if (selectedGroup == "Itot") selectedIndex = 2
-                    if (selectedGroup == "Qtir") selectedIndex = 3
-                    if (selectedGroup == "Speed_S3_BUS") selectedIndex = 4
-                    if (selectedGroup == "Speed_Sync") selectedIndex = 5
-                    if (selectedGroup == "Tdut2") selectedIndex = 6
-                    if (selectedGroup == "Tdut3") selectedIndex = 7
-                    if (selectedGroup == "VibANT_Sync") selectedIndex = 8
-                    if (selectedGroup == "Step") selectedIndex = 9
-
-                    var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
-                    //var my_data = JSON.parse(tmp_data)
+                    var my_data = globalData[selectedGroup][0]
+                    var time = globalData["time"][0]
+              
 
                     for (let i = 0; i < dataLength; i += 1) {
                       var time_tmp = time[i].toFixed(3)
@@ -823,7 +793,9 @@
             }
 
             else{
+             
               var time_tmp = time[i].toFixed(3)
+              console.log(my_data)
               if(my_data[i] != undefined){
                 dataset.push([time_tmp, my_data[i]]);
                 if (my_data[i] < min) {
@@ -958,18 +930,10 @@
             
           
             dataset = []
-            if (selectedGroup == "Tamb") selectedIndex = 0
-            if (selectedGroup == "Tba") selectedIndex = 1
-            if (selectedGroup == "Itot") selectedIndex = 2
-            if (selectedGroup == "Qtir") selectedIndex = 3
-            if (selectedGroup == "Speed_S3_BUS") selectedIndex = 4
-            if (selectedGroup == "Speed_Sync") selectedIndex = 5
-            if (selectedGroup == "Tdut2") selectedIndex = 6
-            if (selectedGroup == "Tdut3") selectedIndex = 7
-            if (selectedGroup == "VibANT_Sync") selectedIndex = 8
-            if (selectedGroup == "Step") selectedIndex = 9
+            
 
-            var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
+            var my_data = globalData[selectedGroup][0]
+            var time = globalData["time"][0]
           
             for (let i = 0; i < dataLength; i += 1) { //SINGOLO.
 
@@ -1185,20 +1149,10 @@
               var selectedGroup = valori[j]
 
 
-              var selectedIndex = 0
 
-              if (selectedGroup == "Tba") selectedIndex = 1
-              if (selectedGroup == "Itot") selectedIndex = 2
-              if (selectedGroup == "Qtir") selectedIndex = 3
-              if (selectedGroup == "Speed_S3_BUS") selectedIndex = 4
-              if (selectedGroup == "Speed_Sync") selectedIndex = 5
-              if (selectedGroup == "Tdut2") selectedIndex = 6
-              if (selectedGroup == "Tdut3") selectedIndex = 7
-              if (selectedGroup == "VibANT_Sync") selectedIndex = 8
-              if (selectedGroup == "Step") selectedIndex = 9
 
-              var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
-              //var my_data = JSON.parse(tmp_data)
+              var my_data = globalData[selectedGroup][0]
+              var time = globalData["time"][0]
 
 
               if (valori.includes("Tba") || valori.includes("Tamb") || valori.includes("Tdut2") || valori.includes("Tdut3")) {
@@ -1365,19 +1319,8 @@
 
                 var selectedGroup = valori[j]
 
-                var selectedIndex = 0
 
-                if (selectedGroup == "Tba") selectedIndex = 1
-                if (selectedGroup == "Itot") selectedIndex = 2
-                if (selectedGroup == "Qtir") selectedIndex = 3
-                if (selectedGroup == "Speed_S3_BUS") selectedIndex = 4
-                if (selectedGroup == "Speed_Sync") selectedIndex = 5
-                if (selectedGroup == "Tdut2") selectedIndex = 6
-                if (selectedGroup == "Tdut3") selectedIndex = 7
-                if (selectedGroup == "VibANT_Sync") selectedIndex = 8
-                if (selectedGroup == "Step") selectedIndex = 9
-
-                var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
+                var my_data = globalData[selectedGroup][0]
                 //var my_data = JSON.parse(tmp_data)
 
                 if (selectedGroup == "Tdut2") {
@@ -1415,20 +1358,9 @@
 
                 var selectedGroup = valori[j]
 
-                var selectedIndex = 0
 
-                if (selectedGroup == "Tba") selectedIndex = 1
-                if (selectedGroup == "Itot") selectedIndex = 2
-                if (selectedGroup == "Qtir") selectedIndex = 3
-                if (selectedGroup == "Speed_S3_BUS") selectedIndex = 4
-                if (selectedGroup == "Speed_Sync") selectedIndex = 5
-                if (selectedGroup == "Tdut2") selectedIndex = 6
-                if (selectedGroup == "Tdut3") selectedIndex = 7
-                if (selectedGroup == "VibANT_Sync") selectedIndex = 8
-                if (selectedGroup == "Step") selectedIndex = 9
-
-                var my_data = eval("globalData[" + selectedIndex + "]" + "." + selectedGroup)
-                //var my_data = JSON.parse(tmp_data)
+                var my_data = globalData[selectedGroup][0]
+                var time = globalData["time"][0]
 
                 for (let i = 0; i < dataLength; i += 1) {
 
@@ -1526,14 +1458,31 @@
 
         document.getElementById("downsamplePlaceholder").innerHTML = "Insert downsample (current: " + downsample + ")"
 
-        
-          
-        
+    
 
         globalData = []
-        for (let i = 0; i < allGroup.length; i++) {
 
-          d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=+" + downsample + "&points=0&columns=" + allGroup[i], { crossOrigin: "anonymous" }).then(function (data) {
+        var valori = []
+        var to_add = document.getElementById("selectedValues").childNodes
+
+        for (let i = 0; i < to_add.length; i++) {
+
+          if (to_add[i] != undefined) {
+
+            if ((to_add[i].id != null) && (to_add[i].checked == true)) {
+
+              valori.push(to_add[i].id)
+
+
+            }
+          }
+
+        }
+
+
+        for (let i = 0; i < valori.length; i++) {
+
+          d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=+" + downsample + "&points=0&columns=" + valori[i], { crossOrigin: "anonymous" }).then(function (data) {
 
             globalData[i] = data
             console.log(data)
@@ -1544,6 +1493,10 @@
               showPopup("Downsample changed successfully!", true);
 
             }
+
+          if( i + 1 == valori.length){
+            
+          }
       
 
 
@@ -1624,22 +1577,22 @@
   d3.select("#selectMenu").on("change", function(d) {
 
       var selectedOption = d3.select(this).property("value")
+      
+
+    if (document.getElementById("loader") != null) document.getElementById("loader").remove();
+    if (document.getElementById("loading") != null) document.getElementById("loading").remove();
 
       d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=100&points=0&columns=" + selectedOption + ",time", { crossOrigin: "anonymous" }).then(function (data) {
       if (!globalData.hasOwnProperty(selectedOption)) {
         globalData[selectedOption] = []; // Crea un nuovo array per la chiave se non esiste
       }
+      globalData["time"] = []
       globalData[selectedOption].push(eval("data." + selectedOption)); // Aggiungi il dato all'array associato alla chiave
+      globalData["time"].push(data.time)
       console.log(globalData);
 
-      if (document.getElementById("loader") != null) document.getElementById("loader").remove();
-      if (document.getElementById("loading") != null) document.getElementById("loading").remove();
-
-      var checkBoxAggregato = document.getElementById("aggregato");
+       var checkBoxAggregato = document.getElementById("aggregato");
         var data = globalData
-
-
-
 
         if (document.getElementById("dot" + selectedOption) != null) {
 
