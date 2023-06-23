@@ -351,7 +351,7 @@
 
         function clearSvg(){
 
-
+                console.log("Clearing svgs...")
                 document.getElementById("selectedValues").innerHTML = ""
                 document.getElementById("aggregato").checked = false
                 document.getElementById("selectMenu").selectedIndex = 0; 
@@ -371,7 +371,7 @@
 
 
     function newGraph(selectedGroup, data, aggregato){
-      console.log(data, globalData)
+
 
 
       var dataLength = globalData["time"][0].length // un qualunque attributo tanto la lunghezza sempre quella è
@@ -382,9 +382,10 @@
       var max = 0
       var scaleCheck = 0
       var time = globalData["time"][0]
-      console.log(time[0], dataLength)
+   
+
       if(document.getElementById("aggregato").checked != true) my_data = globalData[selectedGroup][0]
-      console.log(my_data)
+      console.log(globalData, my_data)
      
 
           if(aggregato == 1){ // Caso AGGREGATO
@@ -778,7 +779,7 @@
 
             }
        
-
+           
           for(let i = 0; i < dataLength; i += 1){ //SINGOLO. Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
            
             if(selectedGroup == "Tdut2"){
@@ -795,7 +796,7 @@
             else{
              
               var time_tmp = time[i].toFixed(3)
-              console.log(my_data)
+              
               if(my_data[i] != undefined){
                 dataset.push([time_tmp, my_data[i]]);
                 if (my_data[i] < min) {
@@ -1449,8 +1450,11 @@
 
    d3.select("#downsampleBtn").on("click", function (d) {
 
-
+      globalData = []
       var downsample = d3.select("#downsample").property("value")
+      if (document.getElementById("loader") != null) document.getElementById("loader").remove()
+      if (document.getElementById("loading") != null) document.getElementById("loading").remove()
+      
 
       if (downsample.length >= 2) {
 
@@ -1460,7 +1464,7 @@
 
     
 
-        globalData = []
+        
 
         var valori = []
         var to_add = document.getElementById("selectedValues").childNodes
@@ -1482,87 +1486,84 @@
 
         for (let i = 0; i < valori.length; i++) {
 
-          d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=+" + downsample + "&points=0&columns=" + valori[i], { crossOrigin: "anonymous" }).then(function (data) {
+          d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_and_date[0][0] + "/raw_data?mode=1&factor=" + downsample + "&points=0&columns=" + valori[i] + ",time", { crossOrigin: "anonymous" }).then(function (data) {
 
-            globalData[i] = data
-            console.log(data)
-            if (i + 1 == allGroup.length) {
-
-              if (document.getElementById("loader") != null) document.getElementById("loader").remove()
-              if (document.getElementById("loading") != null) document.getElementById("loading").remove()
-              showPopup("Downsample changed successfully!", true);
-
+            if (!globalData.hasOwnProperty(valori[i])) {
+              globalData[valori[i]] = []; // Crea un nuovo array per la chiave se non esiste
             }
-
-          if( i + 1 == valori.length){
-            
-          }
-      
-
+            globalData["time"] = []
+            globalData[valori[i]].push(eval("data." + valori[i])); // Aggiungi il dato all'array associato alla chiave
+            globalData["time"].push(data.time)
+            console.log(globalData);
 
           })
 
         }
-        var toRedraw = [], data = globalData
+
+         sleep(1000).then(() => {
+          var toRedraw = []
+          showPopup("Downsample changed successfully!", true);
 
         if (document.getElementById("aggregato").checked == false) {
 
-        for (let i = 0; i < allGroup.length; i++) { //Ridisegnamo dinamicamente :-) 
+          for (let i = 0; i < allGroup.length; i++) { //Ridisegnamo dinamicamente :-) 
 
-          if (document.getElementById("svg" + allGroup[i]) != null) toRedraw.push(allGroup[i])
+            if (document.getElementById("svg" + allGroup[i]) != null) toRedraw.push(allGroup[i])
+
+          }
+
+          
+          clearSvg()
+
+          console.log(globalData)
+          for (let i = 0; i < toRedraw.length; i++) {
+            console.log("Redrawing " + toRedraw[i] + "...")
+            newGraph(toRedraw[i], globalData, 0)
+
+          }
+
+          console.log(globalData)
+
+
 
         }
 
-        clearSvg()
+        else {
 
-        sleep(2000).then(() => {
+          
 
-        for (let i = 0; i < toRedraw.length; i++) { 
+          var toRedraw = []
 
-          newGraph(toRedraw[i], data, 0)
 
-        }
-
-        console.log(globalData)
-        
-        })
-
-      }
-
-      else{
-
-        var toRedraw = [], sleeper = 1
-
-        if(downsample >= 26) sleeper = 1.5
-
-        for (let i = 0; i < allGroup.length; i++) { //Ridisegnamo dinamicamente :-) 
+          for (let i = 0; i < allGroup.length; i++) { //Ridisegnamo dinamicamente :-) 
 
             if (document.getElementById("path" + allGroup[i]) != null) toRedraw.push(allGroup[i])
 
           }
 
-        clearSvg()
+          clearSvg()
 
-          sleep(1000 * sleeper).then(() => {
-
-            for (let i = 0; i < toRedraw.length; i++) {
-
-              newGraph(toRedraw[i], data, 0)
-
-            }
-
-            newGraph("", data, 1, 0)
-            document.getElementById("aggregato").checked = true
-
-            console.log(globalData)
-            showPopup("Downsample changed successfully!", true);
-          })
+          
 
 
+          for (let i = 0; i < toRedraw.length; i++) {
 
-      }
+            newGraph(toRedraw[i], globalData, 0)
 
+          }
+
+          document.getElementById("aggregato").checked = true
+
+          newGraph("", globalData, 1)
+          
+
+
+
+
+        }
+        
     }
+  )}
         
 
       else return
@@ -1589,7 +1590,7 @@
       globalData["time"] = []
       globalData[selectedOption].push(eval("data." + selectedOption)); // Aggiungi il dato all'array associato alla chiave
       globalData["time"].push(data.time)
-      console.log(globalData);
+      
 
        var checkBoxAggregato = document.getElementById("aggregato");
         var data = globalData
@@ -1606,7 +1607,7 @@
 
         if (checkBoxAggregato.checked == false) { //se Aggregato non è checkato, cancella tutto per fare spazio al nuovo grafico sullo stesso svg
 
-          console.log(data)
+          
           newGraph(selectedOption, data, 0)
 
 
