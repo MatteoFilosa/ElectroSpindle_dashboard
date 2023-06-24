@@ -340,7 +340,7 @@
           .style('font-family', 'Helvetica')
           .style('font-size', 20)
           .style('fill', "#CC0000")
-          .text("■ Average(μ)")
+          .text("\u25A0 Average(μ)")
 
         new_svg.append('text')
           .attr('x', width / 2 + 90)
@@ -349,7 +349,7 @@
           .style('font-family', 'Helvetica')
           .style('font-size', 20)
           .style('fill', "#006400")
-          .text("■ μ + 3σ")
+          .text("\u25A0 μ + 3σ")
 
         new_svg.append('text')
           .attr('x', width / 2 + 220)
@@ -358,7 +358,7 @@
           .style('font-family', 'Helvetica')
           .style('font-size', 20)
           .style('fill', "#ff8c00")
-          .text("■ μ - 3σ")
+          .text("\u25A0 μ - 3σ")
 
           
             console.log(averageArray, upperSigmaArray, lowerSigmaArray)
@@ -575,7 +575,7 @@
         .style('font-family', 'Helvetica')
         .style('font-size', 20)
         .style('fill', "#CC0000")
-        .text("■ Average(μ)")
+        .text("\u25A0 Average(μ)")
 
       new_svg.append('text')
         .attr('x', width / 2 + 90)
@@ -584,7 +584,7 @@
         .style('font-family', 'Helvetica')
         .style('font-size', 20)
         .style('fill', "#006400")
-        .text("■ μ + 3σ")
+        .text("\u25A0 μ + 3σ")
 
       new_svg.append('text')
         .attr('x', width / 2 + 220)
@@ -593,7 +593,7 @@
         .style('font-family', 'Helvetica')
         .style('font-size', 20)
         .style('fill', "#ff8c00")
-        .text("■ μ - 3σ")
+        .text("\u25A0 μ - 3σ")
 
         var average_line = d3.line()
         .x(function (d) { return xScale(d[0]); })
