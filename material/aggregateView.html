@@ -62,6 +62,8 @@
 
 <script>
 
+  var spindleArrays = {}
+
       localStorage.removeItem("spindleArrays")
       //inizializzazione array di colori per i grafici
         var colors = ["#CC0000",
@@ -170,7 +172,7 @@
 
     
    var selectedSpindles = JSON.parse(localStorage.getItem("selectedSpindles"))
-   var current_spindle
+   var current_spindle, spindleArrays
    var allGroup = ["Tamb", "Tba", "Itot", "Qtir", "Speed_S3_BUS", "Speed_Sync", "Tdut2", "Tdut3", "VibANT_Sync", "Step"]
     d3.select("#selectMenu")
       .selectAll('myOptions')
@@ -236,7 +238,7 @@
       var min = 100000
       var max = 0
       var selectedSpindles = JSON.parse(localStorage.getItem("selectedSpindles"))
-      var spindleArrays = JSON.parse(localStorage.getItem("spindleArrays"))
+      
       console.log(spindleArrays)
       
 
@@ -324,6 +326,8 @@
              
             var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
             const timeArray = spindleArrays[current_spindle].time
+
+            console.log("qua " + attributeValues, timeArray)
               
 
     
@@ -353,8 +357,9 @@
 
             for (let j = 0; j < selectedSpindles.length; j++) { //Per ogni spindle facente parte di quell'attributo...
 
+              var dataset = []
               current_spindle = selectedSpindles[j][0]
-               var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
+              var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
               const timeArray = spindleArrays[current_spindle].time
 
             console.log(attributeValues)
@@ -404,10 +409,7 @@
 
               }
               
-              
-     
-              
-           
+
 
               new_svg.append('g')
                 .selectAll("dot")
@@ -518,16 +520,15 @@
             var min = 100000
             var max = 0
 
-            const attributeArray = spindleArrays[current_spindle][selectedOption];
-            const attributeValues = eval("attributeArray." + selectedOption);
+            var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
 
-            const timeArray = spindleArrays[current_spindle]["time"];
+            const timeArray = spindleArrays[current_spindle].time
 
             var dataLength = attributeValues.length
             for (let i = 0; i < dataLength; i += 1) {
 
 
-            var time_tmp = timeArray.time[i].toFixed(3)
+            var time_tmp = timeArray[i].toFixed(3)
             
             if (attributeValues[i] != undefined) {
               if (attributeValues[i] < min) {
@@ -544,7 +545,7 @@
             localStorage.setItem("max", JSON.stringify(max));
             localStorage.setItem("min", JSON.stringify(min));
 
-            var tmp_x = timeArray.time[timeArray.time.length - 1].toFixed(3)
+            var tmp_x = timeArray[timeArray.length - 1].toFixed(3)
 
             xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
               yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
@@ -708,8 +709,8 @@
     localStorage.setItem("selectedOption", JSON.stringify(selectedOption))
     
 
-    var spindleArrays = JSON.parse(localStorage.getItem("spindleArrays"));
-    if(spindleArrays == null) spindleArrays = {}
+
+
 
       for (let j = 0; j < selectedSpindles.length; j++) {
         // Get the current selected spindle
@@ -1024,11 +1025,9 @@
                 
                 current_spindle = selectedSpindles[j][0]
 
-                
-                //accrocco funzionante
-                const attributeArray = spindleArrays[current_spindle][selectedOption];
+  
 
-                const attributeValues = eval("attributeArray." + selectedOption);
+                var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
 
 
                 const firstValue = attributeValues[0];
@@ -1059,10 +1058,10 @@
               for (let j = 0; j < selectedSpindles.length; j++) { //Per ogni spindle facente parte di quell'attributo...
                 
                 current_spindle = selectedSpindles[j][0]
-                const attributeArray = spindleArrays[current_spindle][selectedOption];
-                const attributeValues = eval("attributeArray." + selectedOption);
 
-                const timeArray = spindleArrays[current_spindle]["time"];
+                var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
+
+                const timeArray = spindleArrays[current_spindle].time
 
 
                 dataset.length = 0 //annulliamo il dataset ogni volta sennò diventa un misto 
@@ -1070,7 +1069,7 @@
                 var dataLength = attributeValues.length
                 for (let z = 0; z < dataLength; z += 1) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
 
-                  var time_tmp = timeArray.time[z].toFixed(3)
+                  var time_tmp = timeArray[z].toFixed(3)
 
                   if (attributeValues[z] != undefined) {
                     if (attributeValues[z] < min) {
@@ -1086,7 +1085,7 @@
                   }
                 }
 
-                var tmp_x = timeArray.time[timeArray.time.length-1].toFixed(3)
+                var tmp_x = timeArray[timeArray.length-1].toFixed(3)
 
                 //e ora ho la mia scala definitiva...
                 xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
@@ -1198,7 +1197,7 @@
 
         document.getElementById("downsamplePlaceholder").innerHTML = "Insert downsample (current: " + downsample + ")"
 
-        const spindleArrays = {};
+
 
         for (let j = 0; j < selectedSpindles.length; j++) {
           // Get the current selected spindle
