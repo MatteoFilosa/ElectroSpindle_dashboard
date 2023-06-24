@@ -62,6 +62,32 @@
 
 <script>
 
+  function aggiungiSecondi(valoreIniziale, arraySecondi) {
+      var risultato = [];
+
+      for (var i = 0; i < arraySecondi.length; i++) {
+        var secondi = arraySecondi[i];
+        var tempo = valoreIniziale.split(':');
+
+        var data = new Date();
+        data.setHours(parseInt(tempo[0], 10));
+        data.setMinutes(parseInt(tempo[1], 10));
+        data.setSeconds(parseInt(tempo[2], 10));
+
+        // Aggiungi i secondi al tempo iniziale
+        data.setSeconds(data.getSeconds() + secondi);
+
+        // Formatta il tempo in una stringa "ore:minuti:secondi"
+        var tempoNuovo = ('0' + data.getHours()).slice(-2) + ':' +
+          ('0' + data.getMinutes()).slice(-2) + ':' +
+          ('0' + data.getSeconds()).slice(-2);
+
+        risultato.push(tempoNuovo);
+      }
+
+      return risultato;
+    }
+
   var spindleArrays = {}
 
       localStorage.removeItem("spindleArrays")
@@ -361,17 +387,19 @@
               current_spindle = selectedSpindles[j][0]
               var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
               const timeArray = spindleArrays[current_spindle].time
+              var time_start = spindleArrays[current_spindle]["date start"]
+              var real_time = aggiungiSecondi(time_start, timeArray)
+              var parseTime = d3.timeParse("%H:%M:%S");
+              var realTimeDates = real_time.map(function (timeString) {
+                return parseTime(timeString);
+              });
 
-            console.log(attributeValues)
-            console.log(timeArray)
+            
    
 
             var dataLength = attributeValues.length
             for(let z = 0; z < dataLength; z+=1){
 
-              var time_tmp = timeArray[z].toFixed(3)
-              
-      
           if (attributeValues[z] != undefined) {
             if (attributeValues[z] < min){
                 min = attributeValues[z]
@@ -379,7 +407,7 @@
             if (attributeValues[z] > max){
               max = attributeValues[z]
             }    
-          dataset.push([time_tmp, attributeValues[z], selectedSpindles[j][1]]);
+          dataset.push([realTimeDates[z], attributeValues[z], selectedSpindles[j][1]]);
 
           }
         }
@@ -388,7 +416,9 @@
 
               var tmp_x = timeArray[timeArray.length-1].toFixed(3)
 
-              xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
+              xScale = d3.scaleTime()
+                .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+                .range([0, width]);
                 yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
                 
               
@@ -396,8 +426,7 @@
 
                 g.append("g")
                   .attr("transform", "translate(0," + height + ")")
-                  .attr("class", function (d, i) { return "xAxis" })
-                  .call(d3.axisBottom(xScale));
+                  .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));;
 
 
 
@@ -523,13 +552,18 @@
             var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
 
             const timeArray = spindleArrays[current_spindle].time
+          var time_start = spindleArrays[current_spindle]["date start"]
+          var real_time = aggiungiSecondi(time_start, timeArray)
+          var parseTime = d3.timeParse("%H:%M:%S");
+          var realTimeDates = real_time.map(function (timeString) {
+            return parseTime(timeString);
+          });
 
             var dataLength = attributeValues.length
             for (let i = 0; i < dataLength; i += 1) {
 
 
-            var time_tmp = timeArray[i].toFixed(3)
-            
+  
             if (attributeValues[i] != undefined) {
               if (attributeValues[i] < min) {
                 min = attributeValues[i]
@@ -537,7 +571,7 @@
               if (attributeValues[i] > max) {
                 max = attributeValues[i]
               }
-              dataset.push([time_tmp, attributeValues[i]]);
+              dataset.push([realTimeDates[i], attributeValues[i]]);
               
             }
           }
@@ -545,17 +579,19 @@
             localStorage.setItem("max", JSON.stringify(max));
             localStorage.setItem("min", JSON.stringify(min));
 
-            var tmp_x = timeArray[timeArray.length - 1].toFixed(3)
+           
+            xScale = d3.scaleTime()
+            .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+            .range([0, width]);
 
-            xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
-              yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+            yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
             var g = svg.append("g")
               .attr("transform", "translate(" + 100 + "," + 100 + ")");
 
             g.append("g")
-              .attr("transform", "translate(0," + height + ")")
-              .call(d3.axisBottom(xScale));
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));;
 
             g.append("g")
               .call(d3.axisLeft(yScale));
@@ -756,6 +792,8 @@
 
                 // Save the data array for the current column
                 spindleArrays[spindle][column] = eval("data." + column);
+                var time_string = data.Date_start.slice(0, -7).slice(11)
+                spindleArrays[spindle]["date start"] = time_string
 
 
 
@@ -823,14 +861,19 @@
 
             var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
             const timeArray = spindleArrays[current_spindle].time
-
+            var time_start = spindleArrays[current_spindle]["date start"]
+              var real_time = aggiungiSecondi(time_start, timeArray)
+              var parseTime = d3.timeParse("%H:%M:%S");
+              var realTimeDates = real_time.map(function (timeString) {
+                return parseTime(timeString);
+              });
             console.log(attributeValues)
    
 
             var dataLength = attributeValues.length
             for(let j = 0; j < dataLength; j+=1){
 
-              var time_tmp = timeArray[j].toFixed(3)
+           
       
           if (attributeValues[j] != undefined) {
             if (attributeValues[j] < min){
@@ -839,7 +882,7 @@
             if (attributeValues[j] > max){
               max = attributeValues[j]
             }    
-          dataset.push([time_tmp, attributeValues[j]]);
+          dataset.push([realTimeDates[j], attributeValues[j]]);
 
           }
         }
@@ -849,18 +892,20 @@
             localStorage.setItem("max", JSON.stringify(max)); 
             localStorage.setItem("min", JSON.stringify(min)); 
 
-            var tmp_x = timeArray[timeArray.length - 1].toFixed(3)
+           
             
    
-                xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
+                xScale = d3.scaleTime()
+                      .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+                      .range([0, width]);
                 yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
                 var g = svg.append("g")
                 .attr("transform", "translate(" + 100 + "," + 100 + ")");
                 
                 g.append("g")
-                .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(xScale));
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));;
         
                 g.append("g")
                 .call(d3.axisLeft(yScale));
@@ -1062,14 +1107,19 @@
                 var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
 
                 const timeArray = spindleArrays[current_spindle].time
-
+                var time_start = spindleArrays[current_spindle]["date start"]
+                var real_time = aggiungiSecondi(time_start, timeArray)
+                var parseTime = d3.timeParse("%H:%M:%S");
+                var realTimeDates = real_time.map(function (timeString) {
+                  return parseTime(timeString);
+                });
 
                 dataset.length = 0 //annulliamo il dataset ogni volta sennò diventa un misto 
 
                 var dataLength = attributeValues.length
                 for (let z = 0; z < dataLength; z += 1) { //Per ogni valore di quello spindle di quell'attributo devo vedere qual è il min o il max per poter scalare bene il grafico
 
-                  var time_tmp = timeArray[z].toFixed(3)
+                 
 
                   if (attributeValues[z] != undefined) {
                     if (attributeValues[z] < min) {
@@ -1080,24 +1130,25 @@
                       max = attributeValues[z]
                     }
 
-                    dataset.push([time_tmp, attributeValues[z], selectedSpindles[j][1]]);
+                    dataset.push([realTimeDates[z], attributeValues[z], selectedSpindles[j][1]]);
             
                   }
                 }
 
-                var tmp_x = timeArray[timeArray.length-1].toFixed(3)
+              
 
                 //e ora ho la mia scala definitiva...
-                xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
+                  xScale = d3.scaleTime()
+                  .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+                  .range([0, width]);
                   yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
 
                 if  (already_done !=1){ //Per evitare che si disegnino 1000 assi
 
                   g.append("g")
-                    .attr("class", "axis")
                     .attr("transform", "translate(0," + height + ")")
-                    .call(d3.axisBottom(xScale));
+                    .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));;
 
 
 
@@ -1218,6 +1269,7 @@
 
                 // Save the data array for the current column
                 spindleArrays[spindle]["time"] = data.time;
+                
 
 
 
@@ -1242,6 +1294,8 @@
 
                   // Save the data array for the current column
                   spindleArrays[spindle][column] = eval("data." + column);
+                  var time_string = data.Date_start.slice(0, -7).slice(11)
+                  spindleArrays[spindle]["date start"] = time_string
 
                  
 
@@ -1306,7 +1360,12 @@
               var max = 0
               var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
               const timeArray = spindleArrays[current_spindle].time
-
+              var time_start = spindleArrays[current_spindle]["date start"]
+              var real_time = aggiungiSecondi(time_start, timeArray)
+              var parseTime = d3.timeParse("%H:%M:%S");
+              var realTimeDates = real_time.map(function (timeString) {
+                return parseTime(timeString);
+              });
               console.log(attributeValues)
 
 
@@ -1322,7 +1381,7 @@
                   if (attributeValues[j] > max) {
                     max = attributeValues[j]
                   }
-                  dataset.push([time_tmp, attributeValues[j]]);
+                  dataset.push([realTimeDates[j], attributeValues[j]]);
 
                 }
               }
@@ -1335,7 +1394,9 @@
               var tmp_x = timeArray[timeArray.length - 1].toFixed(3)
 
 
-              xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
+              xScale = d3.scaleTime()
+                .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+                .range([0, width]);
                 yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
               var g = svg.append("g")
@@ -1343,7 +1404,7 @@
 
               g.append("g")
                 .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(xScale));
+                .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));;
 
               g.append("g")
                 .call(d3.axisLeft(yScale));
