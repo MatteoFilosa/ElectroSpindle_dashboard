@@ -1535,15 +1535,26 @@
           var toRedraw = []
 
 
-          for (let i = 0; i < allGroup.length; i++) { //Ridisegnamo dinamicamente :-) 
+          
+          var to_add = document.getElementById("selectedValues").childNodes
 
-            if (document.getElementById("path" + allGroup[i]) != null) toRedraw.push(allGroup[i])
+          for (let i = 0; i < to_add.length; i++) {
+
+            if (to_add[i] != undefined) {
+
+              if ((to_add[i].id != null) && (to_add[i].checked == true)) {
+
+                toRedraw.push(to_add[i].id)
+
+
+              }
+            }
 
           }
 
           clearSvg()
 
-          
+          console.log(toRedraw)
 
 
           for (let i = 0; i < toRedraw.length; i++) {
