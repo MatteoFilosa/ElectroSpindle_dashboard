@@ -27,7 +27,7 @@
 
 <body class="mx-4">
   <div class="selectedSpindlesDiv">
-    <p>Features: </p>
+    <p id = "featuresHeader">Features: </p>
     <img src="images/home.png" style="vertical-align:middle" alt="check" width="25" height="25"
       onclick="window.open('index.html', '_self');"> Back to spindle selection
   </div>
@@ -121,7 +121,7 @@
       var tmp = sn_and_date[i][0]
       var virgola = ", "
       if (i + 1 == sn_and_date.length) virgola = ""
-      document.getElementById("featuresH3").innerHTML += tmp + virgola
+      document.getElementById("featuresHeader").innerHTML += tmp + virgola
     }
 
     var valori = JSON.parse(localStorage.getItem("selectedValuesFeatures")) //Prendo i valori selezionati da prima

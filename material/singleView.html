@@ -733,7 +733,7 @@
                       .append("circle")
                       .attr("cx", function (d) { return xScale(d[0]); })
                       .attr("cy", function (d) { return yScale(d[1]); })
-                      .attr("r", 0.005)
+                      .attr("r", 1)
                       .attr("transform", "translate(" + 100 + "," + 100 + ")")
                       .style("fill", colors[colorSelector])
                       .attr("id", function (d, i) { return "dot" + valori[j] })
@@ -752,7 +752,7 @@
                       .attr("d", line)
                       .style("fill", "none")
                       .style("stroke", colors[colorSelector])
-                      .style("stroke-width", "0.5")
+                      .style("stroke-width", "1")
                       .attr("id", function (d, i) { return "path" + valori[j] });
 
                       new_svg.append('text')
@@ -762,7 +762,7 @@
                       .style('font-family', 'Helvetica')
                       .style('font-size', 20)
                       .style('fill', colors[colorSelector])
-                      .text("■ " + selectedGroup)
+                      .text("\u25A0 " + selectedGroup)
 
                     if (colorSelector < colors.length) colorSelector += 1
                     else colorSelector = 0
@@ -889,7 +889,7 @@
                       .style('font-family', 'Helvetica')
                       .style('font-size', 20)
                       .style('fill', colors[colorSelector])
-                      .text("■ " + selectedGroup)
+                      .text("\u25A0 " + selectedGroup)
 
                   if (colorSelector < colors.length) colorSelector += 1
                   else colorSelector = 0
@@ -1073,7 +1073,7 @@
 
         }
         
-        else if (aggregato == 2){ //Caso in cui voglio aggiungere grafici al grafico degli aggregati. Devo disegnare un grafico invisibile e poi uno degli aggregati.
+        else if (aggregato == 2){ //Caso in cui voglio aggiungere grafici al grafico degli aggregati già aggregato. Devo disegnare un grafico invisibile e poi uno degli aggregati.
 
             
           
@@ -1125,13 +1125,15 @@
 
             //Creazione grafico
 
-            document.getElementById("svg-div").innerHTML += '<div class="col-sm"><svg width="800" height="510" id="svg' + selectedGroup + '"></svg></div>'
+            document.getElementById("svg-div").innerHTML += '<div class="col-sm"><svg "2000" height="1600" id="svg' + selectedGroup + '"></svg></div>'
             var svg_to_select = "#svg" + selectedGroup
+
+         
 
             var new_svg = d3.select(svg_to_select),
               margin = 200,
-              width = new_svg.attr("width") - margin, //300
-              height = new_svg.attr("height") - margin //200
+              width = 850
+              height = 750
 
 
 
@@ -1252,11 +1254,11 @@
             valori = rimuoviDuplicati(valori);
          
 
-            document.getElementById("svg-div").innerHTML = "<div class='row' id = 'svg-row'><svg width='1000' height='800' id ='svg_default'></svg></div>"
+            document.getElementById("svg-div").innerHTML = "<div class='row' id = 'svg-row'><svg width ='2000' height='1600' id ='svg_default'></svg></div>"
             var new_svg = d3.select("#svg_default")
             var g = new_svg.append("g")
               .attr("transform", "translate(" + 100 + "," + 100 + ")");
-            var width = 500, height = 400
+            var width = 850, height = 750
 
             ///SETTING DEL TESTO
 
@@ -1307,7 +1309,7 @@
                 .style('font-family', 'Helvetica')
                 .style('font-size', 20)
                 .style('fill', colors[i])
-                .text("■ " + valori[i])
+                .text("\u25A0 " + valori[i])
                 console.log(colors, colors[i])
 
             }
@@ -1470,7 +1472,7 @@
                     .append("circle")
                     .attr("cx", function (d) { return xScale(d[0]); })
                     .attr("cy", function (d) { return yScale(d[1]); })
-                    .attr("r", 0.5)
+                    .attr("r", 1)
                     .attr("transform", "translate(" + 100 + "," + 100 + ")")
                     .style("fill", colors[colorSelector])
                     .attr("id", function (d, i) { return "dot" + valori[j] })
@@ -1489,7 +1491,7 @@
                     .attr("d", line)
                     .style("fill", "none")
                     .style("stroke", colors[colorSelector])
-                    .style("stroke-width", "0.5")
+                    .style("stroke-width", "1")
                     .attr("id", function (d, i) { return "path" + valori[j] });
 
                   if (colorSelector < colors.length) colorSelector += 1
