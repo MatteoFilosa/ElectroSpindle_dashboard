@@ -166,7 +166,9 @@
 </head>
 
 <body class="mx-4">
-<h1>Single spindle visualization</h1>
+  <img src="images/home.png" style="vertical-align:middle" alt="check" width="25" height="25" onclick = "window.open('index.html', '_self');"> Back to spindle selection
+<p>Single spindle visualization</p>
+
 
 
 
@@ -520,11 +522,11 @@
               var scalaAggiuntiva = 0
               if (document.getElementById("svg_default") != null) document.getElementById("svg_default").remove()
               //var valori = JSON.parse(localStorage.getItem("selectedValues"))
-              document.getElementById("svg-div").innerHTML = "<div class='row' id = 'svg-row'><svg width='1000' height='800' id ='svg_default'></svg></div>"
+              document.getElementById("svg-div").innerHTML = "<div class='row' id = 'svg-row'><svg width='2000' height='1600' id ='svg_default'></svg></div>"
               var new_svg = d3.select("#svg_default")
               var g = new_svg.append("g")
                 .attr("transform", "translate(" + 100 + "," + 100 + ")");
-              var width = 500, height = 400
+              var width = 850, height = 750
 
               ///SETTING DEL TESTO
 
@@ -556,7 +558,7 @@
                 .attr('text-anchor', 'middle')
                 .style('font-family', 'Helvetica')
                 .style('font-size', 12)
-                .text("Time(s)");
+                .text("Time(h:m:s)");
 
               // Y label
               new_svg.append('text')
@@ -565,6 +567,8 @@
                 .style('font-family', 'Helvetica')
                 .style('font-size', 12)
                 .text("Aggregate values");
+
+              
 
   
 
@@ -648,7 +652,7 @@
                       g.append("g")
                         .call(d3.axisRight(yScale))
                         .attr("class", "asseDestro");          
-                      d3.select(".asseDestro").attr("transform", "translate(500,0)")
+                      d3.select(".asseDestro").attr("transform", "translate(850,0)")
                       d3.select(".asseDestro").selectAll("text").style("fill", colors[colorSelector])
                    
                     }
@@ -683,7 +687,7 @@
                         .call(d3.axisLeft(yScale))
                         .attr("class", "asseDestro2");
 
-                      d3.select(".asseDestro2").attr("transform", "translate(500,0)")
+                      d3.select(".asseDestro2").attr("transform", "translate(850,0)")
                       d3.select(".asseDestro2").selectAll("text").style("fill", colors[colorSelector])
 
 
@@ -750,6 +754,15 @@
                       .style("stroke", colors[colorSelector])
                       .style("stroke-width", "0.5")
                       .attr("id", function (d, i) { return "path" + valori[j] });
+
+                      new_svg.append('text')
+                      .attr('x', width / 2 +colorSelector*100)
+                      .attr('y', 85)
+                      .attr('text-anchor', 'middle')
+                      .style('font-family', 'Helvetica')
+                      .style('font-size', 20)
+                      .style('fill', colors[colorSelector])
+                      .text("■ " + selectedGroup)
 
                     if (colorSelector < colors.length) colorSelector += 1
                     else colorSelector = 0
@@ -868,6 +881,16 @@
                     .style("stroke-width", "2")
                     .attr("id", function (d, i) { return "path" + valori[j] });
 
+
+                  new_svg.append('text')
+                      .attr('x', width / 2 + colorSelector * 100)
+                      .attr('y', 85)
+                      .attr('text-anchor', 'middle')
+                      .style('font-family', 'Helvetica')
+                      .style('font-size', 20)
+                      .style('fill', colors[colorSelector])
+                      .text("■ " + selectedGroup)
+
                   if (colorSelector < colors.length) colorSelector += 1
                   else colorSelector = 0
             
@@ -982,7 +1005,7 @@
             .attr('text-anchor', 'middle')
             .style('font-family', 'Helvetica')
             .style('font-size', 12)
-            .text("Time(s)");
+            .text("Time(h:m:s)");
         
             // Y label
             new_svg.append('text')
@@ -994,11 +1017,6 @@
 
             
 
-            
-       
-            
-
-          
 
             
 
@@ -1061,12 +1079,15 @@
           
             dataset = []
             
-
+            colorSelector = 0
             var my_data = globalData[selectedGroup][0]
             var time = globalData["time"][0]
             var time_start = globalData["date start"][0]
             var real_time = aggiungiSecondi(time_start, time)
-            console.log(real_time)
+            var parseTime = d3.timeParse("%H:%M:%S");
+            var realTimeDates = real_time.map(function (timeString) {
+              return parseTime(timeString);
+            });
           
             for (let i = 0; i < dataLength; i += 1) { //SINGOLO.
 
@@ -1081,7 +1102,7 @@
               }
 
               else {
-               
+                console.log(realTimeDates[i], my_data[i])
                 if (my_data[i] != undefined) {
                   dataset.push([realTimeDates[i], my_data[i]]);
                   if (my_data[i] < min) {
@@ -1147,7 +1168,7 @@
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 12)
-              .text("Time(s)");
+              .text("Time(h:m:s)");
 
             // Y label
             new_svg.append('text')
@@ -1209,6 +1230,8 @@
               .style("stroke-width", "2")
               .attr("id", function (d, i) { return "path" + selectedGroup })
 
+             
+
 
             d3.select("#svg" + selectedGroup).attr("visibility", "hidden")
 
@@ -1265,7 +1288,7 @@
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 12)
-              .text("Time(s)");
+              .text("Time(h:m:s)");
 
             // Y label
             new_svg.append('text')
@@ -1274,6 +1297,23 @@
               .style('font-family', 'Helvetica')
               .style('font-size', 12)
               .text("Aggregate values");
+
+
+            for(let i = 0; i < valori.length; i++){
+              new_svg.append('text')
+                .attr('x', width / 2 + i * 100)
+                .attr('y', 85)
+                .attr('text-anchor', 'middle')
+                .style('font-family', 'Helvetica')
+                .style('font-size', 20)
+                .style('fill', colors[i])
+                .text("■ " + valori[i])
+                console.log(colors, colors[i])
+
+            }
+
+
+          
 
    
             var container = document.getElementById('svg-div');
@@ -1352,7 +1392,7 @@
                       .call(d3.axisRight(yScale))
                       .attr("class", "asseDestro");
 
-                    d3.select(".asseDestro").attr("transform", "translate(500,0)")
+                    d3.select(".asseDestro").attr("transform", "translate(850,0)")
                     d3.select(".asseDestro").selectAll("text").style("fill", colors[colorSelector])
 
                   }
@@ -1387,7 +1427,7 @@
                       .call(d3.axisLeft(yScale))
                       .attr("class", "asseDestro2");
 
-                    d3.select(".asseDestro2").attr("transform", "translate(500,0)")
+                    d3.select(".asseDestro2").attr("transform", "translate(850,0)")
                     d3.select(".asseDestro2").selectAll("text").style("fill", colors[colorSelector])
 
 

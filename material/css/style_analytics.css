@@ -8,6 +8,13 @@ html * {
     font-family: Roboto !important;
 }
 
+p {
+    transform: scale(1.2);
+    margin-left: 60px;
+    font-weight: bolder;
+    margin-top: 10px;
+}
+
 #title{
     transform: scale(1.2);
 }

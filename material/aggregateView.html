@@ -26,7 +26,9 @@
 
 
 <body class="mx-4">
-<h2>Multiple spindles visualization</h2>
+  <img src="images/home.png" style="vertical-align:middle" alt="check" width="25" height="25"
+    onclick="window.open('index.html', '_self');"> Back to spindle selection
+<p>Multiple spindles visualization</p>
 <div id="selectedSpindles"></div>
 
 <input type = "checkbox" id ="aggregato" class = "checkbox" onchange ="aggregate()"> Aggregate
@@ -342,10 +344,13 @@
               .style('font-size', 12)
               .text(allGroup[i]);
 
+            colorSelector = 0
+
           for (let j = 0; j < selectedSpindles.length; j++) { //Poi, per ogni spindle facente parte di quell'attributo scalo al massimo e minimo e cancello i grafici di prima singoli
 
               current_spindle = selectedSpindles[j][0]
               selectedOption = allGroup[i]
+              
               
              
               console.log(spindleArrays)
@@ -353,11 +358,7 @@
             var attributeValues = eval("spindleArrays[current_spindle]." + selectedOption)
             const timeArray = spindleArrays[current_spindle].time
 
-            console.log("qua " + attributeValues, timeArray)
-              
-
-    
-
+            
 
               d3.select("#svg" + selectedOption + "_" + j).remove();
 
@@ -468,6 +469,15 @@
                 .style("stroke", colors[colorSelector])
                 .style("stroke-width", "2")
                 .attr("id", function (d, i) { return "path" + selectedOption });
+
+                new_svg.append('text')
+                .attr('x', width / 2 + colorSelector * 120)
+                .attr('y', 90)
+                .attr('text-anchor', 'middle')
+                .style('font-family', 'Helvetica')
+                .style('font-size', 20)
+                .style('fill', colors[colorSelector])
+                .text("■ " + current_spindle)
 
               if (colorSelector < colors.length) colorSelector += 1
               else colorSelector = 0
@@ -1066,6 +1076,8 @@
                 .style('font-size', 12)
                 .text(selectedOption);
 
+                colorSelector = 0
+
               for (let j = 0; j < selectedSpindles.length; j++) { //Poi, per ogni spindle facente parte di quell'attributo scalo al massimo e minimo e cancello i grafici di prima singoli
                 
                 current_spindle = selectedSpindles[j][0]
@@ -1192,6 +1204,15 @@
                   .style("stroke", colors[colorSelector])
                   .style("stroke-width", "2")
                   .attr("id", function (d, i) { return "path" + selectedOption });
+
+                  new_svg.append('text')
+                  .attr('x', width / 2 + colorSelector * 120)
+                  .attr('y', 90)
+                  .attr('text-anchor', 'middle')
+                  .style('font-family', 'Helvetica')
+                  .style('font-size', 20)
+                  .style('fill', colors[colorSelector])
+                  .text("■ " + current_spindle)
 
                 if (colorSelector < colors.length) colorSelector += 1
                 else colorSelector = 0

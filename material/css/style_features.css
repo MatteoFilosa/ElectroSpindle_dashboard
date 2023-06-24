@@ -7,6 +7,14 @@ body {
     margin-left: 20px;
     /* Puoi impostare il valore del margine desiderato */
 }
+
+p {
+    transform: scale(1.2);
+    margin-left: 120px;
+    font-weight: bolder;
+    margin-top: 30px;
+}
+
     text.shadow {
         stroke: black;
         stroke-width: 0.6px;

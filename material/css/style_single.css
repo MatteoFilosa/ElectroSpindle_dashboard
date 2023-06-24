@@ -8,6 +8,13 @@
         opacity: 0.8s;
     }
 
+    p{
+        transform: scale(1.2);
+        margin-left: 60px;
+        font-weight:bolder;
+        margin-top: 10px;
+    }
+
     #analyticsDiv{
         position: absolute;
         left: 900px;
