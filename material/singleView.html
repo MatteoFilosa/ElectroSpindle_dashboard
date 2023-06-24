@@ -16,6 +16,96 @@
     <link rel="stylesheet" href="css/style_single.css"></link>
     <script>
 
+      function drawChart(selectedGroup, dataset) {
+          var margin = { top: 100, right: 100, bottom: 100, left: 100 };
+          var width = 800 - margin.left - margin.right;
+          var height = 510 - margin.top - margin.bottom;
+
+          var new_svg = d3.select("#svg" + selectedGroup);
+          new_svg.attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom);
+
+          var g = new_svg.append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .attr("id", "g" + selectedGroup);
+
+          // Creazione delle scale
+          var minTimestamp = d3.min(dataset, function (d) { return d[0]; });
+          var maxTimestamp = d3.max(dataset, function (d) { return d[0]; });
+
+          var xScale = d3.scaleTime()
+            .domain([minTimestamp, maxTimestamp])
+            .range([0, width]);
+
+          var yScale = d3.scaleLinear()
+            .domain([min, max])
+            .range([height, 0]);
+
+          // Creazione degli assi
+          var xAxis = d3.axisBottom(xScale);
+          var yAxis = d3.axisLeft(yScale);
+
+          g.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .attr("id", "xAxis" + selectedGroup)
+            .call(xAxis);
+
+          g.append("g")
+            .attr("id", "yAxis" + selectedGroup)
+            .call(yAxis);
+
+          // Creazione dei punti
+          g.selectAll("dot")
+            .data(dataset)
+            .enter()
+            .append("circle")
+            .attr("cx", function (d) { return xScale(d[0]); })
+            .attr("cy", function (d) { return yScale(d[1]); })
+            .attr("r", 3)
+            .style("fill", "#CC0000")
+            .attr("class", "punto");
+
+          // Creazione della linea
+          var line = d3.line()
+            .x(function (d) { return xScale(d[0]); })
+            .y(function (d) { return yScale(d[1]); })
+            .curve(d3.curveMonotoneX);
+
+          g.append("path")
+            .datum(dataset)
+            .attr("class", "line")
+            .attr("d", line)
+            .style("fill", "none")
+            .style("stroke", "#CC0000")
+            .style("stroke-width", "2");
+        }
+
+      function aggiungiSecondi(valoreIniziale, arraySecondi) {
+          var risultato = [];
+
+          for (var i = 0; i < arraySecondi.length; i++) {
+            var secondi = arraySecondi[i];
+            var tempo = valoreIniziale.split(':');
+
+            var data = new Date();
+            data.setHours(parseInt(tempo[0], 10));
+            data.setMinutes(parseInt(tempo[1], 10));
+            data.setSeconds(parseInt(tempo[2], 10));
+
+            // Aggiungi i secondi al tempo iniziale
+            data.setSeconds(data.getSeconds() + secondi);
+
+            // Formatta il tempo in una stringa "ore:minuti:secondi"
+            var tempoNuovo = ('0' + data.getHours()).slice(-2) + ':' +
+              ('0' + data.getMinutes()).slice(-2) + ':' +
+              ('0' + data.getSeconds()).slice(-2);
+
+            risultato.push(tempoNuovo);
+          }
+
+          return risultato;
+        }
+
       var globalData = []
 
       function restoreLoader() {
@@ -382,6 +472,9 @@
       var max = 0
       var scaleCheck = 0
       var time = globalData["time"][0]
+      var time_start = globalData["date start"][0]
+      var real_time = aggiungiSecondi(time_start, time)
+      console.log(real_time)
    
 
       if(document.getElementById("aggregato").checked != true) my_data = globalData[selectedGroup][0]
@@ -487,6 +580,12 @@
 
                 var my_data = globalData[selectedGroup][0]
                 var time = globalData["time"][0]
+                var time_start = globalData["date start"][0]
+                var real_time = aggiungiSecondi(time_start, time)
+                var parseTime = d3.timeParse("%H:%M:%S");
+                var realTimeDates = real_time.map(function (timeString) {
+                  return parseTime(timeString);
+                });
 
               
 
@@ -494,13 +593,17 @@
                   if (valori.includes("Itot") || valori.includes("Qtir") || valori.includes("Speed_S3_BUS") || valori.includes("Speed_Sync") || valori.includes("VibANT_Sync")){ //scale non omogenee
 
                     max = 0, min = 100000, scalaAggiuntiva += 1, scaleCheck = 1
+                    
+                    console.log(real_time)
+
+                    
 
 
 
                     for (let i = 0; i < dataLength; i += 1) { 
                       if (selectedGroup == "Tdut2") {
-                        var time_tmp = time[i].toFixed(3)
-                        dataset.push([time_tmp, 255]);
+                        
+                        dataset.push([realTimeDates[i], 255]);
 
                         min = 250
                         max = 260
@@ -509,7 +612,7 @@
 
                       else {
                         var time_tmp = time[i].toFixed(3)
-                        dataset.push([time_tmp, my_data[i]]);
+                        dataset.push([realTimeDates[i], my_data[i]]);
                         if (my_data[i] < min) {
                           min = my_data[i]
                         }
@@ -521,9 +624,14 @@
 
                     }
 
-                    var tmp_x = time[time.length-1].toFixed(3)
+                    
        
-                    xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
+                    xScale = d3.scaleTime()
+                      .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+                      .range([0, width]);
+
+                    
+                      
                     yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
                     localStorage.setItem("maxDefault", JSON.stringify(max))
@@ -535,7 +643,7 @@
 
                       g.append("g")
                         .attr("transform", "translate(0," + height + ")")
-                        .call(d3.axisBottom(xScale)); //aggiungiamo una sola volta asse x
+                        .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));; //aggiungiamo una sola volta asse x
 
                       g.append("g")
                         .call(d3.axisRight(yScale))
@@ -584,13 +692,13 @@
 
                     var dataset = []
 
-                    for (let i = 0; i < dataLength; i += 1) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+                    for (let i = 0; i < dataLength; i += 1) { 
 
                       if (selectedGroup == "Tdut2") {
 
-                        var time_tmp = time[i].toFixed(3)
+                        
 
-                        dataset.push([time_tmp, 255]);
+                        dataset.push([realTimeDates[i], 255]);
 
                         min = 250
                         max = 260
@@ -598,10 +706,10 @@
                       }
 
                       else {
-                        var time_tmp = time[i].toFixed(3)
+                        
 
                         if (my_data[i] != undefined) {
-                        dataset.push([time_tmp, my_data[i]]);
+                        dataset.push([realTimeDates[i], my_data[i]]);
                         if (my_data[i] < min) {
                           min = my_data[i]
                         }
@@ -659,7 +767,9 @@
 
                   var my_data = globalData[selectedGroup][0]
                   var time = globalData["time"][0]
-                  console.log(time)
+                  var time_start = globalData["date start"][0]
+                  var real_time = aggiungiSecondi(time_start, time)
+                  console.log(real_time)
 
                   if(selectedGroup == "Tdut2"){
                     min = 250
@@ -682,10 +792,10 @@
 
                   }
                   
-                  var tmp_x = time[time.length - 1].toFixed(3)
+                 
 
 
-                  xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
+                  
                   yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
                   }
 
@@ -704,10 +814,10 @@
                     for (let i = 0; i < dataLength; i += 1) {
                       var time_tmp = time[i].toFixed(3)
 
-                      if(selectedGroup == "Tdut2") dataset.push([time_tmp,255]);
+                      if(selectedGroup == "Tdut2") dataset.push([realTimeDates[i],255]);
                       else if (my_data[i] != undefined) {
-                        var time_tmp = time[i].toFixed(3)
-                        dataset.push([time_tmp, my_data[i]]);
+                       
+                        dataset.push([realTimeDates[i], my_data[i]]);
                       }
 
 
@@ -715,9 +825,14 @@
 
 
  
-                  g.append("g")
-                    .attr("transform", "translate(0," + height + ")")
-                    .call(d3.axisBottom(xScale));
+                  xScale = d3.scaleTime()
+                      .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+                      .range([0, width]);
+
+                    g.append("g")
+                      .attr("transform", "translate(0," + height + ")")
+                      .attr("id", "xAxis" + selectedGroup)
+                      .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));
 
                   g.append("g")
                     .call(d3.axisLeft(yScale));
@@ -770,6 +885,11 @@
 
         else if ((aggregato == 0) || (aggregato == 3)){ //Caso NON aggregato, il 3 è solo per un piccolo sottocaso
 
+          var parseTime = d3.timeParse("%H:%M:%S");
+            var realTimeDates = real_time.map(function (timeString) {
+              return parseTime(timeString);
+            });
+
           for (let i = 0; i <= allGroup.length; i++) {
 
               var tmp = allGroup[i]
@@ -784,9 +904,9 @@
            
             if(selectedGroup == "Tdut2"){
 
-              var time_tmp = time[i].toFixed(3)
+          
 
-              dataset.push([time_tmp, 255]);
+              dataset.push([realTimeDates[i], 255]);
 
               min = 250
               max = 260
@@ -794,11 +914,9 @@
             }
 
             else{
-             
-              var time_tmp = time[i].toFixed(3)
-              
+
               if(my_data[i] != undefined){
-                dataset.push([time_tmp, my_data[i]]);
+                dataset.push([realTimeDates[i], my_data[i]]);
                 if (my_data[i] < min) {
                   min = my_data[i]
                 }
@@ -810,6 +928,8 @@
               }
               
             } 
+
+            console.log(dataset)
 
         }
 
@@ -874,15 +994,24 @@
 
             
 
-            var tmp_x = time[time.length - 1].toFixed(3)
-            xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
-              yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+            
+       
+            
+
+          
+
+            
+
+            var xScale = d3.scaleTime()
+              .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+              .range([0, width]);
 
             g.append("g")
-            .attr("transform", "translate(0," + height + ")")
-            .attr("id", function (d, i) { return "xAxis" + selectedGroup })
-            .call(d3.axisBottom(xScale));
-        
+              .attr("transform", "translate(0," + height + ")")
+              .attr("id", "xAxis" + selectedGroup)
+              .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));
+
+            yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
             g.append("g")
             .attr("id", function (d, i) { return "yAxis" + selectedGroup })
             .call(d3.axisLeft(yScale));
@@ -935,14 +1064,16 @@
 
             var my_data = globalData[selectedGroup][0]
             var time = globalData["time"][0]
+            var time_start = globalData["date start"][0]
+            var real_time = aggiungiSecondi(time_start, time)
+            console.log(real_time)
           
             for (let i = 0; i < dataLength; i += 1) { //SINGOLO.
 
               if (selectedGroup == "Tdut2") {
 
-                var time_tmp = time[i].toFixed(3)
-
-                dataset.push([time_tmp, 255]);
+              
+                dataset.push([realTimeDates[i], 255]);
 
                 min = 250
                 max = 260
@@ -950,9 +1081,9 @@
               }
 
               else {
-                var time_tmp = time[i].toFixed(3)
+               
                 if (my_data[i] != undefined) {
-                  dataset.push([time_tmp, my_data[i]]);
+                  dataset.push([realTimeDates[i], my_data[i]]);
                   if (my_data[i] < min) {
                     min = my_data[i]
                   }
@@ -1026,14 +1157,18 @@
               .style('font-size', 12)
               .text(selectedGroup);
 
-            var tmp_x = time[time.length - 1].toFixed(3)
-            xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
-              yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+            xScale = d3.scaleTime()
+              .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+              .range([0, width]);
 
             g.append("g")
               .attr("transform", "translate(0," + height + ")")
-              .attr("id", function (d, i) { return "xAxis" + selectedGroup })
-              .call(d3.axisBottom(xScale));
+              .attr("id", "xAxis" + selectedGroup)
+              .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));
+
+            yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+            
 
             g.append("g")
               .attr("id", function (d, i) { return "yAxis" + selectedGroup })
@@ -1154,6 +1289,10 @@
 
               var my_data = globalData[selectedGroup][0]
               var time = globalData["time"][0]
+              var parseTime = d3.timeParse("%H:%M:%S");
+              var realTimeDates = real_time.map(function (timeString) {
+                return parseTime(timeString);
+              });
 
 
               if (valori.includes("Tba") || valori.includes("Tamb") || valori.includes("Tdut2") || valori.includes("Tdut3")) {
@@ -1167,7 +1306,7 @@
                     if (selectedGroup == "Tdut2") {
 
                       var time_tmp = time[i].toFixed(3)
-                      dataset.push([time_tmp, 255]);
+                      dataset.push([realTimeDates[i], 255]);
 
                       min = 250
                       max = 260
@@ -1176,7 +1315,7 @@
 
                     else {
                       var time_tmp = time[i].toFixed(3)
-                      dataset.push([time_tmp, my_data[i]]);
+                      dataset.push([realTimeDates[i], my_data[i]]);
                       if (my_data[i] < min) {
                         min = my_data[i]
                       }
@@ -1188,8 +1327,14 @@
 
                   }
 
-                  var tmp_x = time[time.length-1].toFixed(3)
-                  xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
+      
+                  xScale = d3.scaleTime()
+                    .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+                    .range([0, width]);
+
+           
+                 
+                    
                     yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
                   localStorage.setItem("maxDefault", JSON.stringify(max))
@@ -1201,7 +1346,7 @@
 
                     g.append("g")
                       .attr("transform", "translate(0," + height + ")")
-                      .call(d3.axisBottom(xScale)); //aggiungiamo una sola volta asse x
+                      .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));; //aggiungiamo una sola volta asse x
 
                     g.append("g")
                       .call(d3.axisRight(yScale))
@@ -1254,8 +1399,8 @@
                   for (let i = 0; i < dataLength; i += 1) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
 
                     if (selectedGroup == "Tdut2") {
-                      var time_tmp = time[i].toFixed(3)
-                      dataset.push([time_tmp, 255]);
+                      
+                      dataset.push([realTimeDates[i], 255]);
 
                       min = 250
                       max = 260
@@ -1265,7 +1410,7 @@
                     else {
                       var time_tmp = time[i].toFixed(3)
                       if (my_data[i] != undefined) {
-                        dataset.push([time_tmp, my_data[i]]);
+                        dataset.push([realTimeDates[i], my_data[i]]);
                         if (my_data[i] < min) {
                           min = my_data[i]
                         }
@@ -1346,10 +1491,12 @@
                 }
 
 
-                var tmp_x = time[time.length-1].toFixed(3)
+                xScale = d3.scaleTime()
+                  .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+                  .range([0, width]);
 
+                
 
-                xScale = d3.scaleLinear().domain([0, tmp_x]).range([0, width]),
                   yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
               }
 
@@ -1367,9 +1514,9 @@
 
                   var time_tmp = time[i].toFixed(3)
 
-                  if (selectedGroup == "Tdut2") dataset.push([time_tmp, 255]);
+                  if (selectedGroup == "Tdut2") dataset.push([realTimeDates[i], 255]);
                   else if (my_data[i] != undefined) {
-                    dataset.push([time_tmp, my_data[i]]);
+                    dataset.push([realTimeDates[i], my_data[i]]);
                   }
 
 
@@ -1377,7 +1524,8 @@
 
                 g.append("g")
                   .attr("transform", "translate(0," + height + ")")
-                  .call(d3.axisBottom(xScale));
+                  .attr("id", "xAxis" + selectedGroup)
+                  .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));
 
                 g.append("g")
                   .call(d3.axisLeft(yScale));
@@ -1494,6 +1642,8 @@
             globalData["time"] = []
             globalData[valori[i]].push(eval("data." + valori[i])); // Aggiungi il dato all'array associato alla chiave
             globalData["time"].push(data.time)
+            globalData["date start"] = []
+            globalData["date start"].push(data.Date_start.slice(0, -7).slice(11))
             console.log(globalData);
 
           })
@@ -1601,6 +1751,16 @@
       globalData["time"] = []
       globalData[selectedOption].push(eval("data." + selectedOption)); // Aggiungi il dato all'array associato alla chiave
       globalData["time"].push(data.time)
+      globalData["date start"] = []
+      globalData["date start"].push(data.Date_start.slice(0, -7).slice(11))
+
+      var time = globalData["time"][0]
+      var time_start = globalData["date start"][0]
+      var real_time = aggiungiSecondi(time_start, time)
+
+      console.log(document.getElementById("selectedSpindles").innerHTML.length)
+
+      if(document.getElementById("selectedSpindles").innerHTML.length <= 60)document.getElementById("selectedSpindles").innerHTML +=  "<br> Breakin start: " + real_time[0] + ", Breakin end: " + real_time[real_time.length-1]
       
 
        var checkBoxAggregato = document.getElementById("aggregato");
