@@ -332,9 +332,10 @@
               .attr('x', width / 2 + 100)
               .attr('y', height - 15 + 165)
               .attr('text-anchor', 'middle')
+              .attr("id", function (d, i) { return "testo"})
               .style('font-family', 'Helvetica')
               .style('font-size', 12)
-              .text("Time(s)");
+              .text("Time(h:m:s)");
 
             // Y label
             new_svg.append('text')
@@ -380,7 +381,8 @@
           }
               
         }
-
+            var last_height = height
+            var last_text = 0
 
             for (let j = 0; j < selectedSpindles.length; j++) { //Per ogni spindle facente parte di quell'attributo...
 
@@ -421,13 +423,23 @@
                 .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
                 .range([0, width]);
                 yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+                
+
+                g.append("g")
+                .attr("transform", "translate(0," + last_height + ")")
+                .attr("id", function (d, i) { return "xAxis" + j })
+                .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));;
+                last_height += 20
+                last_text += 15
+
+                
+                  d3.select("#xAxis" + j).selectAll("text").style("fill", colors[colorSelector])
+                  d3.select("#testo").attr("transform", "translate(0," + last_text + ")")
+                  if(j>=1)d3.select("#xAxis" + j).selectAll("path").remove()
                 
               
               if(already_done != 1){ //Per evitare che si disegnino 1000 assi
-
-                g.append("g")
-                  .attr("transform", "translate(0," + height + ")")
-                  .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));;
 
 
 
@@ -1178,6 +1190,8 @@
                   already_done = 1
 
                 }
+
+
                 
 
 
