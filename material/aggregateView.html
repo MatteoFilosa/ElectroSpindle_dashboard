@@ -212,7 +212,7 @@
 
     allGroup.push("time")
 
-    document.getElementById("selectedSpindles").innerHTML += "Selected spindles: "
+    document.getElementById("selectedSpindles").innerHTML += "<b>Selected spindles:</b> "
 
     for (let j = 0; j < selectedSpindles.length; j++) {
       
@@ -743,7 +743,7 @@
 
     var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
     //var aggregato = 0
-    var count = 0
+    var count = 0, check_info = 0
     
     //CASO NON AGGREGATO; AGGIUNTA NORMALE DI SVG
 
@@ -816,13 +816,14 @@
       sleep(1000*sleeper).then(() => {
 
         localStorage.setItem("spindleArrays", JSON.stringify(spindleArrays))
+        
 
          if (document.getElementById("loader") != null) document.getElementById("loader").remove()
         if (document.getElementById("loading") != null) document.getElementById("loading").remove()
         var selectedOption = JSON.parse(localStorage.getItem("selectedOption"))
 
        
-     
+  
 
     if (document.getElementById("aggregato").checked == false) {
   
@@ -878,6 +879,12 @@
                 return parseTime(timeString);
               });
             console.log(attributeValues)
+
+            if(check_info != 1){
+
+              document.getElementById("selectedSpindles").innerHTML += "<br><b>Breakin date</b> for <u>"+ current_spindle + "</u>: " + sn_and_date[i][1] + "<b> , Breakin start: </b>" + time_start + ", <b>Breakin end: </b>" + real_time[real_time.length - 1]
+              if(i + 1 == sn_and_date.length) check_info = 1
+            } 
    
 
             var dataLength = attributeValues.length

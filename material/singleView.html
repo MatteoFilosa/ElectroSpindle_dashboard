@@ -1802,7 +1802,7 @@
 
       console.log(document.getElementById("selectedSpindles").innerHTML.length)
 
-      if(document.getElementById("selectedSpindles").innerHTML.length <= 60)document.getElementById("selectedSpindles").innerHTML +=  "<br> Breakin start: " + real_time[0] + ", Breakin end: " + real_time[real_time.length-1]
+      if(document.getElementById("selectedSpindles").innerHTML.length <= 80)document.getElementById("selectedSpindles").innerHTML +=  "<br> <b>Breakin start</b>: " + real_time[0] + ", <b>Breakin end</b>: " + real_time[real_time.length-1]
       
 
        var checkBoxAggregato = document.getElementById("aggregato");
@@ -1861,7 +1861,7 @@
 
         var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
         
-        document.getElementById("selectedSpindles").innerHTML += "Selected spindle: "+ sn_and_date[0][0] + ", Breakin date: " + sn_and_date[0][1]
+        document.getElementById("selectedSpindles").innerHTML += "<b>Selected spindle</b>: <u>"+ sn_and_date[0][0] + "</u>, <b>Breakin date</b>: " + sn_and_date[0][1]
             
 
             
