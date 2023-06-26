@@ -296,12 +296,12 @@
 
           //document.getElementById("svg-div").innerHTML += "<div class='row no-wrap' id='row d-flex justify-content-between" + allGroup[i] + "'>" // Ricorda: una row d-flex justify-content-between per attributo
 
-          document.getElementById("svg-div").innerHTML += "<svg width='1000' height='800' class ='svg_aggregate' id ='svg_aggregate_" + allGroup[i] + "'></svg></div>" // per ogni attributo ho un grafico
+          document.getElementById("svg-div").innerHTML += "<svg width='2000' height='1600' class ='svg_aggregate' id ='svg_aggregate_" + allGroup[i] + "'></svg></div>" // per ogni attributo ho un grafico
             var new_svg = d3.select("#svg_aggregate_" + allGroup[i])
             var g = new_svg.append("g")
               .attr("class", "axis")
               .attr("transform", "translate(" + 100 + "," + 100 + ")");
-            var width = 500, height = 400
+            var width = 850, height = 750
 
             ///SETTING DEL TESTO
 
@@ -332,7 +332,7 @@
               .attr('x', width / 2 + 100)
               .attr('y', height - 15 + 165)
               .attr('text-anchor', 'middle')
-              .attr("id", function (d, i) { return "testo"})
+              .attr("id", function (d, i) { return "testo" + allGroup[i]})
               .style('font-family', 'Helvetica')
               .style('font-size', 12)
               .text("Time(h:m:s)");
@@ -427,18 +427,35 @@
                 
 
                 g.append("g")
+                .attr("id", function (d, i) { return "xAxis" + selectedOption +"_" + j })
                 .attr("transform", "translate(0," + last_height + ")")
-                .attr("id", function (d, i) { return "xAxis" + j })
                 .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));;
                 last_height += 20
                 last_text += 15
 
-                
-                  d3.select("#xAxis" + j).selectAll("text").style("fill", colors[colorSelector])
-                  d3.select("#testo").attr("transform", "translate(0," + last_text + ")")
-                  if(j>=1)d3.select("#xAxis" + j).selectAll("path").remove()
-                
-              
+                d3.select("#xAxis" + selectedOption + "_" + j)
+                .selectAll(".tick line")
+                .attr("stroke", colors[colorSelector])
+                .attr("stroke-dasharray", "5, 5");
+
+                 
+       
+                  d3.select("#xAxis" + selectedOption + "_" + j).selectAll("text").style("fill", colors[colorSelector])
+                  d3.select("#testo" + selectedOption).attr("transform", "translate(0," + last_text + ")")
+                  if(j>=1){
+                    
+                    d3.select("#xAxis" + selectedOption + "_" + j)
+                      .call(d3.axisBottom(xScale)
+                        .tickFormat(d3.timeFormat("%H:%M:%S"))
+                        .ticks(5)
+                        .tickSize(-20*j));
+
+                    d3.select("#xAxis" + selectedOption + "_" + j).selectAll("path").remove()
+                    d3.select("#xAxis" + selectedOption + "_" + j)
+                      .selectAll(".tick line")
+                      .attr("stroke", colors[colorSelector])
+                      .attr("stroke-dasharray", "5, 5");
+                  }
               if(already_done != 1){ //Per evitare che si disegnino 1000 assi
 
 
@@ -483,7 +500,7 @@
                 .attr("id", function (d, i) { return "path" + selectedOption });
 
                 new_svg.append('text')
-                .attr('x', width / 2 + colorSelector * 120)
+                .attr('x', width / 4 + colorSelector * 120)
                 .attr('y', 90)
                 .attr('text-anchor', 'middle')
                 .style('font-family', 'Helvetica')
@@ -1047,12 +1064,13 @@
 
               //document.getElementById("svg-div").innerHTML += "<div class='row no-wrap' id='row d-flex justify-content-between" + allGroup[i] + "'>" // Ricorda: una row d-flex justify-content-between per attributo
 
-              document.getElementById("svg-div").innerHTML += "<svg width='1000' height='800' class ='svg_aggregate' id ='svg_aggregate_" + selectedOption + "'></svg></div>" // per ogni attributo ho un grafico
+              document.getElementById("svg-div").innerHTML += "<svg width='2000' height='1600' class ='svg_aggregate' id ='svg_aggregate_" + selectedOption + "'></svg></div>" // per ogni attributo ho un grafico
               var new_svg = d3.select("#svg_aggregate_" + selectedOption)
               var g = new_svg.append("g")
                 .attr("class", "axis")
                 .attr("transform", "translate(" + 100 + "," + 100 + ")");
-              var width = 500, height = 400
+              var width = 850, height = 750
+
 
               ///SETTING DEL TESTO
 
@@ -1083,9 +1101,10 @@
               .attr('x', width / 2 + 100)
               .attr('y', height - 15 + 165)
               .attr('text-anchor', 'middle')
+              .attr("id", function (d, i) { return "testo" + selectedOption })
               .style('font-family', 'Helvetica')
               .style('font-size', 12)
-              .text("Time(s)");
+              .text("Time(h:m:s)");
 
               // Y label
               new_svg.append('text')
@@ -1096,6 +1115,8 @@
                 .text(selectedOption);
 
                 colorSelector = 0
+                var last_height = height
+                var last_text = 0
 
               for (let j = 0; j < selectedSpindles.length; j++) { //Poi, per ogni spindle facente parte di quell'attributo scalo al massimo e minimo e cancello i grafici di prima singoli
                 
@@ -1168,32 +1189,57 @@
 
               
 
-                //e ora ho la mia scala definitiva...
-                  xScale = d3.scaleTime()
+                var tmp_x = timeArray[timeArray.length - 1].toFixed(3)
+
+                xScale = d3.scaleTime()
                   .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
                   .range([0, width]);
-                  yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+                yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
 
 
-                if  (already_done !=1){ //Per evitare che si disegnino 1000 assi
+
+                g.append("g")
+                  .attr("id", function (d, i) { return "xAxis" + j + "_" + selectedOption})
+                  .attr("transform", "translate(0," + last_height + ")")
+                  .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));;
+                last_height += 20
+                last_text += 15
+
+                d3.select("#xAxis" + j + "_" + selectedOption)
+                  .selectAll(".tick line")
+                  .attr("stroke", colors[colorSelector])
+                  .attr("stroke-dasharray", "5, 5");
+
+
+
+                d3.select("#xAxis" + j + "_" + selectedOption).selectAll("text").style("fill", colors[colorSelector])
+                d3.select("#testo" + selectedOption).attr("transform", "translate(0," + last_text + ")")
+                console.log(j)
+                if (j >= 1) {
+
+                  d3.select("#xAxis" + j + "_" + selectedOption)
+                    .call(d3.axisBottom(xScale)
+                      .tickFormat(d3.timeFormat("%H:%M:%S"))
+                      .ticks(5)
+                      .tickSize(-20 * j));
+
+                  d3.select("#xAxis" + j + "_" + selectedOption).selectAll("path").remove()
+                  d3.select("#xAxis" + j + "_" + selectedOption)
+                    .selectAll(".tick line")
+                    .attr("stroke", colors[colorSelector])
+                    .attr("stroke-dasharray", "5, 5");
+                }
+                if (already_done != 1) { //Per evitare che si disegnino 1000 assi
+
+
 
                   g.append("g")
-                    .attr("transform", "translate(0," + height + ")")
-                    .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));;
-
-
-
-                  g.append("g")
-                    .attr("class", "axis")
+                    .attr("class", function (d, i) { return "yAxis" })
                     .call(d3.axisLeft(yScale));
 
                   already_done = 1
 
                 }
-
-
-                
-
 
 
 
@@ -1226,8 +1272,8 @@
                   .style("stroke-width", "2")
                   .attr("id", function (d, i) { return "path" + selectedOption });
 
-                  new_svg.append('text')
-                  .attr('x', width / 2 + colorSelector * 120)
+                new_svg.append('text')
+                  .attr('x', width / 4 + colorSelector * 120)
                   .attr('y', 90)
                   .attr('text-anchor', 'middle')
                   .style('font-family', 'Helvetica')
