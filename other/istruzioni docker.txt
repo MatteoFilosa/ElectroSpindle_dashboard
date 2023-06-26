@@ -8,9 +8,9 @@ rm -r ElectroSpindle_dashboard
 
 git clone https://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@github.com/MatteoFilosa/ElectroSpindle_dashboard.git
 
-docker stop 2128f99e21b0 ---> stoppa lo specifico container
+docker stop f2046d20f6ee ---> stoppa lo specifico container
 
-docker rm 2128f99e21b0  ---->rimuove specifico container
+docker rm f2046d20f6ee  ---->rimuove specifico container
 
 cd ElectroSpindle_dashboard
 
