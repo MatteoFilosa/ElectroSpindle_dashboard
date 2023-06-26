@@ -530,6 +530,10 @@
 
               ///SETTING DEL TESTO
 
+              new_svg.on("mouseover", function (d, i) {
+                console.log(d.fromElement.__data__[1])
+              })
+
               new_svg.selectAll('text').remove()
 
               new_svg.append('text')
@@ -971,7 +975,8 @@
                 height = new_svg.attr("height") - margin //200
 
 
-    
+            
+
 
          
             var g = new_svg.append("g")
@@ -1068,6 +1073,11 @@
                 .style("stroke", "#CC0000")
                 .style("stroke-width", "2")
                 .attr("id", function (d, i) { return "path" + selectedGroup })
+
+
+                d3.selectAll("svg").on("mouseover", function (d, i) {
+                  console.log(d, i)
+                })
                 
 
 

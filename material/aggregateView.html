@@ -64,9 +64,12 @@
 
 <script>
 
-  function redirectView(spindle){
-    localStorage.setItem("selectedSpindle", JSON.stringify(spindle))
-    window.open('singleView.html', '_blank');
+  function redirectView(spindle,date){
+    /* var sn_to_add = []
+    sn_to_add.push([spindle, date])
+    localStorage.setItem("selectedSpindles", JSON.stringify(sn_to_add))
+    console.log(spindle, date)
+    window.open('singleView.html', '_blank'); */
   }
 
   function aggiungiSecondi(valoreIniziale, arraySecondi) {
@@ -511,11 +514,10 @@
                 .style('font-family', 'Helvetica')
                 .style('font-size', 20)
                 .style('text-decoration', 'underline')
+                .attr("id", function (d, i) { return "text" + current_spindle })
                 .style('fill', colors[colorSelector])
                 .text("\u25A0 " + current_spindle)
-                .on("click", function (d, i) {
-                    redirectView(current_spindle)
-                      })
+                
 
               if (colorSelector < colors.length) colorSelector += 1
               else colorSelector = 0
@@ -528,6 +530,8 @@
 
           }
         }
+
+        
         
 
 
@@ -746,6 +750,14 @@
   document.getElementById("svg-div").innerHTML += "</div>"
   
 }
+
+      for (let j = 0; j < sn_and_date.length; j++) {
+
+        d3.select("#text" + sn_and_date[j][0]).on("click", function (d, i) {
+          redirectView(d.srcElement.id.slice(4), sn_and_date[j][1])
+          console.log(d.srcElement.id.slice(4))
+        })
+      }
 }
 
        
@@ -1291,6 +1303,7 @@
                   .style('fill', colors[colorSelector])
                   .text("\u25A0 " + current_spindle)
                   .on("click", function (d, i) {
+                    console.log(d,i)
                     redirectView(current_spindle)
                   })
 
