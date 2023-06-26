@@ -64,6 +64,11 @@
 
 <script>
 
+  function redirectView(spindle){
+    localStorage.setItem("selectedSpindle", JSON.stringify(spindle))
+    window.open('singleView.html', '_blank');
+  }
+
   function aggiungiSecondi(valoreIniziale, arraySecondi) {
       var risultato = [];
 
@@ -505,8 +510,12 @@
                 .attr('text-anchor', 'middle')
                 .style('font-family', 'Helvetica')
                 .style('font-size', 20)
+                .style('text-decoration', 'underline')
                 .style('fill', colors[colorSelector])
                 .text("\u25A0 " + current_spindle)
+                .on("click", function (d, i) {
+                    redirectView(current_spindle)
+                      })
 
               if (colorSelector < colors.length) colorSelector += 1
               else colorSelector = 0
@@ -1278,8 +1287,12 @@
                   .attr('text-anchor', 'middle')
                   .style('font-family', 'Helvetica')
                   .style('font-size', 20)
+                  .style('text-decoration', 'underline')
                   .style('fill', colors[colorSelector])
                   .text("\u25A0 " + current_spindle)
+                  .on("click", function (d, i) {
+                    redirectView(current_spindle)
+                  })
 
                 if (colorSelector < colors.length) colorSelector += 1
                 else colorSelector = 0
