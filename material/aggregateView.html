@@ -64,13 +64,7 @@
 
 <script>
 
-  function redirectView(spindle,date){
-    /* var sn_to_add = []
-    sn_to_add.push([spindle, date])
-    localStorage.setItem("selectedSpindles", JSON.stringify(sn_to_add))
-    console.log(spindle, date)
-    window.open('singleView.html', '_blank'); */
-  }
+  
 
   function aggiungiSecondi(valoreIniziale, arraySecondi) {
       var risultato = [];
@@ -223,16 +217,39 @@
     document.getElementById("selectedSpindles").innerHTML += "<b>Selected spindles:</b> "
 
     for (let j = 0; j < selectedSpindles.length; j++) {
-      
-      var virgola = ", "
-      if(j+1 == selectedSpindles.length) virgola = ""
-    document.getElementById("selectedSpindles").innerHTML += selectedSpindles[j][0] + virgola //+ ", Breakin date: " + selectedSpindles[j][1]
+        var virgola = ", ";
+        if (j + 1 === selectedSpindles.length) virgola = "";
+
+        var spindleElement = document.createElement("span");
+        spindleElement.textContent = selectedSpindles[j][0] + virgola;
+        spindleElement.classList.add("spindle");
+
+        spindleElement.addEventListener("mouseover", function () {
+          this.classList.add("hovered");
+        });
+
+        spindleElement.addEventListener("mouseout", function () {
+          this.classList.remove("hovered");
+        });
+
+        spindleElement.addEventListener("click", function () {
+          redirectView(selectedSpindles[j][0], selectedSpindles[j][1]);
+          this.classList.add("clicked");
+        });
+
+        document.getElementById("selectedSpindles").appendChild(spindleElement);
+      }
+
     
+      
+  function redirectView(spindle, date) {
+      var sn_to_add = []
+      sn_to_add.push([spindle, date])
+
+      console.log(spindle, date)
+      
+      window.open('singleView.html?spindle=' + spindle + "?date=" + date, '_blank');
     }
-
-    
-      
-
 
   
 
@@ -514,7 +531,7 @@
                 .style('font-family', 'Helvetica')
                 .style('font-size', 20)
                 .style('text-decoration', 'underline')
-                .attr("id", function (d, i) { return "text" + current_spindle })
+                .attr("id", function (d, i) { return "text" + current_spindle + selectedOption})
                 .style('fill', colors[colorSelector])
                 .text("\u25A0 " + current_spindle)
                 
@@ -751,13 +768,6 @@
   
 }
 
-      for (let j = 0; j < sn_and_date.length; j++) {
-
-        d3.select("#text" + sn_and_date[j][0]).on("click", function (d, i) {
-          redirectView(d.srcElement.id.slice(4), sn_and_date[j][1])
-          console.log(d.srcElement.id.slice(4))
-        })
-      }
 }
 
        
@@ -1297,15 +1307,13 @@
                   .attr('x', width / 4 + colorSelector * 120)
                   .attr('y', 90)
                   .attr('text-anchor', 'middle')
+                  .attr("id", function (d, i) { return "text" + current_spindle + selectedOption })
                   .style('font-family', 'Helvetica')
                   .style('font-size', 20)
                   .style('text-decoration', 'underline')
                   .style('fill', colors[colorSelector])
                   .text("\u25A0 " + current_spindle)
-                  .on("click", function (d, i) {
-                    console.log(d,i)
-                    redirectView(current_spindle)
-                  })
+                  
 
                 if (colorSelector < colors.length) colorSelector += 1
                 else colorSelector = 0
@@ -1324,6 +1332,7 @@
 
     
   })
+  
 
   
     })

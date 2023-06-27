@@ -12,6 +12,24 @@ html * {
     justify-content: space-between;
 
 }
+.spindle {
+    cursor: pointer;
+}
+
+.spindle:hover {
+    color: #0088FF;
+    /* Blu acceso durante l'hover */
+}
+
+.spindle.hovered {
+    color: #FF5500;
+    /* Colore acceso alternativo quando il mouse è sopra */
+}
+
+.spindle.clicked {
+    color: #6699FF;
+    /* Tonalità di blu dopo il click */
+}
 
 p {
     transform: scale(1.2);

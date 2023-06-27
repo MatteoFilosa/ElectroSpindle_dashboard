@@ -316,8 +316,18 @@
 
 
 
-        var  colorSelector = 0, selectedValues = [], globalData = []
-        var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
+        var  colorSelector = 0, selectedValues = [], globalData = [], sn_and_date = []
+
+        if(window.location.href.includes("?spindle=")){
+          var params = new URLSearchParams(window.location.search);
+          var query = params.get("spindle");
+          var [spindle, date] = query.split("?date=");
+
+          console.log("Spindle:", spindle);
+          console.log("Date:", date);
+          sn_and_date.push([spindle, date])
+        } 
+        else sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
 
 
         
@@ -1869,7 +1879,7 @@
 
 
 
-        var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
+        //var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
         
         document.getElementById("selectedSpindles").innerHTML += "<b>Selected spindle</b>: <u>"+ sn_and_date[0][0] + "</u>, <b>Breakin date</b>: " + sn_and_date[0][1]
             
