@@ -209,7 +209,6 @@ function sleep (time) {
 
 function saveSpindle(sn){
 
-  console.log("ok")
   sn_and_date = JSON.parse(localStorage.getItem("sn_and_date"))
   var to_write = "", toCheck = []
 
@@ -226,8 +225,11 @@ function saveSpindle(sn){
           for (let j = 0; j < nodesToSelect.length; j++) {
 
             if(nodesToSelect[j].checked == true) toCheck.push(nodesToSelect[j].id)
-            if(nodesToSelect[j].id == sn + "_selected"){
-
+            if(nodesToSelect[j].id == sn + "_selected"){    
+                console.log("aaas")
+                document.getElementById(sn + "_selected").checked = true
+              
+              
               return //Se trovo un duplicato me ne vado proprio
 
             }
@@ -253,7 +255,10 @@ function saveSpindle(sn){
     }
 
   }
-
+  else {
+    document.getElementById(sn + "_selected").checked = false
+    console.log("bbb")
+  }
 
   
 }
