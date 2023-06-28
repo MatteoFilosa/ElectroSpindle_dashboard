@@ -1,78 +1,6 @@
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-}
-
-.container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    height: 80%;
-}
-
-.header {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
-.box {
-    width: 60%;
-    border-radius: 10px;
-    background-color: #f1f1f1;
-    padding: 20px;
-}
-
-.bold-text {
-    font-weight: bold;
-}
-
-.button-row {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-}
-
-
-
-.arrow {
-    display: flex;
-    align-items: center;
-}
-
-.arrow::before {
-    content: "";
-    width: 10px;
-    height: 10px;
-    border-top: 2px solid #000;
-    border-right: 2px solid #000;
-    transform: rotate(45deg);
-    margin-right: 5px;
-}
-
-.first-box {
-    margin-top: 20px;
-}
-
-.last-box {
-    margin-bottom: 20px;
-}
-
-.centered-text {
-    text-align: center;
-    margin-top: 10px;
-}
-
-
 ul {
     list-style-type: none;
 }
-
 
 
 html * {
@@ -279,6 +207,11 @@ input[type=checkbox] {
 }
 
 
+#svg3 {
+    position: absolute;
+    left: 800px;
+    top: 200px;
+}
 
 .button-blue {
     background-color: #0095ff;
