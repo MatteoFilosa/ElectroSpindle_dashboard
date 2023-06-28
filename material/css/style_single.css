@@ -8,12 +8,12 @@
         opacity: 0.8s;
     }
 
-    p{
-        transform: scale(1.2);
-        margin-left: 120px;
-        font-weight:bolder;
-        margin-top: 10px;
-    }
+        p {
+            
+            font-weight: bolder;
+            margin-top: 10px;
+            margin-left: 0;
+        }
 
     #analyticsDiv{
         position: absolute;

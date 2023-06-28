@@ -9,10 +9,10 @@ body {
 }
 
 p {
-    transform: scale(1.2);
-    margin-left: 120px;
+
     font-weight: bolder;
-    margin-top: 30px;
+    margin-top: 10px;
+    margin-left: 0;
 }
 
     text.shadow {

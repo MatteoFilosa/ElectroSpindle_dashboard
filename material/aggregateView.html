@@ -506,8 +506,8 @@
                 .attr("transform", "translate(" + 100 + "," + 100 + ")")
                 .style("fill", colors[colorSelector])
                 .attr("id", function (d, i) { return "dot" + selectedOption })
-                .on("mouseover", function (d, i) { return displayTooltip(d, i, selectedOption, event) })
-                .on("mouseout", function (d, i) { return hideTooltip() })
+                /* .on("mouseover", function (d, i) { return displayTooltip(d, i, selectedOption, event) })
+                .on("mouseout", function (d, i) { return hideTooltip() }) */
 
               var line = d3.line()
                 .x(function (d) { return xScale(d[0]); })
@@ -676,8 +676,8 @@
               .attr("transform", "translate(" + 100 + "," + 100 + ")")
               .style("fill", "#CC0000")
               .attr("id", function (d, i) { return "dot_" + j + "_" + selectedOption })
-              .on("mouseover", function (d, i) { return displayTooltip(d, i, selectedOption, event) })
-              .on("mouseout", function (d, i) { return hideTooltip() })
+              /* .on("mouseover", function (d, i) { return displayTooltip(d, i, selectedOption, event) })
+              .on("mouseout", function (d, i) { return hideTooltip() }) */
 
             var line = d3.line()
               .x(function (d) { return xScale(d[0]); })
@@ -998,8 +998,8 @@
                     .attr("transform", "translate(" + 100 + "," + 100 + ")")
                     .style("fill", "#CC0000")
                     .attr("id", function(d,i){ return "dot_" + i + "_" + selectedOption})
-                    .on("mouseover", function (d, i) { return displayTooltip(d, i, selectedOption, event) })
-                  .on("mouseout", function (d, i) { return hideTooltip() })
+                    /* .on("mouseover", function (d, i) { return displayTooltip(d, i, selectedOption, event) })
+                  .on("mouseout", function (d, i) { return hideTooltip() }) */
 
                 var line = d3.line()
                     .x(function(d) { return xScale(d[0]); }) 
@@ -1285,8 +1285,8 @@
                   .attr("transform", "translate(" + 100 + "," + 100 + ")")
                   .style("fill", colors[colorSelector])
                   .attr("id", function (d, i) { return "dot" + selectedOption })
-                  .on("mouseover", function (d, i) { return displayTooltip(d, i, selectedOption, event) })
-                  .on("mouseout", function (d, i) { return hideTooltip() })
+                  /* .on("mouseover", function (d, i) { return displayTooltip(d, i, selectedOption, event) })
+                  .on("mouseout", function (d, i) { return hideTooltip() }) */
 
                 var line = d3.line()
                   .x(function (d) { return xScale(d[0]); })
@@ -1543,8 +1543,8 @@
                 .attr("transform", "translate(" + 100 + "," + 100 + ")")
                 .style("fill", "#CC0000")
                 .attr("id", function (d, i) { return "dot_" + i + "_" + selectedOption })
-                .on("mouseover", function (d, i) { return displayTooltip(d, i, selectedOption, event) })
-                .on("mouseout", function (d, i) { return hideTooltip() })
+                /* .on("mouseover", function (d, i) { return displayTooltip(d, i, selectedOption, event) })
+                .on("mouseout", function (d, i) { return hideTooltip() }) */
 
               var line = d3.line()
                 .x(function (d) { return xScale(d[0]); })

@@ -32,10 +32,10 @@ html * {
 }
 
 p {
-    transform: scale(1.2);
-    margin-left: 118px;
+
     font-weight: bolder;
     margin-top: 10px;
+    margin-left: 0;
 }
 
 .row.no-wrap {
