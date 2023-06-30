@@ -1,0 +1,376 @@
+ html * {
+     font-size: 1em !important;
+     font-family: Roboto !important;
+ }
+    text.shadow {
+       
+        stroke-width: 0.6px;
+        opacity: 0.8s;
+    }
+
+        p {
+            
+            font-weight: bolder;
+            margin-top: 10px;
+            margin-left: 0;
+        }
+
+    #analyticsDiv{
+        position: absolute;
+        left: 900px;
+        top:120px;
+        display: flex;
+        column-gap: 20px;
+        justify-content: space-between;
+        
+        }
+
+                #loading {
+                    margin-left: 155px;
+                    margin-top: 15px;
+                    margin-bottom: 20px;
+                }
+        
+               
+
+      
+
+        .popup {
+            display: none;
+            position: absolute;
+            top: 15%;
+            left: 20%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            z-index: 9999;
+            transform: scale(0.85)
+        }
+    
+        .success {
+            background-color: #2ecc71;
+        }
+    
+        .error {
+            background-color: #e74c3c;
+        }
+
+        
+                #loader {
+                    border: 16px solid #f3f3f3;
+                    /* Light grey */
+                    border-top: 16px solid #3498db;
+                    /* Blue */
+                    border-radius: 50%;
+                    width: 60px;
+                    height: 60px;
+                    animation: spin 2s linear infinite;
+                    margin-left: 200px;
+                    margin-top: 20px;
+                    margin-bottom: 20px;
+        
+        
+                }
+    
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+    
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+    #coordinates {
+
+        position: absolute;
+        left: 8px;
+        top: 140px;
+    }
+
+
+    .input-color {
+        position: relative;
+    }
+
+    .input-color input {
+        padding-left: 20px;
+    }
+
+    .input-color .color-box {
+        width: 10px;
+        height: 10px;
+        display: inline-block;
+        background-color: #ccc;
+        position: absolute;
+        left: 5px;
+        top: 5px;
+    }
+
+    input[type=number] {
+
+        margin-left: 8px;
+        box-sizing: border-box;
+        border: 2px solid lightseagreen;
+        border-radius: 4px;
+        background-color: rgb(205, 236, 246);
+
+    }
+
+    input[type=checkbox] {
+        background-color: lightblue;
+    }
+
+
+    #problems-found {
+
+        position: absolute;
+        left: 500px;
+        top: 0px;
+        height: 100px;
+        width: 500px;
+
+    }
+
+    #availableSpindles {
+
+        position: absolute;
+        left: 800px;
+        top: 0px;
+        height: 500px;
+        width: 500px;
+        
+            
+
+    }
+
+
+    #histogram {
+        position: absolute;
+        left: 600px;
+        top: 0px;
+    }
+
+    #svg3 {
+        position: absolute;
+        left: 800px;
+        top: 200px;
+    }
+
+    .button-blue {
+        background-color: #0095ff;
+        border: 1px solid transparent;
+        border-radius: 3px;
+        box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
+        box-sizing: border-box;
+        color: #fff;
+        cursor: pointer;
+        display: inline-block;
+        font-family: -apple-system, system-ui, "Segoe UI", "Liberation Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+
+        line-height: 1.15385;
+        margin: 0;
+        outline: none;
+        padding: 8px .8em;
+        position: relative;
+        text-align: center;
+        text-decoration: none;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        vertical-align: baseline;
+        white-space: nowrap;
+    }
+
+    .button-blue:hover,
+    .button-blue:focus {
+        background-color: #07c;
+    }
+
+    .button-blue:focus {
+        box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
+    }
+
+    .button-blue:active {
+        background-color: #0064bd;
+        box-shadow: none;
+    }
+
+    .button-green {
+        background-color: #32CD32;
+        border: 1px solid transparent;
+        border-radius: 3px;
+        box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
+        box-sizing: border-box;
+        color: #fff;
+        cursor: pointer;
+        display: inline-block;
+        font-family: -apple-system, system-ui, "Segoe UI", "Liberation Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 1.15385;
+        margin: 0;
+        outline: none;
+        padding: 8px .8em;
+        position: relative;
+        text-align: center;
+        text-decoration: none;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        vertical-align: baseline;
+        white-space: nowrap;
+    }
+
+    .button-blue-spindle {
+        background-color: #0095ff;
+        border: 1px solid transparent;
+        border-radius: 3px;
+        box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
+        box-sizing: border-box;
+        color: #fff;
+        cursor: pointer;
+        display: inline-block;
+        font-family: -apple-system, system-ui, "Segoe UI", "Liberation Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 1.15385;
+        margin: 0;
+        outline: none;
+        padding: 8px .8em;
+        position: relative;
+        text-align: center;
+        text-decoration: none;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        vertical-align: baseline;
+        white-space: nowrap;
+        height: fit-content;
+        width: fit-content;
+    }
+
+    .button-blue:hover,
+    .button-blue:focus {
+        background-color: #07c;
+    }
+
+    .button-blue:focus {
+        box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
+    }
+
+    .button-blue:active {
+        background-color: #0064bd;
+        box-shadow: none;
+    }
+
+    .button-green {
+        background-color: #32CD32;
+        border: 1px solid transparent;
+        border-radius: 3px;
+        box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
+        box-sizing: border-box;
+        color: #fff;
+        cursor: pointer;
+        display: inline-block;
+        font-family: -apple-system, system-ui, "Segoe UI", "Liberation Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 1.15385;
+        margin: 0;
+        outline: none;
+        padding: 8px .8em;
+        position: relative;
+        text-align: center;
+        text-decoration: none;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        vertical-align: baseline;
+        white-space: nowrap;
+    }
+
+    .button-green:hover,
+    .button-green:focus {
+        background-color: #9ACD32;
+    }
+
+    .button-green:focus {
+        box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
+    }
+
+    .button-green:active {
+        background-color: #228B22;
+        box-shadow: none;
+    }
+
+
+
+    .button-red {
+        background-color: #ff0000;
+        border: 1px solid transparent;
+        border-radius: 3px;
+        box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
+        box-sizing: border-box;
+        color: #fff;
+        cursor: pointer;
+        display: inline-block;
+        font-family: -apple-system, system-ui, "Segoe UI", "Liberation Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 1.15385;
+        margin: 0;
+        outline: none;
+        padding: 8px .8em;
+        position: relative;
+        text-align: center;
+        text-decoration: none;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        vertical-align: baseline;
+        white-space: nowrap;
+    }
+
+    .button-red:hover,
+    .button-red:focus {
+        background-color: #b30000;
+    }
+
+    .button-red:focus {
+        box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
+    }
+
+    .button-red:active {
+        background-color: #ffbfbf;
+        box-shadow: none;
+    }
+
+    #svg-div {
+        display: inline-flex;
+
+    }
+
+    #svg_default {
+        margin-top: 20px;
+
+
+    }
+
+    #tooltip {
+        background-color: lightyellow;
+        position: absolute;
+        left: 200px;
+        top: 200px;
+        visibility: visible;
+    }
+
+   
+                        

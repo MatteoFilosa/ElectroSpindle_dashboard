@@ -14,7 +14,7 @@
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <title>ElectroSpindle Dashboard</title>
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
-    <link rel="stylesheet" href="css/style_index.css">
+    <link rel="stylesheet" href="style_index.css">
     </link>
 <body>
     <div class="container">
@@ -25,7 +25,7 @@
             <div class="button-row">
                 <button class="button-blue" id="ctqBtn">CTQ</button>
                 <span class="arrow"></span>
-                <button class="button-blue" id="breakinBtn" onclick = "window.open('index_breakins.html', '_blank')">Breakin</button>
+                <button class="button-blue" id="breakinBtn" onclick = "window.open('breakins/index_breakins.html', '_blank')">Breakin</button>
                 <span class="arrow"></span>
                 <button class="button-blue" id="smartTesterBtn">Smart Tester</button>
                 <span class="arrow"></span>
@@ -39,7 +39,7 @@
         <div class="box">
             <p class="bold-text">Usage</p>
             <div class="button-row">
-                <button class="button-blue" id="myHsdBtn">MY HSD</button>
+                <button class="button-blue" id="myHsdBtn" onclick = "window.open('myhsd/myhsd_test.html', '_blank')">MY HSD</button>
             </div>
         </div>
 
@@ -52,7 +52,7 @@
                 var buttons = document.querySelectorAll(".button-blue");
 
                 buttons.forEach(function (button) {
-                    if (button.id !== "breakinBtn") {
+                    if ((button.id !== "breakinBtn") && (button.id !== "myHsdBtn")) {
                         button.disabled = true;
                         button.style.backgroundColor = "#a9a9a9";
                     }
