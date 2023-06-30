@@ -1,0 +1,1874 @@
+<!doctype html>
+<html>
+<head>
+    <!---Bootstrap-->
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+
+    <title>Single spindle visualization</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="css/style_single.css"></link>
+    <script>
+
+      function drawChart(selectedGroup, dataset) {
+          var margin = { top: 100, right: 100, bottom: 100, left: 100 };
+          var width = 800 - margin.left - margin.right;
+          var height = 510 - margin.top - margin.bottom;
+
+          var new_svg = d3.select("#svg" + selectedGroup);
+          new_svg.attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom);
+
+          var g = new_svg.append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .attr("id", "g" + selectedGroup);
+
+          // Creazione delle scale
+          var minTimestamp = d3.min(dataset, function (d) { return d[0]; });
+          var maxTimestamp = d3.max(dataset, function (d) { return d[0]; });
+
+          var xScale = d3.scaleTime()
+            .domain([minTimestamp, maxTimestamp])
+            .range([0, width]);
+
+          var yScale = d3.scaleLinear()
+            .domain([min, max])
+            .range([height, 0]);
+
+          // Creazione degli assi
+          var xAxis = d3.axisBottom(xScale);
+          var yAxis = d3.axisLeft(yScale);
+
+          g.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .attr("id", "xAxis" + selectedGroup)
+            .call(xAxis);
+
+          g.append("g")
+            .attr("id", "yAxis" + selectedGroup)
+            .call(yAxis);
+
+          // Creazione dei punti
+          g.selectAll("dot")
+            .data(dataset)
+            .enter()
+            .append("circle")
+            .attr("cx", function (d) { return xScale(d[0]); })
+            .attr("cy", function (d) { return yScale(d[1]); })
+            .attr("r", 3)
+            .style("fill", "#CC0000")
+            .attr("class", "punto");
+
+          // Creazione della linea
+          var line = d3.line()
+            .x(function (d) { return xScale(d[0]); })
+            .y(function (d) { return yScale(d[1]); })
+            .curve(d3.curveMonotoneX);
+
+          g.append("path")
+            .datum(dataset)
+            .attr("class", "line")
+            .attr("d", line)
+            .style("fill", "none")
+            .style("stroke", "#CC0000")
+            .style("stroke-width", "2");
+        }
+
+      function aggiungiSecondi(valoreIniziale, arraySecondi) {
+          var risultato = [];
+
+          for (var i = 0; i < arraySecondi.length; i++) {
+            var secondi = arraySecondi[i];
+            var tempo = valoreIniziale.split(':');
+
+            var data = new Date();
+            data.setHours(parseInt(tempo[0], 10));
+            data.setMinutes(parseInt(tempo[1], 10));
+            data.setSeconds(parseInt(tempo[2], 10));
+
+            // Aggiungi i secondi al tempo iniziale
+            data.setSeconds(data.getSeconds() + secondi);
+
+            // Formatta il tempo in una stringa "ore:minuti:secondi"
+            var tempoNuovo = ('0' + data.getHours()).slice(-2) + ':' +
+              ('0' + data.getMinutes()).slice(-2) + ':' +
+              ('0' + data.getSeconds()).slice(-2);
+
+            risultato.push(tempoNuovo);
+          }
+
+          return risultato;
+        }
+
+      var globalData = []
+
+      function restoreLoader() {
+          console.log("Restoring loader")
+          // Creazione del paragrafo
+          const loadingParagraph = document.createElement('p');
+          loadingParagraph.id = 'loading';
+          loadingParagraph.textContent = 'Loading data, please wait...';
+
+          // Creazione del div
+          const loaderDiv = document.createElement('div');
+          loaderDiv.id = 'loader';
+
+          // Aggiunta degli elementi al DOM
+          document.body.appendChild(loadingParagraph);
+          document.body.appendChild(loaderDiv);
+
+        }
+
+      function showPopup(message, isSuccess) {
+          var popup = document.getElementById("popup");
+          popup.textContent = message;
+          popup.className = "popup" + (isSuccess ? " success" : " error");
+          popup.style.display = "block";
+
+          // Nascondi il popup dopo 3 secondi
+          setTimeout(function () {
+            popup.style.display = "none";
+          }, 3000);
+        }
+
+
+      function rimuoviDuplicati(array) {
+          return Array.from(new Set(array));
+        }
+ 
+
+    const colors = [
+        "#0074D9", // blu
+        "#FF4136", // rosso
+        "#2ECC40", // verde
+        "#FF851B", // arancione
+        "#7FDBFF", // celeste
+        "#B10DC9", // viola
+        "#FFDC00", // giallo
+        "#001f3f", // blu scuro
+        "#39CCCC", // verde acqua
+        "#F012BE", // magenta
+        "#3D9970", // verde scuro
+        "#111111", // nero
+        "#AAAAAA", // grigio
+        "#DDDDDD", // grigio chiaro
+      ];
+
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+</head>
+
+<body class="mx-4">
+  <img src="images/home.png" style="vertical-align:middle" alt="check" width="25" height="25" onclick = "window.open('index_breakins.html', '_self');"> <a href = 'index_breakins.html'>Back to spindle selection</a>
+<p>Single spindle visualization</p>
+
+
+
+
+<div id ="selectedSpindles"></div>
+<input type = "checkbox" id ="aggregato" class = "checkbox" onclick="aggregateHelper()" > Aggregate
+
+
+<select id="selectMenu" onchange = "restoreLoader()">
+  <option value="" disabled selected>Select attribute</option>
+</select>
+<div id = "selectedValues"></div>
+<div id="tooltip"></div>
+<br>
+
+<div id = "downsamplePlaceholder">Insert downsample (current: 100)</div> <input type="text" id="downsample" maxlength="3" required placeholder="Downsample"> <button class="button-green" id="downsampleBtn" onclick = "restoreLoader()" >Apply</button>
+
+<div id="popup" class="popup"></div>
+<br><br>
+<button id="clear" onclick="clearSvg()" class="button-red">Clear all</button>
+
+<div id = "info" class = "info">
+
+
+
+    <!--
+    <img src="images/warning.png" style="vertical-align:middle" alt="warning" width="25" height="25"> Problema in: Tba
+     -->
+
+
+    <!--<img src="images/2.png" style="vertical-align:middle" alt="check" width="150" height="80">-->
+
+    
+</div>
+<div id = "analyticsDiv"></div>
+
+
+
+
+
+
+<br>
+
+
+<div id = "coordinates"></div>
+
+
+<div class="container" id = "svg-div">
+  <div class="row" id = "svg-row">
+    <!--
+    <div class="col-sm">
+      One of three columns
+    </div>
+    -->
+
+  </div>
+</div>
+
+<script>
+
+  
+  /* d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics", { crossOrigin: "anonymous" }).then(function (data) {
+
+      for (let i = 0; i < data.length; i++){
+        
+        document.getElementById("analyticsDiv").innerHTML += "<button class = 'button-blue' onclick = 'analytics(this)'>" + data[i] +"</button>"
+      }
+
+
+
+    }) */
+
+     
+    var allGroup = [], sn_myhsd = JSON.parse(localStorage.getItem("sn_myhsd")); 
+    d3.json("http://arca.diag.uniroma1.it:8082/data/myhsd/measurements/" + sn_myhsd + "", { crossOrigin: "anonymous" }).then(function (data) {
+      
+        console.log(data)
+        for (let i = 0; i < data.results.length; i++){
+          console.log(data.results[i].metrics[0].metric_name)
+          if(allGroup.includes(data.results[i].metrics[0].metric_name)==false) allGroup.push(data.results[i].metrics[0].metric_name)
+          
+        }
+        console.log(allGroup)
+
+        d3.select("#selectMenu")
+        .selectAll('myOptions')
+        .data(allGroup)
+        .enter()
+        .append('option')
+        .text(function (d) { return d; }) // text showed in the menu
+        .attr("value", function (d) { return d; }) // corresponding value returned by the button
+  
+  
+  
+      }) 
+      
+
+  function analytics(button) {
+
+   
+
+
+    
+
+
+      var selectedFeature = button.innerHTML;
+
+      localStorage.setItem("selectedFeature", JSON.stringify(selectedFeature))
+      
+      var to_add = document.getElementById("selectedValues").childNodes
+      var selectedAttributes = []
+
+      for (let i = 0; i <= to_add.length; i++) {
+
+        if (to_add[i] != undefined) {
+
+          if ((to_add[i].id != null) && (to_add[i].checked == true)) {
+
+
+            selectedAttributes.push(to_add[i].id)
+          }
+        }
+      }
+
+    localStorage.setItem("selectedAttributes", JSON.stringify(selectedAttributes))
+
+
+    if (selectedAttributes.length > 0) {
+      if (selectedFeature == "basic statistics") window.open('basic_statistics.html', '_blank');
+      if ((selectedFeature == "pearson") && (selectedAttributes.length == 1)) showPopup("Select at least two attributes to show the pearson correlation.", false)
+
+      else window.open('pearson.html', '_blank');
+
+    }
+    else showPopup("Select at least one attribute to continue.", false)
+  }
+ 
+
+
+  function sleep(time) {
+      return new Promise((resolve) => setTimeout(resolve, time));
+    }
+
+  function displayTooltip(d) {
+      document.getElementById("tooltip").style.visibility = "visible"
+     
+      var tooltip = document.getElementById("tooltip")
+      tooltip.innerHTML = d
+      tooltip.style.position = "absolute"
+      tooltip.style.top = (event.screenY - 80) + "px"
+      tooltip.style.left = (event.screenX - 80) + "px"
+
+
+    }
+
+    function hideTooltip(d, i, event) {
+
+      document.getElementById("tooltip").style.visibility = "hidden"
+
+    }
+
+  
+       
+        
+
+
+
+        var  colorSelector = 0, selectedValues = [], globalData = [], sn_myhsd = JSON.parse(localStorage.getItem("sn_myhsd"))
+
+        /* if(window.location.href.includes("?spindle=")){
+          var params = new URLSearchParams(window.location.search);
+          var query = params.get("spindle");
+          var [spindle, date] = query.split("?date=");
+
+          console.log("Spindle:", spindle);
+          console.log("Date:", date);
+          sn_myhsd.push([spindle, date])
+        } 
+        else sn_myhsd = JSON.parse(localStorage.getItem("selectedSpindles")); */
+
+
+        
+
+
+        function aggregateHelper(){
+
+
+          
+          var data = globalData
+
+
+          if(document.getElementById("aggregato").checked == true) newGraph("", data, 1, 0)
+
+          else { //vuol dire che devo rendere visibili gli attributi di prima
+
+            var to_add = document.getElementById("selectedValues").childNodes
+            var toAvoid = []
+           
+            colorSelector -= 1
+            for (let i = 0; i <= to_add.length; i++) {
+              
+              if(to_add[i] != undefined){
+
+                if ((to_add[i].id != null) && (to_add[i].checked == true)) {
+
+               
+                  var tmp = to_add[i].id
+                  
+                  
+           
+                  
+                  
+                  //d3.select("#svg" + tmp).attr("visibility", "visible")
+                
+
+                  if((d3.select("#svg" + tmp).size() == 0) && (toAvoid.includes(tmp) == false)){
+             
+                    newGraph(tmp, data, 3)
+                    
+                    
+                  }
+                }
+                toAvoid.push(tmp)
+               
+
+              }
+              
+            }
+            d3.select("#svg_default").remove()
+          }
+
+
+
+
+        }
+
+        function modifyElement(selectedOption, flag){ 
+            
+        
+          if (flag != 1) selectedOption = selectedOption.id
+            var data = globalData
+            //var selectedOption = JSON.parse(localStorage.getItem("selectedOption"));
+            
+
+            if (document.getElementById(selectedOption).checked == true){
+
+                var toAddDot = "#dot" + selectedOption
+                var toAddPath = "#path" + selectedOption
+                
+                if(document.getElementById("aggregato").checked == true){
+
+                  d3.select("#svg_default").selectAll(toAddDot).attr("visibility", "visible");
+                  d3.select("#svg_default").selectAll(toAddPath).attr("visibility", "visible");
+
+                }
+
+                else{
+                  d3.selectAll("#svg" + selectedOption).attr("visibility", "visible");
+                }
+
+            }
+        //si cancella tutto ciò che fa parte del grafico con l'id selezionato
+            else if (document.getElementById(selectedOption).checked == false){
+
+                var toRemoveDot = "#dot" + selectedOption
+                var toRemovePath = "#path" + selectedOption
+
+                if(document.getElementById("aggregato").checked == true){
+
+                  
+                  d3.selectAll(toRemoveDot).attr("visibility", "hidden");
+                  d3.selectAll(toRemovePath).attr("visibility", "hidden");
+
+                }
+
+                else {
+                  d3.selectAll("#svg" + selectedOption).remove()
+                  document.getElementById(selectedOption).remove()
+                  document.getElementById("label" + selectedOption).remove()
+                  var values = JSON.parse(localStorage.getItem("selectedValues"))
+                  if (values.includes(selectedOption)) {
+
+                    const index = values.indexOf(selectedOption);
+                    if (index > -1) { // only splice array when item is found
+                      values.splice(index, 1); // 2nd parameter means remove one item only
+                    }
+
+                  }
+                  localStorage.removeItem("selectedValues")
+                  localStorage.setItem("selectedValues", JSON.stringify(values))
+
+                }
+                
+
+                // da rivedere per colore
+                if(colorSelector != -1) --colorSelector
+                else colorSelector = 0
+                
+            }
+            
+        }
+
+        function clearSvg(){
+
+                console.log("Clearing svgs...")
+                document.getElementById("selectedValues").innerHTML = ""
+                document.getElementById("aggregato").checked = false
+                document.getElementById("selectMenu").selectedIndex = 0; 
+
+                d3.select("#svg_default").remove()    //attr("visibility", "hidden");
+
+                document.getElementById("svg-div").remove()
+                var svgDiv = document.createElement("div")
+                svgDiv.classList.add("container");
+                svgDiv.id = "svg-div";
+                document.body.appendChild(svgDiv);
+                document.getElementById("svg-div").innerHTML +=  "<div class='row' id='svg-row'>"
+
+
+                localStorage.removeItem("selectedValues");
+                }
+
+
+    function newGraph(selectedGroup, data, aggregato){
+
+
+
+      var dataLength = globalData["time"][0].length // un qualunque attributo tanto la lunghezza sempre quella è
+      
+
+      var dataset = [];
+      var min = 100000
+      var max = 0
+      var scaleCheck = 0
+      var time = globalData["time"][0]
+      var time_start = globalData["date start"][0]
+      var real_time = aggiungiSecondi(time_start, time)
+      console.log(real_time)
+   
+
+      if(document.getElementById("aggregato").checked != true) my_data = globalData[selectedGroup][0]
+      console.log(globalData, my_data)
+     
+
+          if(aggregato == 1){ // Caso AGGREGATO
+
+            ///Variabili 
+
+            colorSelector = 0
+            
+            d3.select("#svg_default").attr("visibility", "visible");
+
+         
+            
+            ///Scala per grafici OK
+
+            var min = 100000
+            var max = 0
+            var data = globalData
+    
+
+            
+            var valori = []
+            var to_add = document.getElementById("selectedValues").childNodes
+
+            for(let i = 0; i < to_add.length; i++){
+
+              if (to_add[i] != undefined) {
+
+                if ((to_add[i].id != null) && (to_add[i].checked == true)) {
+
+                  valori.push(to_add[i].id)
+   
+
+                }
+              }
+
+            }
+
+
+              var scalaAggiuntiva = 0
+              if (document.getElementById("svg_default") != null) document.getElementById("svg_default").remove()
+              //var valori = JSON.parse(localStorage.getItem("selectedValues"))
+              document.getElementById("svg-div").innerHTML = "<div class='row' id = 'svg-row'><svg width='2000' height='1600' id ='svg_default'></svg></div>"
+              var new_svg = d3.select("#svg_default")
+              var g = new_svg.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+              var width = 850, height = 750
+
+              ///SETTING DEL TESTO
+
+              new_svg.on("mouseover", function (d, i) {
+                console.log(d.fromElement.__data__[1])
+              })
+
+              new_svg.selectAll('text').remove()
+
+              new_svg.append('text')
+                .attr('x', width / 2 + 100)
+                .attr('y', 45)
+                .attr('text-anchor', 'middle')
+                .style('font-family', 'Helvetica')
+                .style('font-size', 20)
+                .text("Aggregate chart");
+
+            var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 65)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text("Downsample: " + numbersOnly);
+
+              // X label
+              new_svg.append('text')
+                .attr('x', width / 2 + 100)
+                .attr('y', height - 15 + 165)
+                .attr('text-anchor', 'middle')
+                .style('font-family', 'Helvetica')
+                .style('font-size', 12)
+                .text("Time(h:m:s)");
+
+              // Y label
+              new_svg.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('transform', 'translate(40,' + height + ')rotate(-90)')
+                .style('font-family', 'Helvetica')
+                .style('font-size', 12)
+                .text("Aggregate values");
+
+              
+
+  
+
+              var container = document.getElementById('svg-div');
+
+           
+
+              for (let j = 0; j < valori.length; j++) { //Serve per scalare gli assi correttamente
+
+                var selectedGroup = valori[j]
+
+
+
+                var my_data = globalData[selectedGroup][0]
+                var time = globalData["time"][0]
+                var time_start = globalData["date start"][0]
+                var real_time = aggiungiSecondi(time_start, time)
+                var parseTime = d3.timeParse("%H:%M:%S");
+                var realTimeDates = real_time.map(function (timeString) {
+                  return parseTime(timeString);
+                });
+
+              
+
+                if(valori.includes("Tba") || valori.includes("Tamb") || valori.includes("Tdut2") || valori.includes("Tdut3") ){
+                  if (valori.includes("Itot") || valori.includes("Qtir") || valori.includes("Speed_S3_BUS") || valori.includes("Speed_Sync") || valori.includes("VibANT_Sync")){ //scale non omogenee
+
+                    max = 0, min = 100000, scalaAggiuntiva += 1, scaleCheck = 1
+                    
+                    console.log(real_time)
+
+                    
+
+
+
+                    for (let i = 0; i < dataLength; i += 1) { 
+                      if (selectedGroup == "Tdut2") {
+                        
+                        dataset.push([realTimeDates[i], 255]);
+
+                        min = 250
+                        max = 260
+
+                      }
+
+                      else {
+                        var time_tmp = time[i].toFixed(3)
+                        dataset.push([realTimeDates[i], my_data[i]]);
+                        if (my_data[i] < min) {
+                          min = my_data[i]
+                        }
+                        if (my_data[i] > max) {
+                          max = my_data[i]
+                        }
+
+                      }
+
+                    }
+
+                    
+       
+                    xScale = d3.scaleTime()
+                      .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+                      .range([0, width]);
+
+                    
+                      
+                    yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+                    localStorage.setItem("maxDefault", JSON.stringify(max))
+                    localStorage.setItem("minDefault", JSON.stringify(min))
+
+                    
+
+                    if (scalaAggiuntiva == 1) {
+
+                      g.append("g")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));; //aggiungiamo una sola volta asse x
+
+                      g.append("g")
+                        .call(d3.axisRight(yScale))
+                        .attr("class", "asseDestro");          
+                      d3.select(".asseDestro").attr("transform", "translate(850,0)")
+                      d3.select(".asseDestro").selectAll("text").style("fill", colors[colorSelector])
+                   
+                    }
+
+
+                    else if (scalaAggiuntiva == 2) {
+
+                      g.append("g")
+                        .call(d3.axisLeft(yScale))
+                        .attr("class", "asseSinistro");
+                     
+                        d3.select(".asseSinistro").selectAll("text").style("fill", colors[colorSelector])
+   
+                      
+
+                    }
+
+                    else if (scalaAggiuntiva == 3) {
+
+                      g.append("g")
+                        .call(d3.axisRight(yScale))
+                        .attr("class", "asseSinistro2");
+
+                      d3.select(".asseSinistro2").selectAll("text").style("fill", colors[colorSelector])
+                     
+
+                    }
+
+                    else if (scalaAggiuntiva == 4) {
+
+                      g.append("g")
+                        .call(d3.axisLeft(yScale))
+                        .attr("class", "asseDestro2");
+
+                      d3.select(".asseDestro2").attr("transform", "translate(850,0)")
+                      d3.select(".asseDestro2").selectAll("text").style("fill", colors[colorSelector])
+
+
+                    }
+                    
+
+                    var dataset = []
+
+                    for (let i = 0; i < dataLength; i += 1) { 
+
+                      if (selectedGroup == "Tdut2") {
+
+                        
+
+                        dataset.push([realTimeDates[i], 255]);
+
+                        min = 250
+                        max = 260
+
+                      }
+
+                      else {
+                        
+
+                        if (my_data[i] != undefined) {
+                        dataset.push([realTimeDates[i], my_data[i]]);
+                        if (my_data[i] < min) {
+                          min = my_data[i]
+                        }
+                        if (my_data[i] > max) {
+                          max = my_data[i]
+                        }
+
+                      }
+                    }
+                    }
+
+
+                    new_svg.append('g')
+                      .selectAll("dot")
+                      .data(dataset)
+                      .enter()
+                      .append("circle")
+                      .attr("cx", function (d) { return xScale(d[0]); })
+                      .attr("cy", function (d) { return yScale(d[1]); })
+                      .attr("r", 1)
+                      .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                      .style("fill", colors[colorSelector])
+                      .attr("id", function (d, i) { return "dot" + valori[j] })
+                      .attr("class", "punto");
+
+
+                    var line = d3.line()
+                      .x(function (d) { return xScale(d[0]); })
+                      .y(function (d) { return yScale(d[1]); })
+                      .curve(d3.curveMonotoneX)
+
+                    new_svg.append("path")
+                      .datum(dataset)
+                      .attr("class", "line")
+                      .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                      .attr("d", line)
+                      .style("fill", "none")
+                      .style("stroke", colors[colorSelector])
+                      .style("stroke-width", "1")
+                      .attr("id", function (d, i) { return "path" + valori[j] });
+
+                      new_svg.append('text')
+                      .attr('x', width / 2 +colorSelector*100)
+                      .attr('y', 85)
+                      .attr('text-anchor', 'middle')
+                      .style('font-family', 'Helvetica')
+                      .style('font-size', 20)
+                      .style('fill', colors[colorSelector])
+                      .text("\u25A0 " + selectedGroup)
+
+                    if (colorSelector < colors.length) colorSelector += 1
+                    else colorSelector = 0
+
+                  }          
+                } 
+              }
+              
+              if(scaleCheck != 1){ // Quando non devo scalare tra due grandezze
+
+                for (let j = 0; j < valori.length; j++) { 
+
+                  var selectedGroup = valori[j]
+             
+
+                  var my_data = globalData[selectedGroup][0]
+                  var time = globalData["time"][0]
+                  var time_start = globalData["date start"][0]
+                  var real_time = aggiungiSecondi(time_start, time)
+                  console.log(real_time)
+
+                  if(selectedGroup == "Tdut2"){
+                    min = 250
+                    max = 260
+                  }
+
+                  else{
+
+                    for (let i = 0; i < dataLength; i += 1) { //riscalo y per ogni valore
+
+                      if (my_data[i] < min) {
+                        min = my_data[i]
+
+                      }
+                      if (my_data[i] > max) {
+                        max = my_data[i]
+                      }
+
+                    }
+
+                  }
+                  
+                 
+
+
+                  
+                  yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+                  }
+
+                  for (let j = 0; j < valori.length; j++) { //parte onerosa
+
+                     var dataset = []
+
+                     var selectedGroup = valori[j]
+
+            
+
+                    var my_data = globalData[selectedGroup][0]
+                    var time = globalData["time"][0]
+              
+
+                    for (let i = 0; i < dataLength; i += 1) {
+                      var time_tmp = time[i].toFixed(3)
+
+                      if(selectedGroup == "Tdut2") dataset.push([realTimeDates[i],255]);
+                      else if (my_data[i] != undefined) {
+                       
+                        dataset.push([realTimeDates[i], my_data[i]]);
+                      }
+
+
+                    }
+
+
+ 
+                  xScale = d3.scaleTime()
+                      .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+                      .range([0, width]);
+
+                    g.append("g")
+                      .attr("transform", "translate(0," + height + ")")
+                      .attr("id", "xAxis" + selectedGroup)
+                      .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));
+
+                  g.append("g")
+                    .call(d3.axisLeft(yScale));
+
+
+             
+                  new_svg.append('g')
+                    .selectAll("dot")
+                    .data(dataset)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return xScale(d[0]); })
+                    .attr("cy", function (d) { return yScale(d[1]); })
+                    .attr("r", 3)
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .style("fill", colors[colorSelector])
+                    .attr("id", function (d, i) { return "dot" + valori[j] })
+                    .attr("class", "punto");
+                    
+
+                  var line = d3.line()
+                    .x(function (d) { return xScale(d[0]); })
+                    .y(function (d) { return yScale(d[1]); })
+                    .curve(d3.curveMonotoneX)
+
+                  new_svg.append("path")
+                    .datum(dataset)
+                    .attr("class", "line")
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .attr("d", line)
+                    .style("fill", "none")
+                    .style("stroke", colors[colorSelector])
+                    .style("stroke-width", "2")
+                    .attr("id", function (d, i) { return "path" + valori[j] });
+
+
+                  new_svg.append('text')
+                      .attr('x', width / 2 + colorSelector * 100)
+                      .attr('y', 85)
+                      .attr('text-anchor', 'middle')
+                      .style('font-family', 'Helvetica')
+                      .style('font-size', 20)
+                      .style('fill', colors[colorSelector])
+                      .text("\u25A0 " + selectedGroup)
+
+                  if (colorSelector < colors.length) colorSelector += 1
+                  else colorSelector = 0
+            
+
+                
+                
+                  }
+
+              }
+              
+
+            }
+
+
+
+        else if ((aggregato == 0) || (aggregato == 3)){ //Caso NON aggregato, il 3 è solo per un piccolo sottocaso
+
+          var parseTime = d3.timeParse("%H:%M:%S");
+            var realTimeDates = real_time.map(function (timeString) {
+              return parseTime(timeString);
+            });
+
+          for (let i = 0; i <= allGroup.length; i++) {
+
+              var tmp = allGroup[i]
+
+              d3.select("#svg" + tmp).attr("visibility", "visible") //Serve per rendere visibili i div che aggiungo nel caso aggiungo grafici quando è già aggregato
+
+
+            }
+       
+           
+          for(let i = 0; i < dataLength; i += 1){ //SINGOLO. Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+           
+            if(selectedGroup == "Tdut2"){
+
+          
+
+              dataset.push([realTimeDates[i], 255]);
+
+              min = 250
+              max = 260
+
+            }
+
+            else{
+
+              if(my_data[i] != undefined){
+                dataset.push([realTimeDates[i], my_data[i]]);
+                if (my_data[i] < min) {
+                  min = my_data[i]
+                }
+                if (my_data[i] > max) {
+                  max = my_data[i]
+                }    
+
+
+              }
+              
+            } 
+
+            console.log(dataset)
+
+        }
+
+          
+
+      
+
+          //Creazione grafico
+
+          document.getElementById("svg-div").innerHTML += '<div class="col-sm"><svg width="800" height="510" id="svg' + selectedGroup +'"></svg></div>'
+            var svg_to_select = "#svg" + selectedGroup
+
+            var new_svg = d3.select(svg_to_select),
+                margin = 200,
+                width = new_svg.attr("width") - margin, //300
+                height = new_svg.attr("height") - margin //200
+
+
+            
+
+
+         
+            var g = new_svg.append("g")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .attr("id", function (d, i) { return "g" + selectedGroup })
+    
+
+          new_svg.append('text')
+            .attr('x', width/2 + 100)
+            .attr('y', 45)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 20)
+            .text(selectedGroup + " Chart");
+
+            var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 65)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text("Downsample: " + numbersOnly);
+        
+            // X label
+            new_svg.append('text')
+            .attr('x', width/2 + 100)
+            .attr('y', height - 15 + 165)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 12)
+            .text("Time(h:m:s)");
+        
+            // Y label
+            new_svg.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('transform', 'translate(40,' + height + ')rotate(-90)')
+            .style('font-family', 'Helvetica')
+            .style('font-size', 12)
+            .text(selectedGroup);
+
+            
+
+
+            
+
+            var xScale = d3.scaleTime()
+              .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+              .range([0, width]);
+
+            g.append("g")
+              .attr("transform", "translate(0," + height + ")")
+              .attr("id", "xAxis" + selectedGroup)
+              .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));
+
+            yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+            g.append("g")
+            .attr("id", function (d, i) { return "yAxis" + selectedGroup })
+            .call(d3.axisLeft(yScale));
+
+          
+
+            // Step 7
+            new_svg.append('g')
+            .selectAll("dot")
+            .data(dataset)
+            .enter()
+            .append("circle")
+            .attr("cx", function (d) { return xScale(d[0]); } )
+            .attr("cy", function (d) { return yScale(d[1]); } )
+            .attr("r", 3)
+            .attr("transform", "translate(" + 100 + "," + 100 + ")")
+            .style("fill", "#CC0000")
+            .attr("id", function(d,i){ return "dot" + selectedGroup})
+            .attr("class", "punto");
+     
+            
+
+            // Step 8        
+
+            var line = d3.line()
+            .x(function(d) { return xScale(d[0]); }) 
+            .y(function(d) { return yScale(d[1]); }) 
+            .curve(d3.curveMonotoneX)
+        
+              new_svg.append("path")
+                .datum(dataset)
+                .attr("class", "line")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                .attr("d", line)
+                .style("fill", "none")
+                .style("stroke", "#CC0000")
+                .style("stroke-width", "2")
+                .attr("id", function (d, i) { return "path" + selectedGroup })
+
+
+                d3.selectAll("svg").on("mouseover", function (d, i) {
+                  console.log(d, i)
+                })
+                
+
+
+        }
+        
+        else if (aggregato == 2){ //Caso in cui voglio aggiungere grafici al grafico degli aggregati già aggregato. Devo disegnare un grafico invisibile e poi uno degli aggregati.
+
+            
+          
+            dataset = []
+            
+            colorSelector = 0
+            var my_data = globalData[selectedGroup][0]
+            var time = globalData["time"][0]
+            var time_start = globalData["date start"][0]
+            var real_time = aggiungiSecondi(time_start, time)
+            var parseTime = d3.timeParse("%H:%M:%S");
+            var realTimeDates = real_time.map(function (timeString) {
+              return parseTime(timeString);
+            });
+          
+            for (let i = 0; i < dataLength; i += 1) { //SINGOLO.
+
+              if (selectedGroup == "Tdut2") {
+
+              
+                dataset.push([realTimeDates[i], 255]);
+
+                min = 250
+                max = 260
+
+              }
+
+              else {
+                console.log(realTimeDates[i], my_data[i])
+                if (my_data[i] != undefined) {
+                  dataset.push([realTimeDates[i], my_data[i]]);
+                  if (my_data[i] < min) {
+                    min = my_data[i]
+                  }
+                  if (my_data[i] > max) {
+                    max = my_data[i]
+                  }
+
+
+                }
+
+              }
+
+            }
+
+            
+
+
+
+            //Creazione grafico
+
+            document.getElementById("svg-div").innerHTML += '<div class="col-sm"><svg "2000" height="1600" id="svg' + selectedGroup + '"></svg></div>'
+            var svg_to_select = "#svg" + selectedGroup
+
+         
+
+            var new_svg = d3.select(svg_to_select),
+              margin = 200,
+              width = 850
+              height = 750
+
+
+
+
+
+            var g = new_svg.append("g")
+              .attr("transform", "translate(" + 100 + "," + 100 + ")")
+              .attr("id", function (d, i) { return "g" + selectedGroup })
+
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 45)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text(selectedGroup + " Chart");
+
+            var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 65)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text("Downsample: " + numbersOnly);
+
+            // X label
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', height - 15 + 165)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 12)
+              .text("Time(h:m:s)");
+
+            // Y label
+            new_svg.append('text')
+              .attr('text-anchor', 'middle')
+              .attr('transform', 'translate(40,' + height + ')rotate(-90)')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 12)
+              .text(selectedGroup);
+
+            xScale = d3.scaleTime()
+              .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+              .range([0, width]);
+
+            g.append("g")
+              .attr("transform", "translate(0," + height + ")")
+              .attr("id", "xAxis" + selectedGroup)
+              .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));
+
+            yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+            
+
+            g.append("g")
+              .attr("id", function (d, i) { return "yAxis" + selectedGroup })
+              .call(d3.axisLeft(yScale));
+
+
+
+            // Step 7
+            new_svg.append('g')
+              .selectAll("dot")
+              .data(dataset)
+              .enter()
+              .append("circle")
+              .attr("cx", function (d) { return xScale(d[0]); })
+              .attr("cy", function (d) { return yScale(d[1]); })
+              .attr("r", 3)
+              .attr("transform", "translate(" + 100 + "," + 100 + ")")
+              .style("fill", "#CC0000")
+              .attr("id", function (d, i) { return "dot" + selectedGroup })
+              .attr("class", "punto");
+
+
+
+            // Step 8        
+
+            var line = d3.line()
+              .x(function (d) { return xScale(d[0]); })
+              .y(function (d) { return yScale(d[1]); })
+              .curve(d3.curveMonotoneX)
+
+            new_svg.append("path")
+              .datum(dataset)
+              .attr("class", "line")
+              .attr("transform", "translate(" + 100 + "," + 100 + ")")
+              .attr("d", line)
+              .style("fill", "none")
+              .style("stroke", "#CC0000")
+              .style("stroke-width", "2")
+              .attr("id", function (d, i) { return "path" + selectedGroup })
+
+             
+
+
+            d3.select("#svg" + selectedGroup).attr("visibility", "hidden")
+
+            //Ora, replica del codice del caso aggregato
+
+            ///Scala per grafici OK
+
+            var min = 100000
+            var max = 0
+            var data = globalData
+
+
+            var scalaAggiuntiva = 0
+            if (document.getElementById("svg_default") != null) document.getElementById("svg_default").remove()
+            var valori = JSON.parse(localStorage.getItem("selectedValues"))
+            valori.push(selectedGroup)
+
+            valori = rimuoviDuplicati(valori);
+         
+
+            document.getElementById("svg-div").innerHTML = "<div class='row' id = 'svg-row'><svg width ='2000' height='1600' id ='svg_default'></svg></div>"
+            var new_svg = d3.select("#svg_default")
+            var g = new_svg.append("g")
+              .attr("transform", "translate(" + 100 + "," + 100 + ")");
+            var width = 850, height = 750
+
+            ///SETTING DEL TESTO
+
+            new_svg.selectAll('text').remove()
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 45)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text("Aggregate chart");
+
+            var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 65)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text("Downsample: " + numbersOnly);
+
+            // X label
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', height - 15 + 165)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 12)
+              .text("Time(h:m:s)");
+
+            // Y label
+            new_svg.append('text')
+              .attr('text-anchor', 'middle')
+              .attr('transform', 'translate(40,' + height + ')rotate(-90)')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 12)
+              .text("Aggregate values");
+
+
+            for(let i = 0; i < valori.length; i++){
+              new_svg.append('text')
+                .attr('x', width / 2 + i * 100)
+                .attr('y', 85)
+                .attr('text-anchor', 'middle')
+                .style('font-family', 'Helvetica')
+                .style('font-size', 20)
+                .style('fill', colors[i])
+                .text("\u25A0 " + valori[i])
+                console.log(colors, colors[i])
+
+            }
+
+
+          
+
+   
+            var container = document.getElementById('svg-div');
+
+
+
+            for (let j = 0; j < valori.length; j++) { //Serve per scalare gli assi correttamente
+
+              var selectedGroup = valori[j]
+
+
+
+
+              var my_data = globalData[selectedGroup][0]
+              var time = globalData["time"][0]
+              var parseTime = d3.timeParse("%H:%M:%S");
+              var realTimeDates = real_time.map(function (timeString) {
+                return parseTime(timeString);
+              });
+
+
+              if (valori.includes("Tba") || valori.includes("Tamb") || valori.includes("Tdut2") || valori.includes("Tdut3")) {
+                if (valori.includes("Itot") || valori.includes("Qtir") || valori.includes("Speed_S3_BUS") || valori.includes("Speed_Sync") || valori.includes("VibANT_Sync")) { //scale non omogenee
+
+                  max = 0, min = 100000, scalaAggiuntiva += 1, scaleCheck = 1
+
+
+
+                  for (let i = 0; i < dataLength; i += 1) {
+                    if (selectedGroup == "Tdut2") {
+
+                      var time_tmp = time[i].toFixed(3)
+                      dataset.push([realTimeDates[i], 255]);
+
+                      min = 250
+                      max = 260
+
+                    }
+
+                    else {
+                      var time_tmp = time[i].toFixed(3)
+                      dataset.push([realTimeDates[i], my_data[i]]);
+                      if (my_data[i] < min) {
+                        min = my_data[i]
+                      }
+                      if (my_data[i] > max) {
+                        max = my_data[i]
+                      }
+
+                    }
+
+                  }
+
+      
+                  xScale = d3.scaleTime()
+                    .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+                    .range([0, width]);
+
+           
+                 
+                    
+                    yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+                  localStorage.setItem("maxDefault", JSON.stringify(max))
+                  localStorage.setItem("minDefault", JSON.stringify(min))
+
+
+
+                  if (scalaAggiuntiva == 1) {
+
+                    g.append("g")
+                      .attr("transform", "translate(0," + height + ")")
+                      .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));; //aggiungiamo una sola volta asse x
+
+                    g.append("g")
+                      .call(d3.axisRight(yScale))
+                      .attr("class", "asseDestro");
+
+                    d3.select(".asseDestro").attr("transform", "translate(850,0)")
+                    d3.select(".asseDestro").selectAll("text").style("fill", colors[colorSelector])
+
+                  }
+
+
+                  else if (scalaAggiuntiva == 2) {
+
+                    g.append("g")
+                      .call(d3.axisLeft(yScale))
+                      .attr("class", "asseSinistro");
+
+                    d3.select(".asseSinistro").selectAll("text").style("fill", colors[colorSelector])
+      
+
+
+                  }
+
+                  else if (scalaAggiuntiva == 3) {
+
+                    g.append("g")
+                      .call(d3.axisRight(yScale))
+                      .attr("class", "asseSinistro2");
+
+                    d3.select(".asseSinistro2").selectAll("text").style("fill", colors[colorSelector])
+
+
+                  }
+
+                  else if (scalaAggiuntiva == 4) {
+
+                    g.append("g")
+                      .call(d3.axisLeft(yScale))
+                      .attr("class", "asseDestro2");
+
+                    d3.select(".asseDestro2").attr("transform", "translate(850,0)")
+                    d3.select(".asseDestro2").selectAll("text").style("fill", colors[colorSelector])
+
+
+                  }
+
+
+                  var dataset = []
+
+                  for (let i = 0; i < dataLength; i += 1) { // Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+
+                    if (selectedGroup == "Tdut2") {
+                      
+                      dataset.push([realTimeDates[i], 255]);
+
+                      min = 250
+                      max = 260
+
+                    }
+
+                    else {
+                      var time_tmp = time[i].toFixed(3)
+                      if (my_data[i] != undefined) {
+                        dataset.push([realTimeDates[i], my_data[i]]);
+                        if (my_data[i] < min) {
+                          min = my_data[i]
+                        }
+                        if (my_data[i] > max) {
+                          max = my_data[i]
+                        }
+
+                      }
+                    }
+                  }
+
+
+                  new_svg.append('g')
+                    .selectAll("dot")
+                    .data(dataset)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return xScale(d[0]); })
+                    .attr("cy", function (d) { return yScale(d[1]); })
+                    .attr("r", 1)
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .style("fill", colors[colorSelector])
+                    .attr("id", function (d, i) { return "dot" + valori[j] })
+                    .attr("class", "punto");
+
+
+                  var line = d3.line()
+                    .x(function (d) { return xScale(d[0]); })
+                    .y(function (d) { return yScale(d[1]); })
+                    .curve(d3.curveMonotoneX)
+
+                  new_svg.append("path")
+                    .datum(dataset)
+                    .attr("class", "line")
+                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                    .attr("d", line)
+                    .style("fill", "none")
+                    .style("stroke", colors[colorSelector])
+                    .style("stroke-width", "1")
+                    .attr("id", function (d, i) { return "path" + valori[j] });
+
+                  if (colorSelector < colors.length) colorSelector += 1
+                  else colorSelector = 0
+
+                }
+              }
+            }
+
+            if (scaleCheck != 1) { // Quando non devo scalare tra due grandezze
+
+              for (let j = 0; j < valori.length; j++) {
+
+                var selectedGroup = valori[j]
+
+
+                var my_data = globalData[selectedGroup][0]
+                //var my_data = JSON.parse(tmp_data)
+
+                if (selectedGroup == "Tdut2") {
+                  min = 250
+                  max = 260
+                }
+
+                else {
+
+                  for (let i = 0; i < dataLength; i += 1) { //riscalo y per ogni valore
+
+                    if (my_data[i] < min) {
+                      min = my_data[i]
+
+                    }
+                    if (my_data[i] > max) {
+                      max = my_data[i]
+                    }
+
+                  }
+
+                }
+
+
+                xScale = d3.scaleTime()
+                  .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+                  .range([0, width]);
+
+                
+
+                  yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+              }
+
+              for (let j = 0; j < valori.length; j++) { 
+
+                var dataset = []
+
+                var selectedGroup = valori[j]
+
+
+                var my_data = globalData[selectedGroup][0]
+                var time = globalData["time"][0]
+
+                for (let i = 0; i < dataLength; i += 1) {
+
+                  var time_tmp = time[i].toFixed(3)
+
+                  if (selectedGroup == "Tdut2") dataset.push([realTimeDates[i], 255]);
+                  else if (my_data[i] != undefined) {
+                    dataset.push([realTimeDates[i], my_data[i]]);
+                  }
+
+
+                }
+
+                g.append("g")
+                  .attr("transform", "translate(0," + height + ")")
+                  .attr("id", "xAxis" + selectedGroup)
+                  .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));
+
+                g.append("g")
+                  .call(d3.axisLeft(yScale));
+
+
+
+                new_svg.append('g')
+                  .selectAll("dot")
+                  .data(dataset)
+                  .enter()
+                  .append("circle")
+                  .attr("cx", function (d) { return xScale(d[0]); })
+                  .attr("cy", function (d) { return yScale(d[1]); })
+                  .attr("r", 3)
+                  .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                  .style("fill", colors[colorSelector])
+                  .attr("id", function (d, i) { return "dot" + valori[j] })
+                  .attr("class", "punto");
+
+
+                var line = d3.line()
+                  .x(function (d) { return xScale(d[0]); })
+                  .y(function (d) { return yScale(d[1]); })
+                  .curve(d3.curveMonotoneX)
+
+                new_svg.append("path")
+                  .datum(dataset)
+                  .attr("class", "line")
+                  .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                  .attr("d", line)
+                  .style("fill", "none")
+                  .style("stroke", colors[colorSelector])
+                  .style("stroke-width", "2")
+                  .attr("id", function (d, i) { return "path" + valori[j] });
+
+                if (colorSelector < colors.length) colorSelector += 1
+                else colorSelector = 0
+
+
+
+
+              }
+
+            }
+
+        }
+
+
+
+
+
+            // codice finale
+            //if (aggregato == 0) document.getElementById("selectedValues").style.visibility = "hidden"
+       
+            if ((aggregato != 1) && (aggregato != 2) && (aggregato != 3)) {
+             
+              document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedGroup +'" onchange = "modifyElement('+ selectedGroup +')" checked>' + "<label for='" + selectedGroup + "' id = 'label" + selectedGroup + "'>" + selectedGroup + "</label>" 
+            }
+              selectedValues.push(selectedGroup)
+            localStorage.setItem("selectedValues", JSON.stringify(selectedValues))
+
+
+
+            var svgElements = d3.selectAll("g").selectAll(".punto") //ogni volta, riaggungo gli eventi agli svg, perché sennò si cancellano
+
+           
+            
+
+        }
+
+   d3.select("#downsampleBtn").on("click", function (d) {
+
+      globalData = []
+      var downsample = d3.select("#downsample").property("value")
+      if (document.getElementById("loader") != null) document.getElementById("loader").remove()
+      if (document.getElementById("loading") != null) document.getElementById("loading").remove()
+      
+
+      if (downsample.length >= 2) {
+
+       
+
+        document.getElementById("downsamplePlaceholder").innerHTML = "Insert downsample (current: " + downsample + ")"
+
+    
+
+        
+
+        var valori = []
+        var to_add = document.getElementById("selectedValues").childNodes
+
+        for (let i = 0; i < to_add.length; i++) {
+
+          if (to_add[i] != undefined) {
+
+            if ((to_add[i].id != null) && (to_add[i].checked == true)) {
+
+              valori.push(to_add[i].id)
+
+
+            }
+          }
+
+        }
+
+
+        for (let i = 0; i < valori.length; i++) {
+
+          d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_myhsd[0][0] + "/raw_data?mode=1&factor=" + downsample + "&points=0&columns=" + valori[i] + ",time", { crossOrigin: "anonymous" }).then(function (data) {
+
+            if (!globalData.hasOwnProperty(valori[i])) {
+              globalData[valori[i]] = []; // Crea un nuovo array per la chiave se non esiste
+            }
+            globalData["time"] = []
+            globalData[valori[i]].push(eval("data." + valori[i])); // Aggiungi il dato all'array associato alla chiave
+            globalData["time"].push(data.time)
+            globalData["date start"] = []
+            globalData["date start"].push(data.Date_start.slice(0, -7).slice(11))
+            console.log(globalData);
+
+          })
+
+        }
+
+         sleep(1000).then(() => {
+          var toRedraw = []
+          showPopup("Downsample changed successfully!", true);
+
+        if (document.getElementById("aggregato").checked == false) {
+
+          for (let i = 0; i < allGroup.length; i++) { //Ridisegnamo dinamicamente :-) 
+
+            if (document.getElementById("svg" + allGroup[i]) != null) toRedraw.push(allGroup[i])
+
+          }
+
+          
+          clearSvg()
+
+          console.log(globalData)
+          for (let i = 0; i < toRedraw.length; i++) {
+            console.log("Redrawing " + toRedraw[i] + "...")
+            newGraph(toRedraw[i], globalData, 0)
+
+          }
+
+          console.log(globalData)
+
+
+
+        }
+
+        else {
+
+          
+
+          var toRedraw = []
+
+
+          
+          var to_add = document.getElementById("selectedValues").childNodes
+
+          for (let i = 0; i < to_add.length; i++) {
+
+            if (to_add[i] != undefined) {
+
+              if ((to_add[i].id != null) && (to_add[i].checked == true)) {
+
+                toRedraw.push(to_add[i].id)
+
+
+              }
+            }
+
+          }
+
+          clearSvg()
+
+          console.log(toRedraw)
+
+
+          for (let i = 0; i < toRedraw.length; i++) {
+
+            newGraph(toRedraw[i], globalData, 0)
+
+          }
+
+          document.getElementById("aggregato").checked = true
+
+          newGraph("", globalData, 1)
+          
+
+
+
+
+        }
+        
+    }
+  )}
+        
+
+      else return
+
+
+    
+  
+  })
+
+
+
+  d3.select("#selectMenu").on("change", function(d) {
+
+      var selectedOption = d3.select(this).property("value")
+      
+    document.getElementById("info").innerHTML = ""
+    if (document.getElementById("loader") != null) document.getElementById("loader").remove();
+    if (document.getElementById("loading") != null) document.getElementById("loading").remove();
+
+      d3.json("http://arca.diag.uniroma1.it:8082/data/myhsd/measurements/" + sn_myhsd +"", { crossOrigin: "anonymous" }).then(function (data) {
+        console.log(data)
+        for(let i = 0; i < data.results.length; i++){
+          console.log(data.results[i])
+          
+          console.log(data.results[i].metrics[0].metric_name, selectedOption)
+        if(data.results[i].metrics[0].metric_name == selectedOption){
+
+          console.log(data.results[i].metrics[0].metric_name, selectedOption)
+         
+          document.getElementById("info").innerHTML +=
+            "<strong>Measurement ID:</strong> " + data.results[i].measurement_id + "<br>" +
+            "<strong>Timestamp:</strong> " + data.results[i].timestamp + "<br>" +
+            "<strong>Date:</strong> " + data.results[i].date_timestamp + "<br>" +
+            "<strong>Thing ID:</strong> " + data.results[i].thing_id + "<br>" +
+            "<strong>Thing Serial Number:</strong> " + data.results[i].thing_serial_number + "<br>" +
+            "<strong>Thing Definition Name:</strong> " + data.results[i].thing_definition_name + "<br>" +
+            "<strong>Customer Name:</strong> " + data.results[i].customer_name + "<br>";
+
+          // Loop through metrics array
+          for (var j = 0; j < data.results[i].metrics.length; j++) {
+            document.getElementById("info").innerHTML +=
+              "<strong>Metric ID:</strong> " + data.results[i].metrics[j].metric_id + "<br>" +
+              "<strong>Metric Name:</strong> " + data.results[i].metrics[j].metric_name + "<br>" +
+              "<strong>Value:</strong> " + data.results[i].metrics[j].value + "<br>";
+          }
+
+          return
+
+        }
+      }
+    })
+
+
+})
+
+
+        //var sn_myhsd = JSON.parse(localStorage.getItem("selectedSpindles"));
+        
+        document.getElementById("selectedSpindles").innerHTML += "<b>Selected spindle</b>: <u>"+ sn_myhsd 
+            
+
+            
+
+</script>
+</body>
+</html>

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--<meta http-equiv="X-UA-Compatible" content="ie=edge">-->
+  <title>Features</title>
+  <link rel="stylesheet" href="css/style_features.css">
+  <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+  <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+
+  <!---Bootstrap-->
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+</head>
+
+<body class="mx-4">
+  <div class="selectedSpindlesDiv">
+    <p id = "featuresHeader">Features: </p>
+    <img src="images/home.png" style="vertical-align:middle" alt="check" width="25" height="25"
+      onclick="window.open('index_breakins.html', '_self');"> <a href='index_breakins.html'>Back to spindle selection</a>
+  </div>
+
+  <!--<Body background="images/test.png" background-repeat="no-repeat” background-size="cover”></Body>-->
+  <select id="selectMenuFeatures">
+    <option value="" disabled selected>Select feature</option>
+  </select>
+  <br>
+  <div id="selectedFeatures"></div>
+  <br>
+  <select id="selectMenu">
+    <option value="" disabled selected>Select attribute</option>
+  </select>
+  <br>
+  <div id="selectedValues"></div>
+  <br>
+  <div id="coordinates"></div>
+  <button id="clear" onclick="clearSvg()" class="button-red">Clear all</button>
+<div class="container" id="svg-div">
+  <div class="row no-wrap" id="svg-row">
+
+
+  </div>
+</div>
+  <script>
+
+    function clearSvg() {
+
+
+        document.getElementById("selectedValues").innerHTML = ""
+    
+        document.getElementById("selectMenu").selectedIndex = 0;
+
+        document.getElementById("svg-div").remove()
+        var svgDiv = document.createElement("div")
+        svgDiv.classList.add("container");
+        svgDiv.id = "svg-div";
+        document.body.appendChild(svgDiv);
+        document.getElementById("svg-div").innerHTML += "<div class='row no-wrap' id='svg-row'>"
+
+
+        localStorage.removeItem("selectedValues");
+      }
+
+    function modifyElement(selectedOption) {
+
+      selectedOption = selectedOption.id
+
+      d3.select("#svgLast" + selectedOption).remove()
+      document.getElementById(selectedOption).remove()
+      document.getElementById("col" + selectedOption).remove()
+      document.getElementById("label" + selectedOption).remove()
+
+
+    }
+
+
+    function sleep(time) {
+      return new Promise((resolve) => setTimeout(resolve, time));
+    }
+
+    var colors = ["#CC0000", '#ff7f50', '#87cefa', '#da70d6', '#32cd32', '#6495ed', '#ff69b4', '#ba55d3', '#cd5c5c', '#cc5500', '#40e0d0'];
+    var featuresGroup = ["Last value"]
+    var datasetLastTba = [];
+    var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
+    var allGroup = ["Tamb", "Tba", "Itot", "Qtir", "Speed_S3_BUS", "Speed_Sync", "Tdut2", "Tdut3", "VibANT_Sync", "Step"]
+    document.getElementById('selectMenu').setAttribute("disabled", "disabled")
+    document.getElementById('selectedValues').setAttribute("hidden", "true")
+
+    d3.select("#selectMenuFeatures")
+      .selectAll('myOptions')
+      .data(featuresGroup)
+      .enter()
+      .append('option')
+      .text(function (d) { return d; }) // text showed in the menu
+      .attr("value", function (d) { return d; }) // corresponding value returned by the button   
+
+
+    d3.select("#selectMenu")
+      .selectAll('myOptions')
+      .data(allGroup)
+      .enter()
+      .append('option')
+      .text(function (d) { return d; }) // text showed in the menu
+      .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+
+    for (let i = 0; i < sn_and_date.length; i++) {
+      if (sn_and_date.length >= 50) document.getElementById("svg-div").style = "margin-top: 240px;"
+      var tmp = sn_and_date[i][0]
+      var virgola = ", "
+      if (i + 1 == sn_and_date.length) virgola = ""
+      document.getElementById("featuresHeader").innerHTML += tmp + virgola
+    }
+
+    var valori = JSON.parse(localStorage.getItem("selectedValuesFeatures")) //Prendo i valori selezionati da prima
+
+    for (i = 0; i < valori.length; i++) { //Popolare il div delle checkbox
+
+      document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + valori[i] + '" onchange = "modifyElement(' + valori[i] + ')" checked>' + "<label for='" + valori[i] + "' id = 'label" + valori[i] + "'>" + valori[i] + "</label>"
+
+
+    }
+
+
+
+      for (let u = 0; u < valori.length; u++) {
+        var dataset = [];
+
+        for (let i = 0; i < sn_and_date.length; i++) {
+          d3.json('http://arca.diag.uniroma1.it:8082/data/breakin/' + sn_and_date[i][0] + '/features_values?columns=' + valori[u] + '&feature=lastValue', { crossOrigin: "anonymous" }).then( function (data) {
+
+            var tmp = valori[u];
+            dataset.push([valori[u], i + 1, data.lastValue[tmp], sn_and_date[i][0]]);
+
+           
+
+
+          });
+        }
+        
+      }
+
+
+    var dataset = []
+
+    
+
+
+    function modifyFeature(selectedFeature) {
+      //TODO
+    }
+
+    
+
+    //document.getElementById("svg-div").innerHTML += "<svg width='500' height='400' id ='svg_last_tba' style = 'margin-top: 500px'></svg>"
+    d3.select("#selectMenu").on("change", function (d) {
+
+      //Caricamento dati
+
+      var selectedOption = d3.select(this).property("value")
+
+      document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedOption + '" onchange = "modifyElement(' + selectedOption + ')" checked>' + "<label for='" + selectedOption + "' id = 'label" + selectedOption + "'>" + selectedOption + "</label>"
+      valori.push(selectedOption)
+      console.log(valori)
+
+      for (let i = 0; i < sn_and_date.length; i++) { //Popoliamo il dataset globale con quest'ultimo dataset
+        d3.json('http://arca.diag.uniroma1.it:8082/data/breakin/' + sn_and_date[i][0] + '/features_values?columns=' + selectedOption + '&feature=lastValue', { crossOrigin: "anonymous" }).then( function (data) {
+
+            console.log(selectedOption, i + 1, data.lastValue[selectedOption], sn_and_date[i][0])
+          dataset.push([selectedOption, i + 1, data.lastValue[selectedOption], sn_and_date[i][0]]);
+          
+
+
+        });
+      }
+
+
+
+      
+      // Il selectMenu è stato cambiato quando già una feature è stata selezionata: creiamo un nuovo grafico!
+        //Poi disegno
+       
+        sleep(1000).then(() => { //Necessaria perché la chiamata è asincrona...sì si possono usare anche le promesse ma questa va bene uguale
+         
+        
+        var count = 0, sum = 0, average = 0, sigma = 0, sigmaCount = 0, upperSigma = 0, lowerSigma = 0, min = 100000, max = 0, current_dataset = [], averageArray = [], upperSigmaArray = [], lowerSigmaArray = []
+        
+
+          
+
+        for (let i = 0; i < dataset.length; i++) {
+          console.log(dataset[i][0])
+          if (dataset[i][0] == selectedOption) {
+            count++
+            current_dataset.push([count, dataset[i][2]])
+            sum += parseFloat(dataset[i][2])
+          }
+        }
+        console.log(current_dataset)
+        for (let i = 0; i < current_dataset.length; i++) {
+          if (current_dataset[i][1] > max) max = current_dataset[i][1]
+
+          if (current_dataset[i][1] < min) min = current_dataset[i][1]
+        }
+
+        average = sum/count
+
+        for(let i = 0; i <= current_dataset.length; i++){
+          averageArray.push([i, average])
+        }
+
+        for (let i = 0; i < current_dataset.length; i++) {
+            console.log(current_dataset[i][1])
+            sigmaCount += Math.pow((current_dataset[i][1] - average), 2)
+         
+          }
+
+          sigma = sigmaCount / current_dataset.length
+          upperSigma = average + sigma * 3
+          lowerSigma = average - sigma * 3
+
+          console.log(sigmaCount, sigma, upperSigma, lowerSigma)
+        for (let i = 0; i <= current_dataset.length; i++) {
+            upperSigmaArray.push([i, upperSigma])
+          }
+
+        for (let i = 0; i <= current_dataset.length; i++) {
+            lowerSigmaArray.push([i, lowerSigma])
+          }
+
+
+
+        for (let i = 0; i < averageArray.length; i++) {
+            if (averageArray[i][1] > max) max = averageArray[i][1]
+
+            if (averageArray[i][1] < min) min = averageArray[i][1]
+          }
+
+        for (let i = 0; i < upperSigmaArray.length; i++) {
+            if (upperSigmaArray[i][1] > max) max = upperSigmaArray[i][1]
+
+            if (upperSigmaArray[i][1] < min) min = upperSigmaArray[i][1]
+          }
+
+        for (let i = 0; i < lowerSigmaArray.length; i++) {
+            if (lowerSigmaArray[i][1] > max) max = lowerSigmaArray[i][1]
+
+            if (lowerSigmaArray[i][1] < min) min = lowerSigmaArray[i][1]
+          }
+
+        //Dare più visibilità alle feature
+
+        max = parseFloat(max) + 3
+        min = parseFloat(min) - 3
+
+
+
+        document.getElementById("svg-row").innerHTML += '<div class="col-sm-2" style = "max-width: 70%" id="col' + selectedOption + '" ><svg width="800" height="510" id="svgLast' + selectedOption + '"></svg></div>'
+        var svg_to_select = "#svgLast" + selectedOption
+
+        var new_svg = d3.select(svg_to_select),
+          margin = 200,
+          width = new_svg.attr("width") - margin, //300
+          height = new_svg.attr("height") - margin //200
+
+        xScale = d3.scaleLinear().domain([0, sn_and_date.length]).range([0, width]),
+          yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+
+        var g = new_svg.append("g")
+          .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+
+        new_svg.append('text')
+          .attr('x', width / 2 + 100)
+          .attr('y', 80)
+          .attr('text-anchor', 'middle')
+          .style('font-family', 'Helvetica')
+          .style('font-size', 20)
+          .text("Last " + selectedOption);
+
+        // X label
+        new_svg.append('text')
+          .attr('x', width / 2 + 100)
+          .attr('y', height - 15 + 150)
+          .attr('text-anchor', 'middle')
+          .style('font-family', 'Helvetica')
+          .style('font-size', 12)
+          .text("Spindles");
+
+        // Y label
+        new_svg.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('transform', 'translate(40,' + height + ')rotate(-90)')
+          .style('font-family', 'Helvetica')
+          .style('font-size', 12)
+          .text("Last " + selectedOption);
+
+
+        g.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(xScale));
+
+        g.append("g")
+          .call(d3.axisLeft(yScale));
+
+
+        // Step 7
+        new_svg.append('g')
+          .selectAll("dot")
+          .data(current_dataset)
+          .enter()
+          .append("circle")
+          .attr("cx", function (d) { return xScale(d[0]); })
+          .attr("cy", function (d) { return yScale(d[1]); })
+          .attr("r", 3)
+          .attr("transform", "translate(" + 100 + "," + 100 + ")")
+          .style("fill", "#CC0000")
+          .attr("id", function (d, i) { return "dotLastTba" })
+          .on("mouseover", function (d, i) { return displayTooltip(d, i, event) })
+          .on("mouseout", function (d, i) { return hideTooltip() })
+
+
+        new_svg.append('text')
+          .attr('x', width / 2 - 50)
+          .attr('y', 50)
+          .attr('text-anchor', 'middle')
+          .style('font-family', 'Helvetica')
+          .style('font-size', 20)
+          .style('fill', "#CC0000")
+          .text("\u25A0 Average(μ)")
+
+        new_svg.append('text')
+          .attr('x', width / 2 + 90)
+          .attr('y', 50)
+          .attr('text-anchor', 'middle')
+          .style('font-family', 'Helvetica')
+          .style('font-size', 20)
+          .style('fill', "#006400")
+          .text("\u25A0 μ + 3σ")
+
+        new_svg.append('text')
+          .attr('x', width / 2 + 220)
+          .attr('y', 50)
+          .attr('text-anchor', 'middle')
+          .style('font-family', 'Helvetica')
+          .style('font-size', 20)
+          .style('fill', "#ff8c00")
+          .text("\u25A0 μ - 3σ")
+
+          
+            console.log(averageArray, upperSigmaArray, lowerSigmaArray)
+
+            var average_line = d3.line()
+            .x(function (d) { return xScale(d[0]); })
+            .y(function (d) { return yScale(d[1]); })
+            .curve(d3.curveMonotoneX)
+
+          var upperSigma_line = d3.line()
+            .x(function (d) { return xScale(d[0]); })
+            .y(function (d) { return yScale(d[1]); })
+            .curve(d3.curveMonotoneX)
+
+          var lowerSigma_line = d3.line()
+            .x(function (d) { return xScale(d[0]); })
+            .y(function (d) { return yScale(d[1]); })
+            .curve(d3.curveMonotoneX)
+
+            new_svg.append("path")
+              .datum(averageArray)
+              .attr("class", "line")
+              .attr("transform", "translate(" + 100 + "," + 100 + ")")
+              .attr("d", average_line)
+              .style("fill", "none")
+              .style("stroke", "#CC0000")
+              .style("stroke-width", "2")
+
+
+            new_svg.append("path")
+              .datum(upperSigmaArray)
+              .attr("class", "line")
+              .attr("transform", "translate(" + 100 + "," + 100 + ")")
+              .attr("d", upperSigma_line)
+              .style("fill", "none")
+              .style("stroke", "#006400")
+              .style("stroke-width", "2")
+
+     
+            new_svg.append("path")
+              .datum(lowerSigmaArray)
+              .attr("class", "line")
+              .attr("transform", "translate(" + 100 + "," + 100 + ")")
+              .attr("d", lowerSigma_line)
+              .style("fill", "none")
+              .style("stroke", "#ff8c00")
+              .style("stroke-width", "2")
+
+          })
+
+          document.getElementById("svg-row").innerHTML += "</div>"
+
+
+
+        })
+
+        
+
+      
+    
+
+
+    ///////////////////
+
+    d3.select("#selectMenuFeatures").on("change", function (d) {
+
+      var selectedFeature = d3.select(this).property("value")
+      document.getElementById('selectMenu').removeAttribute("disabled");
+      document.getElementById('selectedValues').removeAttribute("hidden");
+      document.getElementById("selectedFeatures").innerHTML += '<input type = "checkbox" id = "' + selectedFeature + '" onchange = "modifyFeature(' + selectedFeature + ')" checked>' + "<label for='" + selectedFeature + "' id = 'label" + selectedFeature + "'>" + selectedFeature + "</label>"
+
+      
+
+    for (let u = 0; u < valori.length; u++) { //Per ogni valore, creo un grafico, ma prima devo scremare il dataset con l'attributo che mi interesssa
+
+      var count = 0, sum = 0, average = 0, sigma = 0, sigmaCount = 0, upperSigma = 0, lowerSigma = 0, min = 100000, max = 0, current_dataset = [], averageArray = [], upperSigmaArray = [], lowerSigmaArray = []
+      for (let i = 0; i < dataset.length; i++){
+        console.log(dataset[i][0])
+        if(dataset[i][0] == valori[u]){
+          count++
+          current_dataset.push([count, dataset[i][2]])
+          sum += parseFloat(dataset[i][2])
+        }
+      }
+
+      for (let i = 0; i < current_dataset.length; i++){
+        if(current_dataset[i][1] > max) max = current_dataset[i][1]
+
+        if(current_dataset[i][1] < min) min = current_dataset[i][1]
+      }
+
+      average = sum / count
+
+      for (let i = 0; i <= current_dataset.length; i++) {
+        averageArray.push([i, average])
+      }
+
+      for (let i = 0; i < current_dataset.length; i++) {
+        console.log(current_dataset[i][1])
+        sigmaCount += Math.pow((current_dataset[i][1] - average), 2)
+
+      }
+
+      sigma = sigmaCount / current_dataset.length
+      upperSigma = average + sigma * 3
+      lowerSigma = average - sigma * 3
+
+      console.log(sigmaCount, sigma, upperSigma, lowerSigma)
+      for (let i = 0; i <= current_dataset.length; i++) {
+        upperSigmaArray.push([i, upperSigma])
+      }
+
+      for (let i = 0; i <= current_dataset.length; i++) {
+        lowerSigmaArray.push([i, lowerSigma])
+      }
+
+
+
+      for (let i = 0; i < averageArray.length; i++) {
+        if (averageArray[i][1] > max) max = averageArray[i][1]
+
+        if (averageArray[i][1] < min) min = averageArray[i][1]
+      }
+
+      for (let i = 0; i < upperSigmaArray.length; i++) {
+        if (upperSigmaArray[i][1] > max) max = upperSigmaArray[i][1]
+
+        if (upperSigmaArray[i][1] < min) min = upperSigmaArray[i][1]
+      }
+
+      for (let i = 0; i < lowerSigmaArray.length; i++) {
+        if (lowerSigmaArray[i][1] > max) max = lowerSigmaArray[i][1]
+
+        if (lowerSigmaArray[i][1] < min) min = lowerSigmaArray[i][1]
+      }
+
+      //Dare più visibilità alle feature
+      
+      max = parseFloat(max) + 3
+      min = parseFloat(min) - 3
+      
+
+
+      document.getElementById("svg-row").innerHTML += '<div class="col-sm-2" style = "max-width: 70%" id="col' + valori[u] + '" ><svg width="800" height="510" id="svgLast' + valori[u] + '"></svg></div>'
+      var svg_to_select = "#svgLast" + valori[u]
+
+      var new_svg = d3.select(svg_to_select),
+        margin = 200,
+        width = new_svg.attr("width") - margin, //300
+        height = new_svg.attr("height") - margin //200
+
+      xScale = d3.scaleLinear().domain([0, sn_and_date.length]).range([0, width]),
+        yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+
+
+      var g = new_svg.append("g")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+
+      new_svg.append('text')
+        .attr('x', width / 2 + 100)
+        .attr('y', 80)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 20)
+        .text("Last " + valori[u]);
+
+      // X label
+      new_svg.append('text')
+        .attr('x', width / 2 + 100)
+        .attr('y', height - 15 + 150)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 12)
+        .text("Spindles");
+
+      // Y label
+      new_svg.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('transform', 'translate(40,' + height + ')rotate(-90)')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 12)
+        .text("Last " + valori[u]);
+
+
+      g.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale));
+
+      g.append("g")
+        .call(d3.axisLeft(yScale));
+
+
+      // Step 7
+      new_svg.append('g')
+        .selectAll("dot")
+        .data(current_dataset)
+        .enter()
+        .append("circle")
+        .attr("cx", function (d) { return xScale(d[0]); })
+        .attr("cy", function (d) { return yScale(d[1]); })
+        .attr("r", 3)
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .style("fill", "#CC0000")
+        .attr("id", function (d, i) { return "dotLastTba" })
+        .on("mouseover", function (d, i) { return displayTooltip(d, i, event) })
+        .on("mouseout", function (d, i) { return hideTooltip() })
+
+
+      new_svg.append('text')
+        .attr('x', width / 2 - 50)
+        .attr('y', 50)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 20)
+        .style('fill', "#CC0000")
+        .text("\u25A0 Average(μ)")
+
+      new_svg.append('text')
+        .attr('x', width / 2 + 90)
+        .attr('y', 50)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 20)
+        .style('fill', "#006400")
+        .text("\u25A0 μ + 3σ")
+
+      new_svg.append('text')
+        .attr('x', width / 2 + 220)
+        .attr('y', 50)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 20)
+        .style('fill', "#ff8c00")
+        .text("\u25A0 μ - 3σ")
+
+        var average_line = d3.line()
+        .x(function (d) { return xScale(d[0]); })
+        .y(function (d) { return yScale(d[1]); })
+        .curve(d3.curveMonotoneX)
+
+      var upperSigma_line = d3.line()
+        .x(function (d) { return xScale(d[0]); })
+        .y(function (d) { return yScale(d[1]); })
+        .curve(d3.curveMonotoneX)
+
+      var lowerSigma_line = d3.line()
+        .x(function (d) { return xScale(d[0]); })
+        .y(function (d) { return yScale(d[1]); })
+        .curve(d3.curveMonotoneX)
+
+      new_svg.append("path")
+        .datum(averageArray)
+        .attr("class", "line")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .attr("d", average_line)
+        .style("fill", "none")
+        .style("stroke", "#CC0000")
+        .style("stroke-width", "2")
+
+
+      new_svg.append("path")
+        .datum(upperSigmaArray)
+        .attr("class", "line")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .attr("d", upperSigma_line)
+        .style("fill", "none")
+        .style("stroke", "#006400")
+        .style("stroke-width", "2")
+
+
+      new_svg.append("path")
+        .datum(lowerSigmaArray)
+        .attr("class", "line")
+        .attr("transform", "translate(" + 100 + "," + 100 + ")")
+        .attr("d", lowerSigma_line)
+        .style("fill", "none")
+        .style("stroke", "#ff8c00")
+        .style("stroke-width", "2")
+
+        
+
+
+      }
+
+
+      
+
+      document.getElementById("svg-row").innerHTML += "</div>"
+
+
+
+    })
+
+
+
+
+  </script>
+</body>
+
+</html>

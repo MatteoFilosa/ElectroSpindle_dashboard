@@ -8,6 +8,22 @@
         opacity: 0.8s;
     }
 
+        .info{
+            width: 650px;
+            height: 300px;
+            position: absolute;
+            left: 500px;
+            top: 100px;
+            background-color: #f2f2f2;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: #333;
+        }
+
         p {
             
             font-weight: bolder;
@@ -127,15 +143,6 @@
     }
 
 
-    #problems-found {
-
-        position: absolute;
-        left: 500px;
-        top: 0px;
-        height: 100px;
-        width: 500px;
-
-    }
 
     #availableSpindles {
 

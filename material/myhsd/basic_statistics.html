@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <title>Analytics</title>
+    <link rel="stylesheet" type="text/css" href="css/style_analytics.css"> 
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+
+<body class="mx-4">
+    <img src="images/home.png" style="vertical-align:middle" alt="check" width="25" height="25"
+        onclick="window.open('index_breakins.html', '_self');"> <a href='index_breakins.html'>Back to spindle selection</a>
+    <header>
+        <h1 id = "capa">Analytics</h1>
+    </header>
+    
+<div id = "tableContainer">
+
+    <table id="heatMap">
+
+    </table>
+
+</div>
+
+<select id="selectMenu">
+    <option value="" disabled selected>Select attribute</option>
+</select>
+
+    <script>
+
+
+        var selectedSpindlesBasic = JSON.parse(localStorage.getItem("selectedSpindlesBasic"))
+            if (selectedSpindlesBasic != null) {
+
+                var sn_and_date = selectedSpindlesBasic
+                var selectedAttributes = JSON.parse(localStorage.getItem("selectedAttributesBasic"))
+                localStorage.removeItem("selectedSpindlesBasic");
+                localStorage.removeItem("selectedAttributesBasic");
+
+            }
+
+            else {
+
+                var selectedAttributes = JSON.parse(localStorage.getItem("selectedAttributes"))
+                var sn_and_date = JSON.parse(localStorage.getItem("selectedSpindles"));
+                localStorage.setItem("selectedSpindlesBasic", JSON.stringify(sn_and_date))
+                localStorage.setItem("selectedAttributesBasic", JSON.stringify(selectedAttributes))
+
+            }
+
+        var selectedSpindle = sn_and_date[0][0]
+        var allGroup = ["Tamb", "Tba", "Itot", "Qtir", "Speed_S3_BUS", "Speed_Sync", "Tdut2", "Tdut3", "VibANT_Sync", "Step"]
+
+       
+
+        d3.select("#selectMenu")
+                .selectAll('myOptions')
+                .data(allGroup)
+                .enter()
+                .append('option')
+                .text(function (d) { return d; }) // text showed in the menu
+                .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+        d3.select("#selectMenu").on("change", function (d) {
+
+            var selectedOption = d3.select(this).property("value")
+            selectedAttributes.push(selectedOption)
+            document.getElementById("tableContainer").innerHTML = "<table id='heatMap'></table>"
+            loadAnalytics()
+            
+
+        })
+
+
+        function getColorFromHeatmapScale(normalizedValue) {
+                // Scala di colori per la heatmap (esempio)
+                const colorScale = [
+                    { value: 0.0, color: [255, 255, 255] }, // Bianco
+                    { value: 0.2, color: [255, 210, 210] }, // Rosso chiaro
+                    { value: 0.4, color: [255, 151, 151] }, // Rosso medio
+                    { value: 0.6, color: [255, 83, 83] },   // Rosso scuro
+                    { value: 0.8, color: [255, 11, 11] },   // Rosso intenso
+                    { value: 1.0, color: [153, 0, 0] }      // Rosso profondo
+                ];
+
+                // Trova il colore corrispondente nel colorScale
+                for (let i = 0; i < colorScale.length - 1; i++) {
+                    if (normalizedValue >= colorScale[i].value && normalizedValue <= colorScale[i + 1].value) {
+                        const startColor = colorScale[i].color;
+                        const endColor = colorScale[i + 1].color;
+                        const startValue = colorScale[i].value;
+                        const endValue = colorScale[i + 1].value;
+
+                        // Interpolazione lineare per ottenere il colore
+                        const t = (normalizedValue - startValue) / (endValue - startValue);
+                        const interpolatedColor = interpolateColor(startColor, endColor, t);
+
+                        return rgbToHex(interpolatedColor);
+                    }
+                }
+
+                return '#ffffff'; // Colore di fallback (bianco) se il valore normalizzato non rientra nella scala
+            }
+
+            // Funzione di interpolazione lineare per il colore
+            function interpolateColor(startColor, endColor, t) {
+                const interpolatedColor = [];
+
+                for (let i = 0; i < startColor.length; i++) {
+                    const startValue = startColor[i];
+                    const endValue = endColor[i];
+                    const interpolatedValue = Math.round(startValue + (endValue - startValue) * t);
+                    interpolatedColor.push(interpolatedValue);
+                }
+
+                return interpolatedColor;
+            }
+
+            // Funzione per convertire un colore RGB in esadecimale
+            function rgbToHex(color) {
+                const [r, g, b] = color;
+                const redHex = r.toString(16).padStart(2, '0');
+                const greenHex = g.toString(16).padStart(2, '0');
+                const blueHex = b.toString(16).padStart(2, '0');
+                return `#${redHex}${greenHex}${blueHex}`;
+            }
+
+            document.querySelectorAll("#selectMenu").forEach(opt => {
+                    if (opt.value == "Tdut2") {
+                        opt.disabled = true;
+                    }
+                });
+
+        
+
+        function loadAnalytics(){
+
+            var request = ""
+
+            for (let i = 0; i < selectedAttributes.length; i++) {
+
+               
+                
+
+                    if (i + 1 < selectedAttributes.length) {
+
+                        request += selectedAttributes[i] + "%2C"
+
+                    }
+
+                    else request += selectedAttributes[i]
+
+                
+
+                
+
+            }
+
+             if (request.includes("%2CTdut2") == true) { //Tdut 2 dà errore
+                let substringToRemove = "%2CTdut2";
+
+                request = request.replace(new RegExp(substringToRemove, "g"), "");
+                
+             }
+
+             if (request.includes("Tdut2%2C") == true) { //Tdut 2 dà errore
+                let substringToRemove = "Tdut2%2C";
+
+                request = request.replace(new RegExp(substringToRemove, "g"), "");
+               
+            }
+
+           
+
+            var heatMap = document.getElementById("heatMap")
+
+            if (sn_and_date.length == 1) { //caso singleView
+
+
+                    d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=basic%20statistics", { crossOrigin: "anonymous" }).then( function (data) {
+                      
+
+                        var tableRow = "<tr>";
+
+                        tableRow += "<th id = 'tableHeaderColumn' style='background-color: lightgrey;' >Attributes</th>";
+                        tableRow += "<th id = 'tableHeaderColumn'>Average</th>";
+                        tableRow += "<th id = 'tableHeaderColumn'>Sigma</th>";
+
+                        tableRow += "</tr>";
+                        heatMap.innerHTML += tableRow;
+
+                        for (let i = 0; i < selectedAttributes.length; i++) {
+
+                            var tableRow = "<tr>";
+
+
+                            console.log(selectedAttributes)
+
+                            if(selectedAttributes[i] == "Tdut2"){
+
+                                tableRow += "<th id = 'tableHeaderRow' style='background-color: whitesmoke;' >" + "Tdut2" + "</th><th id='tableValue'>" + 55 + "</th>";
+
+                                tableRow += "<th id='tableValue'>" + 0 + "</th>";
+
+                                tableRow += "</tr>";
+                                heatMap.innerHTML += tableRow;
+
+                               
+
+                            }
+
+                            else{
+
+                                // Calcola un valore normalizzato tra 0 e 1 in base al valore di data.Basic.matrix[i][j]
+                                let normalizedValue = (eval("data['basic statistics']." + selectedAttributes[i] + ".average"));
+
+                                // Calcola il colore in base al valore normalizzato utilizzando una scala di colori adatta per la heatmap
+
+                                normalizedValue = normalizedValue.toFixed(3)
+
+
+                                // Crea il table header con il colore specificato
+                                tableRow += "<th id = 'tableHeaderRow' style='background-color: whitesmoke;' >" + selectedAttributes[i] + "</th><th id='tableValue'>" + normalizedValue + "</th>";
+
+                                normalizedValue = (eval("data['basic statistics']." + selectedAttributes[i] + ".sigma"));
+
+                                // Calcola il colore in base al valore normalizzato utilizzando una scala di colori adatta per la heatmap
+
+                                normalizedValue = normalizedValue.toFixed(3)
+
+                                // Crea il table header con il colore specificato
+                                tableRow += "<th id='tableValue'>" + normalizedValue + "</th>";
+
+                                tableRow += "</tr>";
+                                heatMap.innerHTML += tableRow;
+
+                            }
+
+                            
+
+                        }
+
+
+                    })
+
+                
+
+            }
+
+            else { //caso aggregateView
+                
+
+                    for (let u = 0; u < sn_and_date.length; u++) {
+
+                        selectedSpindle = sn_and_date[u][0];
+                        d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/analytics/" + selectedSpindle + "?fields=" + request + "&analitycs=basic%20statistics", { crossOrigin: "anonymous" }).then( function (data) {
+                            console.log(data)
+
+
+                            var tableRow = "<br><br><br>" + sn_and_date[u][0] + "<tr>";
+
+                            tableRow += "<th id = 'tableHeaderColumn' style='background-color: lightgrey;' >Attributes</th>";
+                            tableRow += "<th id = 'tableHeaderColumn'>Average</th>";
+                            tableRow += "<th id = 'tableHeaderColumn'>Sigma</th>";
+
+
+                            tableRow += "</tr>";
+                            heatMap.innerHTML += tableRow;
+
+                            for (let i = 0; i < selectedAttributes.length; i++) {
+
+                                var tableRow = "<tr>";
+
+                                if (selectedAttributes[i] == "Tdut2") {
+                                    console.log("ok")
+
+                                    tableRow += "<th id = 'tableHeaderRow' style='background-color: whitesmoke;' >" + "Tdut2" + "</th><th id='tableValue'>" + 55 + "</th>";
+
+                                    tableRow += "<th id='tableValue'>" + 0 + "</th>";
+
+                                    tableRow += "</tr>";
+                                    heatMap.innerHTML += tableRow;
+
+                
+
+                                }
+
+                                else{
+
+                                     // Calcola un valore normalizzato tra 0 e 1 in base al valore di data.Basic.matrix[i][j]
+                                    let normalizedValue = (eval("data['basic statistics']." + selectedAttributes[i] + ".average"));
+
+                                    // Calcola il colore in base al valore normalizzato utilizzando una scala di colori adatta per la heatmap
+
+                                    normalizedValue = normalizedValue.toFixed(3)
+
+
+                                    // Crea il table header con il colore specificato
+                                    tableRow += "<th id = 'tableHeaderRow' style='background-color: whitesmoke;'>" + selectedAttributes[i] + "</th><th id='tableValue'>" + normalizedValue + "</th>";
+
+                                    normalizedValue = (eval("data['basic statistics']." + selectedAttributes[i] + ".sigma"));
+
+                                    // Calcola il colore in base al valore normalizzato utilizzando una scala di colori adatta per la heatmap
+
+                                    normalizedValue = normalizedValue.toFixed(3)
+
+
+                                    // Crea il table header con il colore specificato
+                                    tableRow += "<th id='tableValue'>" + normalizedValue + "</th>";
+
+                                    tableRow += "</tr>";
+                                    heatMap.innerHTML += tableRow;
+
+                                }
+                           
+
+                            }
+
+
+                        })
+                    }
+
+                
+
+
+            }
+
+            }
+
+            window.onload = loadAnalytics()
+            document.getElementById("capa").innerHTML += ": Average, sigma"
+        
+       
+        
+        
+
+
+
+    </script>
+
+
+
+</body>
+
+</html>
