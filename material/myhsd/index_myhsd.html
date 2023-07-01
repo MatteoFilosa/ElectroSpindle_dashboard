@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <script src="https://d3js.org/d3.v6.min.js"></script>
-    <title >ElectroSpindle Dashboard</title>
+    <title >ElectroSpindle Dashboard: MyHSD</title>
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
 
     <link rel="stylesheet" href="css/calendar.css">
@@ -45,7 +45,7 @@
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-<h1>ElectroSpindle: Dashboard</h1>
+<h1>ElectroSpindle: Dashboard MyHSD</h1>
 <!-- <Body background="images/PROVA.png" background-repeat="no-repeat” background-size="cover”>  -->
 <!--<Body background="images/test.png" background-repeat="no-repeat” background-size="cover”></Body>-->  
   Model <select id="modello"></select>
@@ -128,14 +128,13 @@ Insert Spindle SN <input type = "text" id ="request" maxlength="10" required pla
   <span id = "modelSpan">
     Model
   </span>
-  <span id = "breakinSpan">
+  <!-- <span id = "breakinSpan">
     Breakin date
-  </span>
+  </span> -->
 
 <div id = "loader"></div>
 
 </div>
-
 
 </div>
 
@@ -157,11 +156,32 @@ Insert Spindle SN <input type = "text" id ="request" maxlength="10" required pla
     </div>
 </div>
 
+<div id = "info" class ="info"></div>
+
 <button id = 'cerca' class = 'button-blue' onClick='redirectView()'>Search</button>
 <button id = 'clearSelected' class = 'button-red' onClick='clearSelectedSpindles()'>Clear</button>
 
 
 <script>
+
+  d3.json("http://arca.diag.uniroma1.it:8082/data/myhsd/ES951/models", { crossOrigin: "anonymous" }).then(function (data) {
+      var infoDiv = document.getElementById("info");
+
+      var name = "<b>Name:</b> " + data.name;
+      var description = "<b>Description:</b> " + data.description;
+      var th2PowerSupply = "<b>TH2 Power Supply:</b> " + data.properties.th2PowerSupply;
+      var th1PowerSupply = "<b>TH1 Power Supply:</b> " + data.properties.th1PowerSupply;
+      var warrantyType = "<b>Warranty Type:</b> " + data.warrantyType;
+
+      var html = "<p>" + name + "</p>" +
+        "<p>" + description + "</p>" +
+        "<p>" + th2PowerSupply + "</p>" +
+        "<p>" + th1PowerSupply + "</p>" +
+        "<p>" + warrantyType + "</p>";
+
+      infoDiv.innerHTML = html;
+    });
+
 
 localStorage.setItem("resetClicked", JSON.stringify(0))
 

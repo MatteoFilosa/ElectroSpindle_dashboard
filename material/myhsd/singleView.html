@@ -108,7 +108,7 @@
 
       var globalData = []
 
-      function restoreLoader() {
+      /* function restoreLoader() {
           console.log("Restoring loader")
           // Creazione del paragrafo
           const loadingParagraph = document.createElement('p');
@@ -123,7 +123,7 @@
           document.body.appendChild(loadingParagraph);
           document.body.appendChild(loaderDiv);
 
-        }
+        } */
 
       function showPopup(message, isSuccess) {
           var popup = document.getElementById("popup");
@@ -173,23 +173,37 @@
 
 
 <div id ="selectedSpindles"></div>
-<input type = "checkbox" id ="aggregato" class = "checkbox" onclick="aggregateHelper()" > Aggregate
+<br>
+<b>Measurements</b>
 
 
-<select id="selectMenu" onchange = "restoreLoader()">
+<select id="selectMenu">
+  <option value="" disabled selected>Select measurement</option>
+</select>
+
+<br><br>
+
+<b>Columns</b>
+
+
+<select id="selectMenuColumns">
   <option value="" disabled selected>Select attribute</option>
 </select>
-<div id = "selectedValues"></div>
+
+
+
+<!-- <div id = "selectedValues"></div>
 <div id="tooltip"></div>
-<br>
+<br> -->
 
 <!-- <div id = "downsamplePlaceholder">Insert downsample (current: 100)</div> <input type="text" id="downsample" maxlength="3" required placeholder="Downsample"> <button class="button-green" id="downsampleBtn" onclick = "restoreLoader()" >Apply</button> -->
 
 <div id="popup" class="popup"></div>
 <br><br>
-<button id="clear" onclick="clearSvg()" class="button-red">Clear all</button>
+<!-- <button id="clear" onclick="clearSvg()" class="button-red">Clear all</button> -->
 
 <div id = "info" class = "info">
+<div id = "infoColumns" class="infoColumns">
 
 
 
@@ -241,7 +255,7 @@
     }) */
 
      
-    var allGroup = [], sn_myhsd = JSON.parse(localStorage.getItem("sn_myhsd")); 
+    var allGroup = [], allGroupColumns = [], sn_myhsd = JSON.parse(localStorage.getItem("sn_myhsd")); 
     d3.json("http://arca.diag.uniroma1.it:8082/data/myhsd/measurements/" + sn_myhsd + "", { crossOrigin: "anonymous" }).then(function (data) {
       
         console.log(data)
@@ -263,6 +277,26 @@
   
   
       }) 
+
+       d3.json("http://arca.diag.uniroma1.it:8082/data/myhsd/" + sn_myhsd + "/columns", { crossOrigin: "anonymous" }).then(function (data) {
+
+          for (let i = 0; i < data.length; i++) {
+          
+           allGroupColumns.push(data[i].toString())
+
+         }
+
+          d3.select("#selectMenuColumns")
+            .selectAll('myOptions')
+            .data(allGroupColumns)
+            .enter()
+            .append('option')
+            .text(function (d) { return d; }) // text showed in the menu
+            .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+
+
+        }) 
       
 
   function analytics(button) {
@@ -1817,49 +1851,228 @@
 
 
 
-  d3.select("#selectMenu").on("change", function(d) {
+ d3.select("#selectMenu").on("change", function (d) {
+    var selectedOption = d3.select(this).property("value");
 
-      var selectedOption = d3.select(this).property("value")
-      
-    document.getElementById("info").innerHTML = ""
-    if (document.getElementById("loader") != null) document.getElementById("loader").remove();
-    if (document.getElementById("loading") != null) document.getElementById("loading").remove();
+    // Rimuovi i dati precedenti dal div "info"
+    //document.getElementById("info").innerHTML = "";
 
-      d3.json("http://arca.diag.uniroma1.it:8082/data/myhsd/measurements/" + sn_myhsd +"", { crossOrigin: "anonymous" }).then(function (data) {
-        console.log(data)
-        for(let i = 0; i < data.results.length; i++){
-          console.log(data.results[i])
-          
-          console.log(data.results[i].metrics[0].metric_name, selectedOption)
-        if(data.results[i].metrics[0].metric_name == selectedOption){
+    d3.json("http://arca.diag.uniroma1.it:8082/data/myhsd/measurements/" + sn_myhsd + "", { crossOrigin: "anonymous" }).then(function (data) {
+      console.log(data);
+      for (let i = 0; i < data.results.length; i++) {
+        console.log(data.results[i]);
+        console.log(data.results[i].metrics[0].metric_name, selectedOption);
+        if (data.results[i].metrics[0].metric_name == selectedOption) {
+          console.log(data.results[i].metrics[0].metric_name, selectedOption);
 
-          console.log(data.results[i].metrics[0].metric_name, selectedOption)
-         
+          // Aggiungi i dati al div "info" con la linea orizzontale
           document.getElementById("info").innerHTML +=
+            "<div class='data-row'>" +
             "<strong>Measurement ID:</strong> " + data.results[i].measurement_id + "<br>" +
             "<strong>Timestamp:</strong> " + data.results[i].timestamp + "<br>" +
-            "<strong>Date:</strong> " + data.results[i].date_timestamp + "<br>" +
+            "<strong>Date:</strong> " + formatDate(data.results[i].date_timestamp) + "<br>" +
             "<strong>Thing ID:</strong> " + data.results[i].thing_id + "<br>" +
             "<strong>Thing Serial Number:</strong> " + data.results[i].thing_serial_number + "<br>" +
             "<strong>Thing Definition Name:</strong> " + data.results[i].thing_definition_name + "<br>" +
-            "<strong>Customer Name:</strong> " + data.results[i].customer_name + "<br>";
+            "<strong>Customer Name:</strong> " + data.results[i].customer_name + "<br>" +
+            "</div>";
 
           // Loop through metrics array
           for (var j = 0; j < data.results[i].metrics.length; j++) {
             document.getElementById("info").innerHTML +=
+              "<div class='data-row-strong'>" +
               "<strong>Metric ID:</strong> " + data.results[i].metrics[j].metric_id + "<br>" +
               "<strong>Metric Name:</strong> " + data.results[i].metrics[j].metric_name + "<br>" +
-              "<strong>Value:</strong> " + data.results[i].metrics[j].value + "<br>";
+              "<strong>Value:</strong> " + data.results[i].metrics[j].value + "<br>" +
+              "</div>";
           }
 
-          return
-
+          return;
         }
       }
-    })
+    });
+  });
+
+  function formatDate(dateTimeString) {
+    var dateTimeParts = dateTimeString.split("T");
+    var date = dateTimeParts[0];
+    var time = dateTimeParts[1];
+    return date + "<br><b>Time: </b>" + time;
+  }
 
 
-})
+
+
+
+
+  d3.select("#selectMenuColumns").on("change", function (d) {
+      var selectedOption = d3.select(this).property("value");
+
+      var filterDiv = document.getElementById("filterDiv");
+      if (filterDiv) {
+        filterDiv.parentNode.removeChild(filterDiv);
+      }
+
+      var infoColumnsDiv = document.getElementById("infoColumns");
+      infoColumnsDiv.innerHTML = "";
+
+      
+
+      d3.json(
+        "http://arca.diag.uniroma1.it:8082/data/myhsd/" +
+        sn_myhsd +
+        "/raw_data?columns=" +
+        selectedOption +
+        "&mode=1&limit=1000",
+        { crossOrigin: "anonymous" }
+      ).then(function (data) {
+        infoColumnsDiv.innerHTML = "";
+        if (data.hasOwnProperty(selectedOption)) {
+          var columnData = data[selectedOption].data;
+          var html = "<table>";
+          html += "<tr><th colspan='3'>" + selectedOption + "</th></tr>";
+          html += "<tr><th>Date</th><th>Time</th><th>Value</th></tr>";
+
+          columnData.forEach(function (entry) {
+            var dateTime = entry.date_timestamp;
+            var date = dateTime.split("T")[0];
+            var time = dateTime.split("T")[1].split(".")[0];
+
+            html +=
+              "<tr><td>" +
+              date +
+              "</td><td>" +
+              time +
+              "</td><td>" +
+              entry.value +
+              "</td></tr>";
+          });
+
+          html += "</table>";
+          infoColumnsDiv.innerHTML = html;
+
+          // Crea il div per il filtraggio
+          filterDiv = document.createElement("div");
+          filterDiv.setAttribute("id", "filterDiv");
+          filterDiv.classList.add("filter-div");
+
+          var filterForm = document.createElement("form");
+          filterForm.setAttribute("id", "filterForm");
+          filterForm.classList.add("filter-form");
+
+          var dateInput = document.createElement("input");
+          dateInput.setAttribute("type", "text");
+          dateInput.setAttribute("placeholder", "Enter date (YYYY-MM-DD)");
+
+          var timeInput = document.createElement("input");
+          timeInput.setAttribute("type", "text");
+          timeInput.setAttribute("placeholder", "Enter time (HH:MM:SS)");
+
+          var filterButton = document.createElement("button");
+          filterButton.innerHTML = "Filter";
+          filterButton.classList.add("filter-button");
+          filterButton.classList.add("button-blue");
+
+          var resetButton = document.createElement("button");
+          resetButton.innerHTML = "Reset";
+          resetButton.classList.add("reset-button");
+          resetButton.classList.add("button-red");
+
+          filterForm.appendChild(dateInput);
+          filterForm.appendChild(timeInput);
+          filterForm.appendChild(filterButton);
+          filterForm.appendChild(resetButton);
+
+          filterDiv.appendChild(filterForm);
+
+          // Aggiungi il div del filtraggio sopra il div infoColumns
+          infoColumnsDiv.parentNode.insertBefore(filterDiv, infoColumnsDiv);
+
+          // Aggiungi l'evento di filtraggio
+          filterForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            var filterDate = dateInput.value.trim();
+            var filterTime = timeInput.value.trim();
+
+            var filteredData = columnData.filter(function (entry) {
+              var dateTime = entry.date_timestamp;
+              var date = dateTime.split("T")[0];
+              var time = dateTime.split("T")[1].split(".")[0];
+
+              if (filterDate && filterTime) {
+                return date === filterDate && time === filterTime;
+              } else if (filterDate) {
+                return date === filterDate;
+              } else if (filterTime) {
+                return time === filterTime;
+              } else {
+                return true;
+              }
+            });
+
+            var filteredHtml = "<table>";
+            filteredHtml +=
+              "<tr><th colspan='3'>" + selectedOption + " (Filtered)</th></tr>";
+            filteredHtml += "<tr><th>Date</th><th>Time</th><th>Value</th></tr>";
+
+            filteredData.forEach(function (entry) {
+              var dateTime = entry.date_timestamp;
+              var date = dateTime.split("T")[0];
+              var time = dateTime.split("T")[1].split(".")[0];
+
+              filteredHtml +=
+                "<tr><td>" +
+                date +
+                "</td><td>" +
+                time +
+                "</td><td>" +
+                entry.value +
+                "</td></tr>";
+            });
+
+            filteredHtml += "</table>";
+            infoColumnsDiv.innerHTML = filteredHtml;
+          });
+
+          // Aggiungi l'evento di reset
+          resetButton.addEventListener("click", function () {
+            dateInput.value = "";
+            timeInput.value = "";
+
+            var html = "<table>";
+            html += "<tr><th colspan='3'>" + selectedOption + "</th></tr>";
+            html += "<tr><th>Date</th><th>Time</th><th>Value</th></tr>";
+
+            columnData.forEach(function (entry) {
+              var dateTime = entry.date_timestamp;
+              var date = dateTime.split("T")[0];
+              var time = dateTime.split("T")[1].split(".")[0];
+
+              html +=
+                "<tr><td>" +
+                date +
+                "</td><td>" +
+                time +
+                "</td><td>" +
+                entry.value +
+                "</td></tr>";
+            });
+
+            html += "</table>";
+            infoColumnsDiv.innerHTML = html;
+          });
+        } else {
+          infoColumnsDiv.innerHTML = "No data available for the selected column.";
+        }
+      });
+    });
+
+
+
+
+
+
 
 
         //var sn_myhsd = JSON.parse(localStorage.getItem("selectedSpindles"));
