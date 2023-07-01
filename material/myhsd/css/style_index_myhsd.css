@@ -89,12 +89,12 @@ html * {
 }
 #snSpan{
 
-    padding-left: 28%;
+    padding-left: 40.5%;
 
 }
 
 #modelSpan{
-    padding-left: 12.5%;
+    padding-left: 22.5%;
     
 }
 
@@ -176,7 +176,7 @@ input[type=checkbox] {
     position: absolute;
     left: 850px;
     top: 100px;
-    width: 500px;
+    width: 300px;
     display: block;
     justify-content: space-between;
     font-size: 13px;
@@ -200,7 +200,7 @@ input[type=checkbox] {
     position: absolute;
     left: 850px;
     top: 470px;
-    width: 500px;
+    width: 300px;
     display: block;
 
     justify-content: space-between;
@@ -457,7 +457,7 @@ h5{
 
 h3 {
     position: absolute;
-    left: 980px;
+    left: 900px;
     top: 20px;
 }
 
@@ -516,13 +516,13 @@ h3 {
 
 #divselectAll0 {
     position: absolute;
-    left: 800px;
+    left: 830px;
     top: 50px;
 }
 
 #divselectAll1 {
     position: absolute;
-    left: 800px;
+    left: 830px;
     top: 428px;
 }
 

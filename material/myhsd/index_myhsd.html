@@ -482,7 +482,7 @@ function resetFilters(){
                 return;
             } 
             else if(selected_sn.length == 1) window.open('singleView.html', '_blank');
-            else if (selected_sn.length > 1) window.open('aggregateView.html', '_blank');
+            else if (selected_sn.length > 1) alert("Multiple Spindle visualization not available yet. Select only one spindle to continue.")/* window.open('aggregateView.html', '_blank') */;
             console.log(selected_sn, selected_sn.length)
 
              
