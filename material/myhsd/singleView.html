@@ -529,26 +529,26 @@
 
 
 
-      var dataLength = globalData["time"][0].length // un qualunque attributo tanto la lunghezza sempre quella è
+      /* var dataLength = globalData["time"][0].length */ // un qualunque attributo tanto la lunghezza sempre quella è
       
 
       var dataset = [];
       var min = 100000
       var max = 0
-      var scaleCheck = 0
+      /* var scaleCheck = 0
       var time = globalData["time"][0]
       var time_start = globalData["date start"][0]
       var real_time = aggiungiSecondi(time_start, time)
-      console.log(real_time)
+      console.log(real_time) */
    
 
-      if(document.getElementById("aggregato").checked != true) my_data = globalData[selectedGroup][0]
-      console.log(globalData, my_data)
+      /* if(document.getElementById("aggregato").checked != true) my_data = globalData[selectedGroup][0]
+      console.log(globalData, my_data) */
      
 
           if(aggregato == 1){ // Caso AGGREGATO
 
-            ///Variabili 
+            /* ///Variabili 
 
             colorSelector = 0
             
@@ -967,7 +967,7 @@
                   }
 
               }
-              
+               */
 
             }
 
@@ -980,30 +980,13 @@
               return parseTime(timeString);
             });
 
-          for (let i = 0; i <= allGroup.length; i++) {
+         
 
-              var tmp = allGroup[i]
-
-              d3.select("#svg" + tmp).attr("visibility", "visible") //Serve per rendere visibili i div che aggiungo nel caso aggiungo grafici quando è già aggregato
-
-
-            }
-       
-           
           for(let i = 0; i < dataLength; i += 1){ //SINGOLO. Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
            
-            if(selectedGroup == "Tdut2"){
+           
 
-          
-
-              dataset.push([realTimeDates[i], 255]);
-
-              min = 250
-              max = 260
-
-            }
-
-            else{
+            
 
               if(my_data[i] != undefined){
                 dataset.push([realTimeDates[i], my_data[i]]);
@@ -1017,7 +1000,7 @@
 
               }
               
-            } 
+            
 
             console.log(dataset)
 
@@ -1906,16 +1889,8 @@
 
 
   d3.select("#selectMenuColumns").on("change", function (d) {
+    
       var selectedOption = d3.select(this).property("value");
-
-      var filterDiv = document.getElementById("filterDiv");
-      if (filterDiv) {
-        filterDiv.parentNode.removeChild(filterDiv);
-      }
-
-      var infoColumnsDiv = document.getElementById("infoColumns");
-      infoColumnsDiv.innerHTML = "";
-
       
 
       d3.json(
@@ -1926,145 +1901,10 @@
         "&mode=1&limit=1000",
         { crossOrigin: "anonymous" }
       ).then(function (data) {
-        infoColumnsDiv.innerHTML = "";
-        if (data.hasOwnProperty(selectedOption)) {
-          var columnData = data[selectedOption].data;
-          var html = "<table>";
-          html += "<tr><th colspan='3'>" + selectedOption + "</th></tr>";
-          html += "<tr><th>Date</th><th>Time</th><th>Value</th></tr>";
-
-          columnData.forEach(function (entry) {
-            var dateTime = entry.date_timestamp;
-            var date = dateTime.split("T")[0];
-            var time = dateTime.split("T")[1].split(".")[0];
-
-            html +=
-              "<tr><td>" +
-              date +
-              "</td><td>" +
-              time +
-              "</td><td>" +
-              entry.value +
-              "</td></tr>";
-          });
-
-          html += "</table>";
-          infoColumnsDiv.innerHTML = html;
-
-          // Crea il div per il filtraggio
-          filterDiv = document.createElement("div");
-          filterDiv.setAttribute("id", "filterDiv");
-          filterDiv.classList.add("filter-div");
-
-          var filterForm = document.createElement("form");
-          filterForm.setAttribute("id", "filterForm");
-          filterForm.classList.add("filter-form");
-
-          var dateInput = document.createElement("input");
-          dateInput.setAttribute("type", "text");
-          dateInput.setAttribute("placeholder", "Enter date (YYYY-MM-DD)");
-
-          var timeInput = document.createElement("input");
-          timeInput.setAttribute("type", "text");
-          timeInput.setAttribute("placeholder", "Enter time (HH:MM:SS)");
-
-          var filterButton = document.createElement("button");
-          filterButton.innerHTML = "Filter";
-          filterButton.classList.add("filter-button");
-          filterButton.classList.add("button-blue");
-
-          var resetButton = document.createElement("button");
-          resetButton.innerHTML = "Reset";
-          resetButton.classList.add("reset-button");
-          resetButton.classList.add("button-red");
-
-          filterForm.appendChild(dateInput);
-          filterForm.appendChild(timeInput);
-          filterForm.appendChild(filterButton);
-          filterForm.appendChild(resetButton);
-
-          filterDiv.appendChild(filterForm);
-
-          // Aggiungi il div del filtraggio sopra il div infoColumns
-          infoColumnsDiv.parentNode.insertBefore(filterDiv, infoColumnsDiv);
-
-          // Aggiungi l'evento di filtraggio
-          filterForm.addEventListener("submit", function (event) {
-            event.preventDefault();
-
-            var filterDate = dateInput.value.trim();
-            var filterTime = timeInput.value.trim();
-
-            var filteredData = columnData.filter(function (entry) {
-              var dateTime = entry.date_timestamp;
-              var date = dateTime.split("T")[0];
-              var time = dateTime.split("T")[1].split(".")[0];
-
-              if (filterDate && filterTime) {
-                return date === filterDate && time === filterTime;
-              } else if (filterDate) {
-                return date === filterDate;
-              } else if (filterTime) {
-                return time === filterTime;
-              } else {
-                return true;
-              }
-            });
-
-            var filteredHtml = "<table>";
-            filteredHtml +=
-              "<tr><th colspan='3'>" + selectedOption + " (Filtered)</th></tr>";
-            filteredHtml += "<tr><th>Date</th><th>Time</th><th>Value</th></tr>";
-
-            filteredData.forEach(function (entry) {
-              var dateTime = entry.date_timestamp;
-              var date = dateTime.split("T")[0];
-              var time = dateTime.split("T")[1].split(".")[0];
-
-              filteredHtml +=
-                "<tr><td>" +
-                date +
-                "</td><td>" +
-                time +
-                "</td><td>" +
-                entry.value +
-                "</td></tr>";
-            });
-
-            filteredHtml += "</table>";
-            infoColumnsDiv.innerHTML = filteredHtml;
-          });
-
-          // Aggiungi l'evento di reset
-          resetButton.addEventListener("click", function () {
-            dateInput.value = "";
-            timeInput.value = "";
-
-            var html = "<table>";
-            html += "<tr><th colspan='3'>" + selectedOption + "</th></tr>";
-            html += "<tr><th>Date</th><th>Time</th><th>Value</th></tr>";
-
-            columnData.forEach(function (entry) {
-              var dateTime = entry.date_timestamp;
-              var date = dateTime.split("T")[0];
-              var time = dateTime.split("T")[1].split(".")[0];
-
-              html +=
-                "<tr><td>" +
-                date +
-                "</td><td>" +
-                time +
-                "</td><td>" +
-                entry.value +
-                "</td></tr>";
-            });
-
-            html += "</table>";
-            infoColumnsDiv.innerHTML = html;
-          });
-        } else {
-          infoColumnsDiv.innerHTML = "No data available for the selected column.";
-        }
+        console.log(data)
+        newGraph(selectedOption, data, 0)
+        
+        
       });
     });
 
