@@ -528,18 +528,20 @@
       var dataset = [];
       var min = 100000
       var max = 0
-      var timeArray = []
+      var dateArray = [], timeArray = []
       var time = 0
       //console.log(data["Tank piston return time"].data.length)
       var attributeLength = data[selectedGroup].data.length
       console.log(attributeLength)
       for(let i = 0; i< attributeLength; i++){
 
-        time = data[selectedGroup].data[i].date_timestamp.slice(0, -9)
-        console.log(time)
+        date = data[selectedGroup].data[i].date_timestamp.slice(0, 10)
+        time = data[selectedGroup].data[i].date_timestamp.slice(10)
+        console.log(time, date)
+        dateArray.push(date)
         timeArray.push(time)
       }
-      console.log(timeArray)
+      console.log(dateArray)
       /* var scaleCheck = 0
       var time = globalData["time"][0]
       var time_start = globalData["date start"][0]
@@ -994,7 +996,7 @@
             
 
               
-                dataset.push([timeArray[i], data[selectedGroup].data[i].value]);
+                dataset.push([dateArray[i], data[selectedGroup].data[i].value]);
                 if (data[selectedGroup].data[i].value < min) {
                   min = data[selectedGroup].data[i].value
                 }
@@ -1081,7 +1083,7 @@
             
 
             var xScale = d3.scaleTime()
-              .domain(d3.extent(timeArray))
+              .domain(d3.extent(dateArray))
               .range([0, width]);
 
             g.append("g")
@@ -1130,9 +1132,9 @@
                 .attr("id", function (d, i) { return "path" + nsSelectedGroup })
 
 
-                d3.selectAll("svg").on("mouseover", function (d, i) {
+                /* d3.selectAll("svg").on("mouseover", function (d, i) {
                   console.log(d, i)
-                })
+                }) */
                 
 
 
