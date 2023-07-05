@@ -80,11 +80,9 @@
             .style("stroke-width", "2");
         }
 
-      function aggiungiSecondi(valoreIniziale, arraySecondi) {
-          var risultato = [];
+      function setTime(valoreIniziale) { //Formatta il tempo in un valore adeguato per D3.js
+            var risultato = [];
 
-          for (var i = 0; i < arraySecondi.length; i++) {
-            var secondi = arraySecondi[i];
             var tempo = valoreIniziale.split(':');
 
             var data = new Date();
@@ -93,7 +91,7 @@
             data.setSeconds(parseInt(tempo[2], 10));
 
             // Aggiungi i secondi al tempo iniziale
-            data.setSeconds(data.getSeconds() + secondi);
+            
 
             // Formatta il tempo in una stringa "ore:minuti:secondi"
             var tempoNuovo = ('0' + data.getHours()).slice(-2) + ':' +
@@ -101,12 +99,12 @@
               ('0' + data.getSeconds()).slice(-2);
 
             risultato.push(tempoNuovo);
-          }
+          
 
-          return risultato;
+            return risultato;
         }
 
-      var globalData = []
+
 
       /* function restoreLoader() {
           console.log("Restoring loader")
@@ -174,12 +172,7 @@
 
 <div id ="selectedSpindles"></div>
 <br>
-<b>Measurements</b>
-
-
-<select id="selectMenu">
-  <option value="" disabled selected>Select measurement</option>
-</select>
+<div id="selectedValues"></div>
 
 <br><br>
 
@@ -202,8 +195,7 @@
 <br><br>
 <!-- <button id="clear" onclick="clearSvg()" class="button-red">Clear all</button> -->
 
-<div id = "info" class = "info">
-<div id = "infoColumns" class="infoColumns">
+
 
 
 
@@ -225,8 +217,6 @@
 
 <br>
 
-
-<div id = "coordinates"></div>
 
 
 <div class="container" id = "svg-div">
@@ -527,19 +517,34 @@
 
     function newGraph(selectedGroup, data, aggregato){
 
-
-
+      var nsSelectedGroup = selectedGroup
+      if (selectedGroup.includes(" ")) {
+        nsSelectedGroup = selectedGroup.replace(/\s/g, "");
+      }
+      
       /* var dataLength = globalData["time"][0].length */ // un qualunque attributo tanto la lunghezza sempre quella è
       
 
       var dataset = [];
       var min = 100000
       var max = 0
+      var timeArray = []
+      var time = 0
+      //console.log(data["Tank piston return time"].data.length)
+      var attributeLength = data[selectedGroup].data.length
+      console.log(attributeLength)
+      for(let i = 0; i< attributeLength; i++){
+
+        time = data[selectedGroup].data[i].date_timestamp.slice(0, -9)
+        console.log(time)
+        timeArray.push(time)
+      }
+      console.log(timeArray)
       /* var scaleCheck = 0
       var time = globalData["time"][0]
       var time_start = globalData["date start"][0]
-      var real_time = aggiungiSecondi(time_start, time)
       console.log(real_time) */
+      //var real_time = aggiungiSecondi(time)
    
 
       /* if(document.getElementById("aggregato").checked != true) my_data = globalData[selectedGroup][0]
@@ -975,56 +980,60 @@
 
         else if ((aggregato == 0) || (aggregato == 3)){ //Caso NON aggregato, il 3 è solo per un piccolo sottocaso
 
-          var parseTime = d3.timeParse("%H:%M:%S");
+          /* var parseTime = d3.timeParse("%H:%M:%S");
             var realTimeDates = real_time.map(function (timeString) {
               return parseTime(timeString);
-            });
+            }); */
 
          
 
-          for(let i = 0; i < dataLength; i += 1){ //SINGOLO. Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
+          for(let i = 0; i < attributeLength; i += 1){ //SINGOLO. Modificare il += 5 per aumentare o diminuire la velocità nel caricamento.
            
            
 
             
 
-              if(my_data[i] != undefined){
-                dataset.push([realTimeDates[i], my_data[i]]);
-                if (my_data[i] < min) {
-                  min = my_data[i]
+              
+                dataset.push([timeArray[i], data[selectedGroup].data[i].value]);
+                if (data[selectedGroup].data[i].value < min) {
+                  min = data[selectedGroup].data[i].value
                 }
-                if (my_data[i] > max) {
-                  max = my_data[i]
+                if (data[selectedGroup].data[i].value > max) {
+                  max = data[selectedGroup].data[i].value
                 }    
 
 
-              }
+              
               
             
 
-            console.log(dataset)
+            
 
         }
 
-          
+          console.log(dataset)
+          var parseDate = d3.timeParse("%Y-%m-%d");
+            dataset.forEach(function (d) {
+              d[0] = parseDate(d[0]);
+            });
 
-      
+            console.log(typeof (dataset[0][0]))
+
+            console.log(typeof(dataset[0][0]))
+            console.log(typeof (dataset[0][1]))
 
           //Creazione grafico
 
-          document.getElementById("svg-div").innerHTML += '<div class="col-sm"><svg width="800" height="510" id="svg' + selectedGroup +'"></svg></div>'
-            var svg_to_select = "#svg" + selectedGroup
+          document.getElementById("svg-div").innerHTML += '<div class="col-sm"><svg width="800" height="510" id="svg' + nsSelectedGroup+'"></svg></div>'
+            var svg_to_select = "#svg" + nsSelectedGroup
 
             var new_svg = d3.select(svg_to_select),
                 margin = 200,
-                width = new_svg.attr("width") - margin, //300
-                height = new_svg.attr("height") - margin //200
+                width = 600
+                height = 310
 
 
-            
-
-
-         
+   
             var g = new_svg.append("g")
         .attr("transform", "translate(" + 100 + "," + 100 + ")")
         .attr("id", function (d, i) { return "g" + selectedGroup })
@@ -1038,16 +1047,16 @@
             .style('font-size', 20)
             .text(selectedGroup + " Chart");
 
-            var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
-            var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+            /* var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var numbersOnly = downsampleText.match(/\d+/g).map(Number); */
 
-            new_svg.append('text')
+            /* new_svg.append('text')
               .attr('x', width / 2 + 100)
               .attr('y', 65)
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 20)
-              .text("Downsample: " + numbersOnly);
+              .text("Downsample: " + numbersOnly); */
         
             // X label
             new_svg.append('text')
@@ -1072,17 +1081,17 @@
             
 
             var xScale = d3.scaleTime()
-              .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+              .domain(d3.extent(timeArray))
               .range([0, width]);
 
             g.append("g")
               .attr("transform", "translate(0," + height + ")")
-              .attr("id", "xAxis" + selectedGroup)
-              .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));
+              .attr("id", "xAxis" + nsSelectedGroup)
+              .call(d3.axisBottom(xScale));
 
             yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
             g.append("g")
-            .attr("id", function (d, i) { return "yAxis" + selectedGroup })
+            .attr("id", function (d, i) { return "yAxis" + nsSelectedGroup })
             .call(d3.axisLeft(yScale));
 
           
@@ -1098,7 +1107,7 @@
             .attr("r", 3)
             .attr("transform", "translate(" + 100 + "," + 100 + ")")
             .style("fill", "#CC0000")
-            .attr("id", function(d,i){ return "dot" + selectedGroup})
+            .attr("id", function(d,i){ return "dot" + nsSelectedGroup})
             .attr("class", "punto");
      
             
@@ -1118,7 +1127,7 @@
                 .style("fill", "none")
                 .style("stroke", "#CC0000")
                 .style("stroke-width", "2")
-                .attr("id", function (d, i) { return "path" + selectedGroup })
+                .attr("id", function (d, i) { return "path" + nsSelectedGroup })
 
 
                 d3.selectAll("svg").on("mouseover", function (d, i) {
@@ -1211,13 +1220,13 @@
             var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
             var numbersOnly = downsampleText.match(/\d+/g).map(Number);
 
-            new_svg.append('text')
+            /* new_svg.append('text')
               .attr('x', width / 2 + 100)
               .attr('y', 65)
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 20)
-              .text("Downsample: " + numbersOnly);
+              .text("Downsample: " + numbersOnly); */
 
             // X label
             new_svg.append('text')
@@ -1331,13 +1340,13 @@
             var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
             var numbersOnly = downsampleText.match(/\d+/g).map(Number);
 
-            new_svg.append('text')
+            /* new_svg.append('text')
               .attr('x', width / 2 + 100)
               .attr('y', 65)
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 20)
-              .text("Downsample: " + numbersOnly);
+              .text("Downsample: " + numbersOnly); */
 
             // X label
             new_svg.append('text')
