@@ -1005,24 +1005,16 @@
                 }    
 
 
-              
-              
-            
-
+                if (min == max){ 
+                  min = min - 5
+                  max = max + 5
+                }
             
 
         }
 
           console.log(dataset)
-          var parseDate = d3.timeParse("%Y-%m-%d");
-            dataset.forEach(function (d) {
-              d[0] = parseDate(d[0]);
-            });
-
-            console.log(typeof (dataset[0][0]))
-
-            console.log(typeof(dataset[0][0]))
-            console.log(typeof (dataset[0][1]))
+          
 
           //Creazione grafico
 
@@ -1079,45 +1071,59 @@
 
             
 
-
+            console.log(width)
             
 
             var xScale = d3.scaleTime()
-              .domain(d3.extent(dateArray))
+              .domain(d3.extent(dataset, function (d) {
+                return new Date(d[0]);
+              }))
               .range([0, width]);
 
+              console.log(typeof(dataset[0][0]))
+              console.log(typeof (dataset[0][1]))
             g.append("g")
               .attr("transform", "translate(0," + height + ")")
               .attr("id", "xAxis" + nsSelectedGroup)
               .call(d3.axisBottom(xScale));
 
-            yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
-            g.append("g")
-            .attr("id", function (d, i) { return "yAxis" + nsSelectedGroup })
-            .call(d3.axisLeft(yScale));
+            var yScale = d3.scaleLinear()
+              .domain([min, max])
+              .range([height, 0])
 
-          
+            g.append("g")
+              .attr("id", "yAxis" + nsSelectedGroup)
+              .call(d3.axisLeft(yScale));
+              
+
+            // ...
 
             // Step 7
             new_svg.append('g')
-            .selectAll("dot")
-            .data(dataset)
-            .enter()
-            .append("circle")
-            .attr("cx", function (d) { return xScale(d[0]); } )
-            .attr("cy", function (d) { return yScale(d[1]); } )
-            .attr("r", 3)
-            .attr("transform", "translate(" + 100 + "," + 100 + ")")
-            .style("fill", "#CC0000")
-            .attr("id", function(d,i){ return "dot" + nsSelectedGroup})
-            .attr("class", "punto");
+              .selectAll("dot")
+              .data(dataset)
+              .enter()
+              .append("circle")
+              .attr("cx", function (d) {
+                return xScale(new Date(d[0]));
+              })
+              .attr("cy", function (d) {
+                return yScale(d[1]); // Converte il valore in un numero
+              })
+              .attr("r", 3)
+              .attr("transform", "translate(" + 100 + "," + 100 + ")")
+              .style("fill", "#CC0000")
+              .attr("id", function (d, i) {
+                return "dot" + nsSelectedGroup;
+              })
+              .attr("class", "punto");
      
             
 
             // Step 8        
 
             var line = d3.line()
-            .x(function(d) { return xScale(d[0]); }) 
+            .x(function(d) {  return xScale(new Date(d[0])); }) 
             .y(function(d) { return yScale(d[1]); }) 
             .curve(d3.curveMonotoneX)
         
@@ -1129,7 +1135,8 @@
                 .style("fill", "none")
                 .style("stroke", "#CC0000")
                 .style("stroke-width", "2")
-                .attr("id", function (d, i) { return "path" + nsSelectedGroup })
+                .attr("id", function (d, i) { console.log(d)
+                  return "path" + nsSelectedGroup })
 
 
                 /* d3.selectAll("svg").on("mouseover", function (d, i) {
