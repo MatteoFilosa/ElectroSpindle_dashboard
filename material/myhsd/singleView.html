@@ -80,7 +80,7 @@
             .style("stroke-width", "2");
         }
 
-      function setTime(valoreIniziale) { //Formatta il tempo in un valore adeguato per D3.js
+      function setTime(valoreIniziale) { //Formatta il tempo in un valore adeguato per 
             var risultato = [];
 
             var tempo = valoreIniziale.split(':');
@@ -172,6 +172,7 @@
 
 <div id ="selectedSpindles"></div>
 <br>
+<input type="checkbox" id="aggregato" class="checkbox" onclick="aggregateHelper()"> Aggregate
 <div id="selectedValues"></div>
 
 <br><br>
@@ -245,7 +246,7 @@
     }) */
 
      
-    var allGroup = [], allGroupColumns = [], sn_myhsd = JSON.parse(localStorage.getItem("sn_myhsd")); 
+    var allGroup = [], allGroupColumns = [], sn_myhsd = JSON.parse(localStorage.getItem("sn_myhsd")), globalData; 
     d3.json("http://arca.diag.uniroma1.it:8082/data/myhsd/measurements/" + sn_myhsd + "", { crossOrigin: "anonymous" }).then(function (data) {
       
         console.log(data)
@@ -268,25 +269,26 @@
   
       }) 
 
-       d3.json("http://arca.diag.uniroma1.it:8082/data/myhsd/" + sn_myhsd + "/columns", { crossOrigin: "anonymous" }).then(function (data) {
+       d3.json("http://arca.diag.uniroma1.it:8082/data/myhsd/" + sn_myhsd + "/columns", { crossOrigin: "anonymous" })
+          .then(function (data) {
+            for (let i = 0; i < data.length; i++) {
+              if(data[i] != "Failed hooks number tank") allGroupColumns.push(data[i].toString())
+            }
 
-          for (let i = 0; i < data.length; i++) {
-          
-           allGroupColumns.push(data[i].toString())
+            // Ordina i valori in ordine alfabetico
+            allGroupColumns.sort();
 
-         }
+            
+            d3.select("#selectMenuColumns")
+              .selectAll('myOptions')
+              .data(allGroupColumns)
+              .enter()
+              .append('option')
+              .text(function (d) { return d; })
+              .attr("value", function (d) { return d; });
 
-          d3.select("#selectMenuColumns")
-            .selectAll('myOptions')
-            .data(allGroupColumns)
-            .enter()
-            .append('option')
-            .text(function (d) { return d; }) // text showed in the menu
-            .attr("value", function (d) { return d; }) // corresponding value returned by the button
-
-
-
-        }) 
+            
+          });
       
 
   function analytics(button) {
@@ -379,11 +381,9 @@
         function aggregateHelper(){
 
 
-          
-          var data = globalData
+        
 
-
-          if(document.getElementById("aggregato").checked == true) newGraph("", data, 1, 0)
+          if(document.getElementById("aggregato").checked == true) newGraph("", null, 1)
 
           else { //vuol dire che devo rendere visibili gli attributi di prima
 
@@ -524,24 +524,40 @@
       
       /* var dataLength = globalData["time"][0].length */ // un qualunque attributo tanto la lunghezza sempre quella è
       
-
+      var scaleCheck = 0
       var dataset = [];
       var min = 100000
       var max = 0
       var dateArray = [], timeArray = []
       var time = 0
-      //console.log(data["Tank piston return time"].data.length)
-      var attributeLength = data[selectedGroup].data.length
-      console.log(attributeLength)
-      for(let i = 0; i< attributeLength; i++){
+      if(selectedGroup == null){
 
-        date = data[selectedGroup].data[i].date_timestamp.slice(0, 10)
-        time = data[selectedGroup].data[i].date_timestamp.slice(10)
-        console.log(time, date)
-        dateArray.push(date)
-        timeArray.push(time)
-      }
-      console.log(dateArray)
+         selectedGroup = d3.select("#selectMenu").property("value");
+
+      } 
+
+      console.log(data)
+      //console.log(data["Tank piston return time"].data.length)
+      if(data == null){
+        console.log("ok")
+        attributeLength = 59
+
+      } 
+      else{
+
+        var attributeLength = data[selectedGroup].data.length
+        console.log(attributeLength)
+        for (let i = 0; i < attributeLength; i++) {
+
+          date = data[selectedGroup].data[i].date_timestamp.slice(0, 10)
+          time = data[selectedGroup].data[i].date_timestamp.slice(10)
+          console.log(time, date)
+          dateArray.push(date)
+          timeArray.push(time)
+        }
+        console.log(dateArray)
+
+      } 
       /* var scaleCheck = 0
       var time = globalData["time"][0]
       var time_start = globalData["date start"][0]
@@ -555,7 +571,7 @@
 
           if(aggregato == 1){ // Caso AGGREGATO
 
-            /* ///Variabili 
+             ///Variabili 
 
             colorSelector = 0
             
@@ -578,15 +594,16 @@
 
               if (to_add[i] != undefined) {
 
-                if ((to_add[i].id != null) && (to_add[i].checked == true)) {
+                if (("label" + to_add[i].id != null) && (to_add[i].checked == true)) {
 
-                  valori.push(to_add[i].id)
-   
+                  valori.push(document.getElementById("label" + to_add[i].id).innerHTML)
+                  console.log(to_add[i])
 
                 }
               }
 
             }
+            console.log(valori)
 
 
               var scalaAggiuntiva = 0
@@ -600,9 +617,7 @@
 
               ///SETTING DEL TESTO
 
-              new_svg.on("mouseover", function (d, i) {
-                console.log(d.fromElement.__data__[1])
-              })
+              
 
               new_svg.selectAll('text').remove()
 
@@ -614,17 +629,17 @@
                 .style('font-size', 20)
                 .text("Aggregate chart");
 
-            var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
-            var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+            /* var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var numbersOnly = downsampleText.match(/\d+/g).map(Number); */
 
-            new_svg.append('text')
+            /* new_svg.append('text')
               .attr('x', width / 2 + 100)
               .attr('y', 65)
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 20)
               .text("Downsample: " + numbersOnly);
-
+ */
               // X label
               new_svg.append('text')
                 .attr('x', width / 2 + 100)
@@ -632,7 +647,7 @@
                 .attr('text-anchor', 'middle')
                 .style('font-family', 'Helvetica')
                 .style('font-size', 12)
-                .text("Time(h:m:s)");
+                .text("Time");
 
               // Y label
               new_svg.append('text')
@@ -652,18 +667,44 @@
 
               for (let j = 0; j < valori.length; j++) { //Serve per scalare gli assi correttamente
 
-                var selectedGroup = valori[j]
+                (function () {
+                  var selectedGroup = valori[j];
+                  var dataLength = 59; //change
+                  console.log(selectedGroup);
 
+                  d3.json(
+                    "http://arca.diag.uniroma1.it:8082/data/myhsd/" +
+                    sn_myhsd +
+                    "/raw_data?columns=" +
+                    selectedGroup +
+                    "&mode=1&limit=1000",
+                    { crossOrigin: "anonymous" }
+                  ).then(function (data) {
+                    console.log(data);
 
+                    for (let i = 0; i < dataLength; i++) {
+                      
+                      dataset.push([dateArray[i], data[selectedGroup].data[i].value]);
+                      if (data[selectedGroup].data[i].value < min) {
+                        min = data[selectedGroup].data[i].value;
+                      }
+                      if (data[selectedGroup].data[i].value > max) {
+                        max = data[selectedGroup].data[i].value;
+                      }
+                    }
 
-                var my_data = globalData[selectedGroup][0]
-                var time = globalData["time"][0]
-                var time_start = globalData["date start"][0]
-                var real_time = aggiungiSecondi(time_start, time)
-                var parseTime = d3.timeParse("%H:%M:%S");
-                var realTimeDates = real_time.map(function (timeString) {
-                  return parseTime(timeString);
-                });
+                    if (min == max) {
+                      min = min - 5;
+                      max = max + 5;
+                    }
+                  });
+                })();
+            
+
+              
+
+              
+            
 
               
 
@@ -849,81 +890,92 @@
 
                 for (let j = 0; j < valori.length; j++) { 
 
-                  var selectedGroup = valori[j]
-             
+                  var selectedGroup = valori[j], dataLength = 59 //cambiare
 
-                  var my_data = globalData[selectedGroup][0]
-                  var time = globalData["time"][0]
-                  var time_start = globalData["date start"][0]
-                  var real_time = aggiungiSecondi(time_start, time)
-                  console.log(real_time)
+                  var nsSelectedGroup = selectedGroup
+                  if (selectedGroup.includes(" ")) {
+                    nsSelectedGroup = selectedGroup.replace(/\s/g, "");
+                  }
+
+
+ 
 
                   if(selectedGroup == "Tdut2"){
                     min = 250
                     max = 260
                   }
 
-                  else{
-
-                    for (let i = 0; i < dataLength; i += 1) { //riscalo y per ogni valore
-
-                      if (my_data[i] < min) {
-                        min = my_data[i]
-
-                      }
-                      if (my_data[i] > max) {
-                        max = my_data[i]
-                      }
-
-                    }
-
-                  }
                   
-                 
-
-
-                  
+  
                   yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
                   }
 
                   for (let j = 0; j < valori.length; j++) { //parte onerosa
 
-                     var dataset = []
+                     
 
-                     var selectedGroup = valori[j]
-
+                    
             
 
-                    var my_data = globalData[selectedGroup][0]
-                    var time = globalData["time"][0]
+                    (function () {
+                        var dataset = []
+                         var selectedGroup = valori[j];
+                         var dataLength = 59; //change
+                         console.log(selectedGroup);
+
+                         d3.json(
+                           "http://arca.diag.uniroma1.it:8082/data/myhsd/" +
+                           sn_myhsd +
+                           "/raw_data?columns=" +
+                           selectedGroup +
+                           "&mode=1&limit=1000",
+                           { crossOrigin: "anonymous" }
+                         ).then(function (data) {
+                           console.log(data);
+
+                           for (let i = 0; i < dataLength; i++) {
+                             
+                             dataset.push([dateArray[i], data[selectedGroup].data[i].value]);
+                             if (data[selectedGroup].data[i].value < min) {
+                               min = data[selectedGroup].data[i].value;
+                             }
+                             if (data[selectedGroup].data[i].value > max) {
+                               max = data[selectedGroup].data[i].value;
+                             }
+                           }
+
+                           
+                         });
+                       })();
               
 
-                    for (let i = 0; i < dataLength; i += 1) {
-                      var time_tmp = time[i].toFixed(3)
-
-                      if(selectedGroup == "Tdut2") dataset.push([realTimeDates[i],255]);
-                      else if (my_data[i] != undefined) {
-                       
-                        dataset.push([realTimeDates[i], my_data[i]]);
-                      }
-
-
-                    }
-
-
+                      
  
-                  xScale = d3.scaleTime()
-                      .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+                  var xScale = d3.scaleTime()
+                      .domain(d3.extent(dataset, function (d) {
+                        return new Date(d[0]);
+                      }))
                       .range([0, width]);
+
 
                     g.append("g")
                       .attr("transform", "translate(0," + height + ")")
-                      .attr("id", "xAxis" + selectedGroup)
-                      .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));
+                      .attr("id", "xAxis" + nsSelectedGroup)
+                      .call(d3.axisBottom(xScale));
 
-                  g.append("g")
-                    .call(d3.axisLeft(yScale));
+                      if((min == 100000) && (max == 0)){
+                        min = -5, max = 5
+                      }
 
+                    var yScale = d3.scaleLinear()
+                      .domain([min, max])
+                      .range([height, 0])
+
+                    g.append("g")
+                      .attr("id", "yAxis" + nsSelectedGroup)
+                      .call(d3.axisLeft(yScale));
+
+                    console.log(dataset)
 
              
                   new_svg.append('g')
@@ -957,16 +1009,18 @@
 
 
                   new_svg.append('text')
-                      .attr('x', width / 2 + colorSelector * 100)
+                      .attr('x', width / 2 + colorSelector * 120)
                       .attr('y', 85)
                       .attr('text-anchor', 'middle')
                       .style('font-family', 'Helvetica')
                       .style('font-size', 20)
                       .style('fill', colors[colorSelector])
-                      .text("\u25A0 " + selectedGroup)
+                      .text("\u25A0 " + valori[j])
 
                   if (colorSelector < colors.length) colorSelector += 1
                   else colorSelector = 0
+
+                  console.log(min,max)
             
 
                 
@@ -974,7 +1028,7 @@
                   }
 
               }
-               */
+               
 
             }
 
@@ -1059,7 +1113,7 @@
             .attr('text-anchor', 'middle')
             .style('font-family', 'Helvetica')
             .style('font-size', 12)
-            .text("Time(h:m:s)");
+            .text("Time");
         
             // Y label
             new_svg.append('text')
@@ -1080,8 +1134,7 @@
               }))
               .range([0, width]);
 
-              console.log(typeof(dataset[0][0]))
-              console.log(typeof (dataset[0][1]))
+           
             g.append("g")
               .attr("transform", "translate(0," + height + ")")
               .attr("id", "xAxis" + nsSelectedGroup)
@@ -1244,7 +1297,7 @@
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 12)
-              .text("Time(h:m:s)");
+              .text("Time");
 
             // Y label
             new_svg.append('text')
@@ -1364,7 +1417,7 @@
               .attr('text-anchor', 'middle')
               .style('font-family', 'Helvetica')
               .style('font-size', 12)
-              .text("Time(h:m:s)");
+              .text("Time");
 
             // Y label
             new_svg.append('text')
@@ -1698,7 +1751,7 @@
        
             if ((aggregato != 1) && (aggregato != 2) && (aggregato != 3)) {
              
-              document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + selectedGroup +'" onchange = "modifyElement('+ selectedGroup +')" checked>' + "<label for='" + selectedGroup + "' id = 'label" + selectedGroup + "'>" + selectedGroup + "</label>" 
+              document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + nsSelectedGroup +'" onchange = "modifyElement('+ nsSelectedGroup +')" checked>' + "<label for='" + nsSelectedGroup + "' id = 'label" + nsSelectedGroup + "'>" + selectedGroup + "</label>" 
             }
               selectedValues.push(selectedGroup)
             localStorage.setItem("selectedValues", JSON.stringify(selectedValues))
@@ -1904,7 +1957,7 @@
 
 
 
-
+  var globalData = []
 
   d3.select("#selectMenuColumns").on("change", function (d) {
     
@@ -1921,7 +1974,7 @@
       ).then(function (data) {
         console.log(data)
         newGraph(selectedOption, data, 0)
-        
+        globalData = data
         
       });
     });
