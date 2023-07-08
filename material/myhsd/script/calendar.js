@@ -134,7 +134,7 @@ function setDate(day){
             localStorage.setItem("month-end", JSON.stringify(document.getElementById("month-picker").innerHTML))
             localStorage.setItem("year-end", JSON.stringify(document.getElementById("year").innerHTML))
             document.getElementById("calendar-original").hidden = true
-            document.getElementById("availableSpindles").innerHTML = "<div id = 'loader' style = 'margin-top: 60px;'></div>"
+            //document.getElementById("availableSpindles").innerHTML = "<div id = 'loader' style = 'margin-top: 60px;'></div>"
             //if(document.getElementById("cambia_data_inizio")!= null) document.getElementById("cambia_data_inizio").disabled = false
 
     }

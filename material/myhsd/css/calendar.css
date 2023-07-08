@@ -47,16 +47,12 @@
     border-radius: 30px;
     padding: 20px;
     position: absolute;
-    left: 20px;
-    top: 200px;
-    
+    left: 520px;
+    top: 50px;
     overflow: hidden;
     transform: scale(0.7);
-
     box-shadow: 10px 10px 5px lightblue;
-        
 }
-
 .light .calendar {
     box-shadow: var(--shadow);
 }

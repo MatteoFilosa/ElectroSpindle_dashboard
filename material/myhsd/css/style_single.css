@@ -228,6 +228,46 @@
         left: 800px;
         top: 200px;
     }
+    h5{
+
+        position: absolute;
+            left: 650px;
+            top: 20px;
+
+    }
+
+        #day-start {
+    
+            position: absolute;
+            left: 620px;
+            top: 100px;
+    
+        }
+
+        #day-end {
+    
+            position: absolute;
+            left: 720px;
+            top: 100px;
+    
+        }
+
+        .button-wrapper {
+            position: absolute;
+            left: 620px;
+            top: 50px;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+                .button-wrapper .button-green {
+                    margin-right: 10px;
+                }
+
+                .button-wrapper .button-red {
+                    margin-right: 50px;
+                }
 
     .button-blue {
         background-color: #0095ff;
