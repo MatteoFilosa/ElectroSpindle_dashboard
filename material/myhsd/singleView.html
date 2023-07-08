@@ -347,7 +347,7 @@
 
 
 
-        var  colorSelector = 0, selectedValues = [], globalData = [], sn_myhsd = JSON.parse(localStorage.getItem("sn_myhsd"))
+        var  colorSelector = 0, selectedValues = [], globalData = [], sn_myhsd = JSON.parse(localStorage.getItem("sn_myhsd")),  dateArray = []
         
 
 
@@ -517,15 +517,16 @@
       var dataset = [];
       var min = 100000
       var max = 0
-      var dateArray = [], timeArray = []
+      var timeArray = []
       var time = 0
       if(selectedGroup == null){
 
          selectedGroup = d3.select("#selectMenu").property("value");
+         console.log("qua")
 
       } 
 
-      console.log(data)
+      
       //console.log(data["Tank piston return time"].data.length)
       if(data == null){
         console.log("ok")
@@ -533,9 +534,14 @@
 
       } 
       else{
+       console.log("Debug: " + data);
+        console.log("Selected Group: " + selectedGroup);
+        console.log("Data Selected Group: " + data[selectedGroup]);
+        console.log("Data Selected Group Data: " + data[selectedGroup].data);
+        console.log("Data Selected Group Data Length: " + data[selectedGroup].data.length);
 
         var attributeLength = data[selectedGroup].data.length
-        console.log(attributeLength)
+        
         for (let i = 0; i < attributeLength; i++) {
 
           date = data[selectedGroup].data[i].date_timestamp.slice(0, 10)
@@ -652,230 +658,8 @@
 
               var container = document.getElementById('svg-div');
 
-           
-
-              for (let j = 0; j < valori.length; j++) { //Serve per scalare gli assi correttamente
-
-                (function () {
-                  var selectedGroup = valori[j];
-                  var dataLength = 59; //change
-                  console.log(selectedGroup);
-
-                  d3.json(
-                    "http://arca.diag.uniroma1.it:8082/data/myhsd/" +
-                    sn_myhsd +
-                    "/raw_data?columns=" +
-                    selectedGroup +
-                    "&mode=1&limit=1000",
-                    { crossOrigin: "anonymous" }
-                  ).then(function (data) {
-                    console.log(data);
-
-                    for (let i = 0; i < dataLength; i++) {
-                      
-                      dataset.push([dateArray[i], data[selectedGroup].data[i].value]);
-                      if (data[selectedGroup].data[i].value < min) {
-                        min = data[selectedGroup].data[i].value;
-                      }
-                      if (data[selectedGroup].data[i].value > max) {
-                        max = data[selectedGroup].data[i].value;
-                      }
-                    }
-
-                    if (min == max) {
-                      min = min - 5;
-                      max = max + 5;
-                    }
-                  });
-                })();
-            
-
               
-
-              
-            
-
-              
-
-                if(valori.includes("Tba") || valori.includes("Tamb") || valori.includes("Tdut2") || valori.includes("Tdut3") ){
-                  if (valori.includes("Itot") || valori.includes("Qtir") || valori.includes("Speed_S3_BUS") || valori.includes("Speed_Sync") || valori.includes("VibANT_Sync")){ //scale non omogenee
-
-                    max = 0, min = 100000, scalaAggiuntiva += 1, scaleCheck = 1
-                    
-                    console.log(real_time)
-
-                    
-
-
-
-                    for (let i = 0; i < dataLength; i += 1) { 
-                      if (selectedGroup == "Tdut2") {
-                        
-                        dataset.push([realTimeDates[i], 255]);
-
-                        min = 250
-                        max = 260
-
-                      }
-
-                      else {
-                        var time_tmp = time[i].toFixed(3)
-                        dataset.push([realTimeDates[i], my_data[i]]);
-                        if (my_data[i] < min) {
-                          min = my_data[i]
-                        }
-                        if (my_data[i] > max) {
-                          max = my_data[i]
-                        }
-
-                      }
-
-                    }
-
-                    
-       
-                    xScale = d3.scaleTime()
-                      .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
-                      .range([0, width]);
-
-                    
-                      
-                    yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
-
-                    localStorage.setItem("maxDefault", JSON.stringify(max))
-                    localStorage.setItem("minDefault", JSON.stringify(min))
-
-                    
-
-                    if (scalaAggiuntiva == 1) {
-
-                      g.append("g")
-                        .attr("transform", "translate(0," + height + ")")
-                        .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%H:%M:%S")).ticks(5));; //aggiungiamo una sola volta asse x
-
-                      g.append("g")
-                        .call(d3.axisRight(yScale))
-                        .attr("class", "asseDestro");          
-                      d3.select(".asseDestro").attr("transform", "translate(850,0)")
-                      d3.select(".asseDestro").selectAll("text").style("fill", colors[colorSelector])
-                   
-                    }
-
-
-                    else if (scalaAggiuntiva == 2) {
-
-                      g.append("g")
-                        .call(d3.axisLeft(yScale))
-                        .attr("class", "asseSinistro");
-                     
-                        d3.select(".asseSinistro").selectAll("text").style("fill", colors[colorSelector])
-   
-                      
-
-                    }
-
-                    else if (scalaAggiuntiva == 3) {
-
-                      g.append("g")
-                        .call(d3.axisRight(yScale))
-                        .attr("class", "asseSinistro2");
-
-                      d3.select(".asseSinistro2").selectAll("text").style("fill", colors[colorSelector])
-                     
-
-                    }
-
-                    else if (scalaAggiuntiva == 4) {
-
-                      g.append("g")
-                        .call(d3.axisLeft(yScale))
-                        .attr("class", "asseDestro2");
-
-                      d3.select(".asseDestro2").attr("transform", "translate(850,0)")
-                      d3.select(".asseDestro2").selectAll("text").style("fill", colors[colorSelector])
-
-
-                    }
-                    
-
-                    var dataset = []
-
-                    for (let i = 0; i < dataLength; i += 1) { 
-
-                      if (selectedGroup == "Tdut2") {
-
-                        
-
-                        dataset.push([realTimeDates[i], 255]);
-
-                        min = 250
-                        max = 260
-
-                      }
-
-                      else {
-                        
-
-                        if (my_data[i] != undefined) {
-                        dataset.push([realTimeDates[i], my_data[i]]);
-                        if (my_data[i] < min) {
-                          min = my_data[i]
-                        }
-                        if (my_data[i] > max) {
-                          max = my_data[i]
-                        }
-
-                      }
-                    }
-                    }
-
-
-                    new_svg.append('g')
-                      .selectAll("dot")
-                      .data(dataset)
-                      .enter()
-                      .append("circle")
-                      .attr("cx", function (d) { return xScale(d[0]); })
-                      .attr("cy", function (d) { return yScale(d[1]); })
-                      .attr("r", 1)
-                      .attr("transform", "translate(" + 100 + "," + 100 + ")")
-                      .style("fill", colors[colorSelector])
-                      .attr("id", function (d, i) { return "dot" + valori[j] })
-                      .attr("class", "punto");
-
-
-                    var line = d3.line()
-                      .x(function (d) { return xScale(d[0]); })
-                      .y(function (d) { return yScale(d[1]); })
-                      .curve(d3.curveMonotoneX)
-
-                    new_svg.append("path")
-                      .datum(dataset)
-                      .attr("class", "line")
-                      .attr("transform", "translate(" + 100 + "," + 100 + ")")
-                      .attr("d", line)
-                      .style("fill", "none")
-                      .style("stroke", colors[colorSelector])
-                      .style("stroke-width", "1")
-                      .attr("id", function (d, i) { return "path" + valori[j] });
-
-                      new_svg.append('text')
-                      .attr('x', width / 2 +colorSelector*100)
-                      .attr('y', 85)
-                      .attr('text-anchor', 'middle')
-                      .style('font-family', 'Helvetica')
-                      .style('font-size', 20)
-                      .style('fill', colors[colorSelector])
-                      .text("\u25A0 " + selectedGroup)
-
-                    if (colorSelector < colors.length) colorSelector += 1
-                    else colorSelector = 0
-
-                  }          
-                } 
-              }
-              
-              if(scaleCheck != 1){ // Quando non devo scalare tra due grandezze
+               // Quando non devo scalare tra due grandezze
 
                 for (let j = 0; j < valori.length; j++) { 
 
@@ -903,15 +687,11 @@
 
                      
 
-                    
             
 
-                    (function () {
+                 
                         var dataset = []
-                         var selectedGroup = valori[j];
-                         var dataLength = 59; //change
-                         console.log(selectedGroup);
-
+                         
                          d3.json(
                            "http://arca.diag.uniroma1.it:8082/data/myhsd/" +
                            sn_myhsd +
@@ -920,7 +700,13 @@
                            "&mode=1&limit=1000",
                            { crossOrigin: "anonymous" }
                          ).then(function (data) {
+                          var selectedGroup = valori[j];
+                           var dataLength = data[selectedGroup].data.length; //change
+                           console.log(selectedGroup);
+
                            console.log(data);
+
+                           sleep(1000).then(() => {
 
                            for (let i = 0; i < dataLength; i++) {
                              
@@ -934,90 +720,89 @@
                            }
 
                            
+                           var xScale = d3.scaleTime()
+                             .domain(d3.extent(dataset, function (d) {
+                               return new Date(d[0]);
+                             }))
+                             .range([0, width]);
+
+
+                           g.append("g")
+                             .attr("transform", "translate(0," + height + ")")
+                             .attr("id", "xAxis" + nsSelectedGroup)
+                             .call(d3.axisBottom(xScale));
+
+                           if ((min == 100000) && (max == 0)) {
+                             min = -5, max = 5
+                           }
+
+                           var yScale = d3.scaleLinear()
+                             .domain([min, max])
+                             .range([height, 0])
+
+                           g.append("g")
+                             .attr("id", "yAxis" + nsSelectedGroup)
+                             .call(d3.axisLeft(yScale));
+
+                           console.log(dataset)
+
+
+                           new_svg.append('g')
+                             .selectAll("dot")
+                             .data(dataset)
+                             .enter()
+                             .append("circle")
+                             .attr("cx", function (d) { return xScale(d[0]); })
+                             .attr("cy", function (d) { return yScale(d[1]); })
+                             .attr("r", 3)
+                             .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                             .style("fill", colors[colorSelector])
+                             .attr("id", function (d, i) { return "dot" + valori[j] })
+                             .attr("class", "punto");
+
+
+                           var line = d3.line()
+                             .x(function (d) { return xScale(d[0]); })
+                             .y(function (d) { return yScale(d[1]); })
+                             .curve(d3.curveMonotoneX)
+
+                           new_svg.append("path")
+                             .datum(dataset)
+                             .attr("class", "line")
+                             .attr("transform", "translate(" + 100 + "," + 100 + ")")
+                             .attr("d", line)
+                             .style("fill", "none")
+                             .style("stroke", colors[colorSelector])
+                             .style("stroke-width", "2")
+                             .attr("id", function (d, i) { return "path" + valori[j] });
+
+
+                           new_svg.append('text')
+                             .attr('x', width / 2 + colorSelector * 120)
+                             .attr('y', 85)
+                             .attr('text-anchor', 'middle')
+                             .style('font-family', 'Helvetica')
+                             .style('font-size', 20)
+                             .style('fill', colors[colorSelector])
+                             .text("\u25A0 " + valori[j])
+
+                           if (colorSelector < colors.length) colorSelector += 1
+                           else colorSelector = 0
+
+                           console.log(min, max)
+
+                          });
                          });
-                       })();
+                       
+                       
               
 
-                      
- 
-                  var xScale = d3.scaleTime()
-                      .domain(d3.extent(dataset, function (d) {
-                        return new Date(d[0]);
-                      }))
-                      .range([0, width]);
-
-
-                    g.append("g")
-                      .attr("transform", "translate(0," + height + ")")
-                      .attr("id", "xAxis" + nsSelectedGroup)
-                      .call(d3.axisBottom(xScale));
-
-                      if((min == 100000) && (max == 0)){
-                        min = -5, max = 5
-                      }
-
-                    var yScale = d3.scaleLinear()
-                      .domain([min, max])
-                      .range([height, 0])
-
-                    g.append("g")
-                      .attr("id", "yAxis" + nsSelectedGroup)
-                      .call(d3.axisLeft(yScale));
-
-                    console.log(dataset)
-
-             
-                  new_svg.append('g')
-                    .selectAll("dot")
-                    .data(dataset)
-                    .enter()
-                    .append("circle")
-                    .attr("cx", function (d) { return xScale(d[0]); })
-                    .attr("cy", function (d) { return yScale(d[1]); })
-                    .attr("r", 3)
-                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
-                    .style("fill", colors[colorSelector])
-                    .attr("id", function (d, i) { return "dot" + valori[j] })
-                    .attr("class", "punto");
-                    
-
-                  var line = d3.line()
-                    .x(function (d) { return xScale(d[0]); })
-                    .y(function (d) { return yScale(d[1]); })
-                    .curve(d3.curveMonotoneX)
-
-                  new_svg.append("path")
-                    .datum(dataset)
-                    .attr("class", "line")
-                    .attr("transform", "translate(" + 100 + "," + 100 + ")")
-                    .attr("d", line)
-                    .style("fill", "none")
-                    .style("stroke", colors[colorSelector])
-                    .style("stroke-width", "2")
-                    .attr("id", function (d, i) { return "path" + valori[j] });
-
-
-                  new_svg.append('text')
-                      .attr('x', width / 2 + colorSelector * 120)
-                      .attr('y', 85)
-                      .attr('text-anchor', 'middle')
-                      .style('font-family', 'Helvetica')
-                      .style('font-size', 20)
-                      .style('fill', colors[colorSelector])
-                      .text("\u25A0 " + valori[j])
-
-                  if (colorSelector < colors.length) colorSelector += 1
-                  else colorSelector = 0
-
-                  console.log(min,max)
+                     
             
 
                 
                 
                   }
-
-              }
-               
 
             }
 
@@ -1112,10 +897,7 @@
             .style('font-size', 12)
             .text(selectedGroup);
 
-            
-
-            console.log(width)
-            
+      
 
             var xScale = d3.scaleTime()
               .domain(d3.extent(dataset, function (d) {
@@ -2051,25 +1833,24 @@
 
                 console.log(selectedAttributes);
                 clearSvg();
-                for (let i = 0; i < selectedAttributes.length; i++) {
-                  var selectedOption = selectedAttributes[i];
-                  console.log(selectedOption)
-
-                  d3.json(
-                    "http://arca.diag.uniroma1.it:8082/data/myhsd/" +
-                    sn_myhsd +
-                    "/raw_data?columns=" +
-                    selectedOption +
-                    "&mode=1&limit=1000" +
-                    "&dateStart=" + startFormatted + "&dateEnd=" + endFormatted,
-                    { crossOrigin: "anonymous" }
-                  ).then(function (data) {
-                    
-                    newGraph(selectedOption, data, 0);
-                    globalData = data;
-                   
-                  });
+                for (let j = 0; j < selectedAttributes.length; j++) {
+                  (function (selectedOption) {
+                    d3.json(
+                      "http://arca.diag.uniroma1.it:8082/data/myhsd/" +
+                      sn_myhsd +
+                      "/raw_data?columns=" +
+                      selectedOption +
+                      "&mode=1&limit=1000" +
+                      "&dateStart=" + startFormatted + "&dateEnd=" + endFormatted,
+                      { crossOrigin: "anonymous" }
+                    ).then(function (data) {
+                      console.log(selectedOption);
+                      newGraph(selectedOption, data, 0);
+                      globalData = data;
+                    });
+                  })(selectedAttributes[j]);
                 }
+
               }
             }
           }
