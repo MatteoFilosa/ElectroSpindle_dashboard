@@ -184,16 +184,16 @@
 
 
 <br><br><br><br>
-<div class="container" id = "svg-div">
+<!-- <div class="container" id = "svg-div">
   <div class="row" id = "svg-row">
-    <!--
+    
     <div class="col-sm">
       One of three columns
     </div>
     -->
 
   </div>
-</div>
+</div> 
 
 <script>
 
@@ -491,13 +491,14 @@
                 document.getElementById("selectMenuColumns").selectedIndex = 0; 
 
                 d3.select("#svg_default").remove()    //attr("visibility", "hidden");
+                d3.selectAll("svg").remove();
 
-                document.getElementById("svg-div").remove()
+                /* document.getElementById("svg-div").remove()
                 var svgDiv = document.createElement("div")
                 svgDiv.classList.add("container");
                 svgDiv.id = "svg-div";
                 document.body.appendChild(svgDiv);
-                document.getElementById("svg-div").innerHTML +=  "<div class='row' id='svg-row'>"
+                document.getElementById("svg-div").innerHTML +=  "<div class='row' id='svg-row'>" */
 
 
                 localStorage.removeItem("selectedValues");
@@ -846,127 +847,108 @@
 
           //Creazione grafico
 
-          document.getElementById("svg-div").innerHTML += '<div class="col-sm"><svg width="800" height="510" id="svg' + nsSelectedGroup+'"></svg></div>'
-            var svg_to_select = "#svg" + nsSelectedGroup
+          //document.getElementById("svg-div").innerHTML += '<div class="col-sm"><svg width="800" height="510" id="svg' + nsSelectedGroup+'"></svg></div>'
+            
+            const margin = { top: 20, right: 30, bottom: 30, left: 50 };
+            const width = 960 - margin.left - margin.right;
+            const height = 500 - margin.top - margin.bottom;
 
-            var new_svg = d3.select(svg_to_select),
-                margin = 200,
-                width = 600
-                height = 310
-
-
-   
-            var g = new_svg.append("g")
-        .attr("transform", "translate(" + 100 + "," + 100 + ")")
-        .attr("id", function (d, i) { return "g" + selectedGroup })
-    
-
-          new_svg.append('text')
-            .attr('x', width/2 + 100)
-            .attr('y', 45)
-            .attr('text-anchor', 'middle')
-            .style('font-family', 'Helvetica')
-            .style('font-size', 20)
-            .text(selectedGroup + " Chart");
-
-            /* var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
-            var numbersOnly = downsampleText.match(/\d+/g).map(Number); */
-
-            /* new_svg.append('text')
-              .attr('x', width / 2 + 100)
-              .attr('y', 65)
-              .attr('text-anchor', 'middle')
-              .style('font-family', 'Helvetica')
-              .style('font-size', 20)
-              .text("Downsample: " + numbersOnly); */
-        
-            // X label
-            new_svg.append('text')
-            .attr('x', width/2 + 100)
-            .attr('y', height - 15 + 165)
-            .attr('text-anchor', 'middle')
-            .style('font-family', 'Helvetica')
-            .style('font-size', 12)
-            .text("Time");
-        
-            // Y label
-            new_svg.append('text')
-            .attr('text-anchor', 'middle')
-            .attr('transform', 'translate(40,' + height + ')rotate(-90)')
-            .style('font-family', 'Helvetica')
-            .style('font-size', 12)
-            .text(selectedGroup);
-
-      
-
-            var xScale = d3.scaleTime()
+            const xScale = d3.scaleTime()
               .domain(d3.extent(dataset, function (d) {
                 return new Date(d[0]);
               }))
               .range([0, width]);
 
-           
-            g.append("g")
-              .attr("transform", "translate(0," + height + ")")
-              .attr("id", "xAxis" + nsSelectedGroup)
-              .call(d3.axisBottom(xScale));
-
-            var yScale = d3.scaleLinear()
+            const yScale = d3.scaleLinear()
               .domain([min, max])
-              .range([height, 0])
+              .range([height, 0]);
 
-            g.append("g")
-              .attr("id", "yAxis" + nsSelectedGroup)
-              .call(d3.axisLeft(yScale));
-              
+            const xAxis = d3.axisBottom(xScale);
+            const yAxis = d3.axisLeft(yScale);
 
-            // ...
+            const zoom = d3.zoom()
+              .extent([[0, 0], [width, height]])
+              .scaleExtent([1, 10])
+              .on("zoom", zoomed);
 
-            // Step 7
-            new_svg.append('g')
-              .selectAll("dot")
+            const svg = d3.select("body").append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+              .call(zoom)
+              .append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var clip = svg.append("defs").append("clipPath")
+              .attr("id", "clip")
+              .append("rect")
+              .attr("width", width)
+              .attr("height", height)
+              .attr("x", 0)
+              .attr("y", 0);
+
+            svg.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + height + ")")
+              .call(xAxis);
+
+            svg.append("g")
+              .attr("class", "y axis")
+              .call(yAxis);
+
+            svg.append("g")
+              .attr("class", "y axis")
+              .append("text")
+              .attr("class", "axis-label")
+              .attr("transform", "rotate(-90)")
+              .attr("y", -margin.left + 10)
+              .attr("x", -height / 2)
+              .text('Test');
+
+            const line = d3.line()
+              .x(function (d) { return xScale(new Date(d[0])); })
+              .y(function (d) { return yScale(d[1]); });
+
+            svg.append("path")
+              .datum(dataset)
+              .attr("class", "line")
+              .attr("stroke", "#CC0000")
+              .attr("fill", "none")  // Imposta il riempimento a "none"
+              .attr("d", line)
+              .attr("clip-path", "url(#clip)");
+
+            const points = svg.append("g")
+              .attr("class", "dots")
+              .attr("clip-path", "url(#clip)");
+
+            points.selectAll('.dot')
               .data(dataset)
               .enter()
-              .append("circle")
-              .attr("cx", function (d) {
-                return xScale(new Date(d[0]));
-              })
-              .attr("cy", function (d) {
-                return yScale(d[1]); // Converte il valore in un numero
-              })
-              .attr("r", 3)
-              .attr("transform", "translate(" + 100 + "," + 100 + ")")
-              .style("fill", "#CC0000")
-              .attr("id", function (d, i) {
-                return "dot" + nsSelectedGroup;
-              })
-              .attr("class", "punto");
-     
-            
+              .append('circle')
+              .attr('class', 'dot')
+              .attr("r", 2.5)
+              .attr('fill', "#CC0000")
+              .attr("transform", function (d) {
+                return "translate(" + xScale(new Date(d[0])) + "," + yScale(d[1]) + ")";
+              });
 
-            // Step 8        
+            function zoomed(event) {
+              const { transform } = event;
 
-            var line = d3.line()
-            .x(function(d) {  return xScale(new Date(d[0])); }) 
-            .y(function(d) { return yScale(d[1]); }) 
-            .curve(d3.curveMonotoneX)
-        
-              new_svg.append("path")
-                .datum(dataset)
-                .attr("class", "line")
-                .attr("transform", "translate(" + 100 + "," + 100 + ")")
-                .attr("d", line)
-                .style("fill", "none")
-                .style("stroke", "#CC0000")
-                .style("stroke-width", "2")
-                .attr("id", function (d, i) { console.log(d)
-                  return "path" + nsSelectedGroup })
+              const newXScale = transform.rescaleX(xScale);
+              const newYScale = transform.rescaleY(yScale);
 
+              svg.select(".x.axis").call(xAxis.scale(newXScale));
+              svg.select(".y.axis").call(yAxis.scale(newYScale));
 
-                /* d3.selectAll("svg").on("mouseover", function (d, i) {
-                  console.log(d, i)
-                }) */
-                
+              svg.select(".line")
+                .attr("d", line.x(function (d) { return newXScale(new Date(d[0])); })
+                  .y(function (d) { return newYScale(d[1]); }));
+
+              points.selectAll('.dot')
+                .attr("transform", function (d) {
+                  return "translate(" + newXScale(new Date(d[0])) + "," + newYScale(d[1]) + ")";
+                });
+            }
 
 
         }
