@@ -76,7 +76,7 @@
 
 <div id ="selectedSpindles"></div>
 <br>
-<input type="checkbox" id="aggregato" class="checkbox" onclick="aggregateHelper()"> Aggregate
+<!-- <input type="checkbox" id="aggregato" class="checkbox" onclick="aggregateHelper()"> Aggregate -->
 <div id="selectedValues"></div>
 
 <br><br>
@@ -487,7 +487,7 @@
 
                 console.log("Clearing svgs...")
                 document.getElementById("selectedValues").innerHTML = ""
-                document.getElementById("aggregato").checked = false
+                /* document.getElementById("aggregato").checked = false */
                 document.getElementById("selectMenuColumns").selectedIndex = 0; 
 
                 d3.select("#svg_default").remove()    //attr("visibility", "hidden");
