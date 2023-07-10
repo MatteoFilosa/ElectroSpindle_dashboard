@@ -1,0 +1,199 @@
+var xScale = d3.scaleTime()
+              .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+              .range([0, width]);
+
+
+yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+            g.append("g")
+            .attr("id", function (d, i) { return "yAxis" + selectedGroup })
+            .call(d3.axisLeft(yScale));
+
+
+var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 65)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text("Downsample: " + numbersOnly);
+
+
+new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 45)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text(selectedGroup + " Chart");
+
+            var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', 65)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text("Downsample: " + numbersOnly);
+
+            // X label
+            new_svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', height - 15 + 165)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 12)
+              .text("Time(h:m:s)");
+
+            // Y label
+            new_svg.append('text')
+              .attr('text-anchor', 'middle')
+              .attr('transform', 'translate(40,' + height + ')rotate(-90)')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 12)
+              .text(selectedGroup);
+
+
+
+-----------
+
+
+//Creazione grafico
+
+            const margin = { top: 20, right: 30, bottom: 30, left: 50 };
+            const width = 960 - margin.left - margin.right;
+            const height = 500 - margin.top - margin.bottom;
+
+            console.log(dataset)
+
+            const xScale = d3.scaleTime()
+              .domain([realTimeDates[0], realTimeDates[realTimeDates.length - 1]])
+              .range([0, width]);
+
+            const yScale = d3.scaleLinear().domain([min, max]).range([height, 0]);
+          
+
+            const xAxis = d3.axisBottom(xScale);
+            const yAxis = d3.axisLeft(yScale);
+
+            const zoom = d3.zoom()
+              .extent([[0, 0], [width, height]])
+              .scaleExtent([1, 10])
+              .on("zoom", zoomed);
+
+            const svg = d3.select("body").append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+              .call(zoom)
+              .append("g")
+              .attr("id", function (d, i) { return "svg" + selectedGroup })
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var clip = svg.append("defs").append("clipPath")
+              .attr("id", "clip")
+              .append("rect")
+              .attr("width", width)
+              .attr("height", height)
+              .attr("x", 0)
+              .attr("y", 0);
+
+            svg.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + height + ")")
+              .call(xAxis);
+
+            svg.append("g")
+              .attr("class", "y axis")
+              .call(yAxis);
+
+            svg.append("g")
+              .attr("class", "y axis")
+              .append("text")
+              .attr("class", "axis-label")
+              .attr("transform", "rotate(-90)")
+              .attr("y", -margin.left + 10)
+              .attr("x", -height / 2)
+              .text(selectedGroup);
+
+            const line = d3.line()
+              .x(function (d) { return xScale(new Date(d[0])); })
+              .y(function (d) { return yScale(d[1]); });
+
+            svg.append("path")
+              .datum(dataset)
+              .attr("class", "line")
+              .attr("stroke", "#CC0000")
+              .attr("fill", "none")  // Imposta il riempimento a "none"
+              .attr("d", line)
+              .attr("clip-path", "url(#clip)");
+
+            const points = svg.append("g")
+              .attr("class", "dots")
+              .attr("clip-path", "url(#clip)");
+
+            points.selectAll('.dot')
+              .data(dataset)
+              .enter()
+              .append('circle')
+              .attr('class', 'dot')
+              .attr("r", 2.5)
+              .attr('fill', "#CC0000")
+              .attr("transform", function (d) {
+                return "translate(" + xScale(new Date(d[0])) + "," + yScale(d[1]) + ")";
+              });
+
+
+            var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
+            var numbersOnly = downsampleText.match(/\d+/g).map(Number);
+
+            svg.append('text')
+              .attr('x', width / 2)
+              .attr('y', 15)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text("Downsample: " + numbersOnly);
+
+            svg.append('text')
+              .attr('x', width / 2)
+              .attr('y', 0)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .text(selectedGroup + " Chart");
+
+
+            svg.append('text')
+              .attr('x', width / 2 + 100)
+              .attr('y', height - 15 + 165)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 12)
+              .text("Time(h:m:s)");
+
+           
+
+            function zoomed(event) {
+              const { transform } = event;
+
+              const newXScale = transform.rescaleX(xScale);
+              const newYScale = transform.rescaleY(yScale);
+
+              svg.select(".x.axis").call(xAxis.scale(newXScale));
+              svg.select(".y.axis").call(yAxis.scale(newYScale));
+
+              svg.select(".line")
+                .attr("d", line.x(function (d) { return newXScale(new Date(d[0])); })
+                  .y(function (d) { return newYScale(d[1]); }));
+
+              points.selectAll('.dot')
+                .attr("transform", function (d) {
+                  return "translate(" + newXScale(new Date(d[0])) + "," + newYScale(d[1]) + ")";
+                });
+            }
+
+
