@@ -545,12 +545,14 @@
         
         for (let i = 0; i < attributeLength; i++) {
 
-          date = data[selectedGroup].data[i].date_timestamp.slice(0, 10)
-          time = data[selectedGroup].data[i].date_timestamp.slice(10)
+          date = data[selectedGroup].data[i].date_timestamp
+          //time = data[selectedGroup].data[i].date_timestamp.slice(10)
           
           dateArray.push(date)
-          timeArray.push(time)
+          //timeArray.push(time)
         }
+
+        console.log(date, time)
         
 
       } 
@@ -721,11 +723,11 @@
                            }
 
                            
-                           var xScale = d3.scaleTime()
-                             .domain(d3.extent(dataset, function (d) {
-                               return new Date(d[0]);
-                             }))
-                             .range([0, width]);
+                          var xScale = d3.scaleTime()
+                               .domain(d3.extent(dataset, function (d) {
+                                 return d3.timeParse("%Y-%m-%dT%H:%M:%S.%L")(d[0]);
+                               }))
+                               .range([0, width]);
 
 
                            g.append("g")
@@ -853,6 +855,7 @@
             const width = 960 - margin.left - margin.right;
             const height = 500 - margin.top - margin.bottom;
 
+            console.log(dataset)
             const xScale = d3.scaleTime()
               .domain(d3.extent(dataset, function (d) {
                 return new Date(d[0]);
@@ -914,7 +917,7 @@
               .attr("stroke", "#CC0000")
               .attr("fill", "none")  // Imposta il riempimento a "none"
               .attr("d", line)
-              .attr("clip-path", "url(#clip)");
+              .attr("clip-path", "url(#clip)"); 
 
             const points = svg.append("g")
               .attr("class", "dots")
