@@ -100,6 +100,12 @@
         
         }
 
+                                #tooltip {
+                                    position: relative;
+                                    opacity: 0;
+                                    pointer-events: none;
+                                }
+
                 #loading {
                     margin-left: 155px;
                     margin-top: 15px;
@@ -236,38 +242,46 @@
 
     }
 
-        #day-start {
-    
+        /*calendario etc*/
+
+        #pickDate{
+
             position: absolute;
-            left: 620px;
-            top: 100px;
-    
+            left: 730px;
+            top: 20px;
+
         }
 
-        #day-end {
+         .button-wrapper {
+             position: absolute;
+             left: 620px;
+             top: 50px;
+             display: flex;
+             align-items: center;
+             padding-left: 10px;
+             padding-right: 10px;
+         }
     
-            position: absolute;
-            left: 720px;
-            top: 100px;
+         .button-wrapper .button-green {
+             margin-right: 50px;
+         }
     
-        }
-
-        .button-wrapper {
-            position: absolute;
-            left: 620px;
-            top: 50px;
-            display: flex;
-            align-items: center;
-            padding-left: 10px;
-            padding-right: 10px;
-        }
-                .button-wrapper .button-green {
-                    margin-right: 10px;
-                }
-
-                .button-wrapper .button-red {
-                    margin-right: 50px;
-                }
+         .button-wrapper .button-red {
+             margin-right: 50px;
+         }
+    
+         #day-start {
+             position: absolute;
+             left: 620px;
+             top: 100px;
+         }
+    
+         #day-end {
+             position: absolute;
+             left: 720px;
+             /* Aumentato il valore left per distanziare i div */
+             top: 100px;
+         }
 
     .button-blue {
         background-color: #0095ff;

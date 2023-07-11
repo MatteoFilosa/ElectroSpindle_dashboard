@@ -103,63 +103,47 @@ function resetCalendar(){
 
 function setDate(day){
 
+    var buttonClicked = JSON.parse(localStorage.getItem("buttonClicked"))
+
     var resetClicked = JSON.parse(localStorage.getItem("resetClicked"))
-    if(document.getElementById("day-start").innerHTML.length <15){
-        if ((flag == 0) || (resetClicked == 1)){
+    console.log(buttonClicked)
+    
+        if (buttonClicked == 0){
 
             //document.getElementById("day-start").innerHTML = "Data inizio: "
-            document.getElementById("day-start").innerHTML += day + " " + document.getElementById("month-picker").innerHTML + " " + document.getElementById("year").innerHTML
-            localStorage.setItem("day-start", JSON.stringify(day))
+            document.getElementById("day-start").innerHTML = day + " " + document.getElementById("month-picker").innerHTML + " " + document.getElementById("year").innerHTML
+            /* localStorage.setItem("day-start", JSON.stringify(day))
             localStorage.setItem("month-start", JSON.stringify(document.getElementById("month-picker").innerHTML))
-            localStorage.setItem("year-start", JSON.stringify(document.getElementById("year").innerHTML))
+            localStorage.setItem("year-start", JSON.stringify(document.getElementById("year").innerHTML)) */
             //if(document.getElementById("cambia_data_fine")!= null) document.getElementById("cambia_data_fine").disabled = false
             document.getElementById("calendar-original").hidden = true
             localStorage.setItem("resetClicked", JSON.stringify(0))
+            console.log("okok")
             if(resetClicked == 1) flag = 0
     
         }
-    }
+    
 
     
     
-    if(document.getElementById("day-end").innerHTML.length <15){
+    else if(buttonClicked == 1){
 
-        if((flag == 1)){
+            console.log("okok2")
 
             //document.getElementById("day-end").innerHTML = "Data fine: "
-            document.getElementById("day-end").innerHTML += day + " " + document.getElementById("month-picker").innerHTML + " " + document.getElementById("year").innerHTML
+            document.getElementById("day-end").innerHTML = day + " " + document.getElementById("month-picker").innerHTML + " " + document.getElementById("year").innerHTML
             document.getElementById("calendar-day" + day).style.backgroundColor = "grey"
-            flag = 0
-            localStorage.setItem("day-end", JSON.stringify(day))
+            /* flag = 0 */
+            /* localStorage.setItem("day-end", JSON.stringify(day))
             localStorage.setItem("month-end", JSON.stringify(document.getElementById("month-picker").innerHTML))
-            localStorage.setItem("year-end", JSON.stringify(document.getElementById("year").innerHTML))
+            localStorage.setItem("year-end", JSON.stringify(document.getElementById("year").innerHTML)) */
             document.getElementById("calendar-original").hidden = true
             //document.getElementById("availableSpindles").innerHTML = "<div id = 'loader' style = 'margin-top: 60px;'></div>"
             //if(document.getElementById("cambia_data_inizio")!= null) document.getElementById("cambia_data_inizio").disabled = false
-
-    }
-    
-
-    flag = 1
-    //console.log(flag)
+            /* flag = 1 */
+ 
     }
    
-}
-
-function cambia_data_inizio(day){
-    document.getElementById("calendar-day" + day).style.backgroundColor = ""
-    //document.getElementById("day-start").innerHTML = "Data inizio: "
-    flag = 0
-    document.getElementById("cambia_data_fine").disabled = true
-}
-
-function cambia_data_fine(day){
-
-    document.getElementById("calendar-day" + day).style.backgroundColor = ""
-    //document.getElementById("day-end").innerHTML = "Data inizio: "
-    flag = 1
-    document.getElementById("cambia_data_inizio").disabled = true
-
 }
 
 document.querySelector('#prev-year').onclick = () => {

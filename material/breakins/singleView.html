@@ -140,6 +140,21 @@
         .style('font-size', 12)
         .text("Time(h:m:s)");
 
+         // Aggiungi l'evento mouseover ai punti
+      points.selectAll('.dot')
+        .on('mouseover', function (d) {
+          // Mostra il tooltip
+          d3.select('#tooltip')
+            .style('opacity', 1)
+            .html('Date: ' + d[0] + '<br/>Value: ' + d[1])
+            .style('left', (d3.event.pageX + 10) + 'px')
+            .style('top', (d3.event.pageY - 10) + 'px');
+        })
+        .on('mouseout', function () {
+          // Nascondi il tooltip
+          d3.select('#tooltip').style('opacity', 0);
+        });
+
 
       function zoomed(event) {
         const { transform } = event;
@@ -159,6 +174,8 @@
             return "translate(" + newXScale(new Date(d[0])) + "," + newYScale(d[1]) + ")";
           });
       }
+
+
 
 
 
@@ -258,6 +275,7 @@
     onclick="window.open('index_breakins.html', '_self');"> <a href='index_breakins.html'>Back to spindle selection</a>
   <p>Single spindle visualization</p>
 
+  <div id="tooltip" style="position: absolute; opacity: 0;"></div>
 
 
 
@@ -854,12 +872,16 @@
                   return "translate(" + xScale(new Date(d[0])) + "," + yScale(d[1]) + ")";
                 });
 
+             
+
+
 
               var downsampleText = document.getElementById("downsamplePlaceholder").innerHTML
               var numbersOnly = downsampleText.match(/\d+/g).map(Number);
 
 
 
+              
 
 
               function zoomed(event) {
