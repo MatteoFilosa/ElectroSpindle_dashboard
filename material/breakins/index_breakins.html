@@ -62,7 +62,7 @@ Insert Spindle SN <input type = "text" id ="request" maxlength="10" required pla
 
   
 
-  <button class="button-green" onclick="displayCalendar(1)" id="toButton" disabled=true>To</button>
+  <button class="button-green" onclick="displayCalendar(1)" id="toButton" >To</button>
 
 
   
@@ -385,26 +385,16 @@ function resetFilters(){
 }
 
 
-        function displayCalendar(flag) { // 0 vuol dire che ho cliccato "From", 1 vuol dire che ho cliccato "To"
+        function displayCalendar(flag) { // From : 0, To: 1
 
-
-
-            var calendar = document.getElementById("calendar-original")
-            var dayStart = document.getElementById("day-start")
-            var dayEnd = document.getElementById("day-end")
+            localStorage.setItem("buttonClicked", JSON.stringify(flag))
+            console.log("displaycalendar")
             calendar.hidden = false;
             //Migliorare popup
-            if(flag == 0) calendar.style = "margin-left: 10px;"
+            if (flag == 0) calendar.style = "margin-left: 10px;"
             else calendar.style = "margin-left: 80px;"
-            if (flag == 0) {
-              document.getElementById("fromButton").disabled = true
-              document.getElementById("toButton").disabled = false
-              if (dayStart.innerHTML.length < 10) {
-                 document.getElementById("fromButton").disabled = false
 
-              }
-            }
-            
+
           }
 
         function redirectView(){

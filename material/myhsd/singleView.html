@@ -224,27 +224,7 @@
 
      
     var allGroup = [], allGroupColumns = [], sn_myhsd = JSON.parse(localStorage.getItem("sn_myhsd")), globalData; 
-    d3.json("http://arca.diag.uniroma1.it:8082/data/myhsd/measurements/" + sn_myhsd + "", { crossOrigin: "anonymous" }).then(function (data) {
-      
-        console.log(data)
-        for (let i = 0; i < data.results.length; i++){
-  
-          if(allGroup.includes(data.results[i].metrics[0].metric_name)==false) allGroup.push(data.results[i].metrics[0].metric_name)
-          
-        }
-        console.log(allGroup)
-
-        d3.select("#selectMenu")
-        .selectAll('myOptions')
-        .data(allGroup)
-        .enter()
-        .append('option')
-        .text(function (d) { return d; }) // text showed in the menu
-        .attr("value", function (d) { return d; }) // corresponding value returned by the button
-  
-  
-  
-      }) 
+    
 
        d3.json("http://arca.diag.uniroma1.it:8082/data/myhsd/" + sn_myhsd + "/columns", { crossOrigin: "anonymous" })
           .then(function (data) {
@@ -834,7 +814,7 @@
 
 
                   svg.append('text')
-                    .attr('x', width / 3 + colorSelector * selectedGroup.length*12)
+                    .attr('x', width / 2 + selectedGroup.length*12)
                     .attr('y', 0)
                     .attr('text-anchor', 'middle')
                     .style('font-family', 'Helvetica')
@@ -1028,6 +1008,25 @@
           
           ///Variabili 
 
+          const end = document.getElementById("day-end").innerHTML;
+
+            if (end.length >= 10) {
+              var start = document.getElementById("day-start").innerHTML
+
+
+              const startDate = new Date(start);
+              const endDate = new Date(end);
+              const startFormatted = `${startDate.getDate()}/${startDate.getMonth() + 1}/${startDate.getFullYear().toString().slice(-2)}`;
+              const endFormatted = `${endDate.getDate()}/${endDate.getMonth() + 1}/${endDate.getFullYear().toString().slice(-2)}`;
+              startFormatted.replace("/", "%2F");
+              endFormatted.replace("/", "%2F");
+
+              var afterSelectedGroup = "&mode=1&limit=1000" + "&dateStart=" + startFormatted + "&dateEnd=" + endFormatted
+
+
+
+            }
+
             d3.selectAll("svg").remove()
 
             colorSelector = 0
@@ -1104,7 +1103,7 @@
             for (let j = 0; j < valori.length; j++) { //parte  per calcolare una sola yscale.
 
 
-
+              if(end.length < 10) afterSelectedGroup = "&mode=1&limit=1000"
               sleep(1000).then(() => {
                 var dataset = []
                 var selectedGroup = valori[j]
@@ -1114,7 +1113,7 @@
                   sn_myhsd +
                   "/raw_data?columns=" +
                   selectedGroup +
-                  "&mode=1&limit=1000",
+                  afterSelectedGroup,
                   { crossOrigin: "anonymous" }
                 ).then(function (data) {
                   var attributeLength = data[selectedGroup].data.length
@@ -1172,7 +1171,7 @@
                   sn_myhsd +
                   "/raw_data?columns=" +
                   selectedGroup +
-                  "&mode=1&limit=1000",
+                  afterSelectedGroup,
                   { crossOrigin: "anonymous" }
                 ).then(function (data) {
                   var attributeLength = data[selectedGroup].data.length
@@ -1325,187 +1324,11 @@
 
         }
 
-   d3.select("#downsampleBtn").on("click", function (d) {
+   
 
-      globalData = []
-      var downsample = d3.select("#downsample").property("value")
-      if (document.getElementById("loader") != null) document.getElementById("loader").remove()
-      if (document.getElementById("loading") != null) document.getElementById("loading").remove()
-      
 
-      if (downsample.length >= 2) {
 
-       
-
-        document.getElementById("downsamplePlaceholder").innerHTML = "Insert downsample (current: " + downsample + ")"
-
-    
-
-        
-
-        var valori = []
-        var to_add = document.getElementById("selectedValues").childNodes
-
-        for (let i = 0; i < to_add.length; i++) {
-
-          if (to_add[i] != undefined) {
-
-            if ((to_add[i].id != null) && (to_add[i].checked == true)) {
-
-              valori.push(to_add[i].id)
-
-
-            }
-          }
-
-        }
-
-
-        for (let i = 0; i < valori.length; i++) {
-
-          d3.json("http://arca.diag.uniroma1.it:8082/data/breakin/" + sn_myhsd[0][0] + "/raw_data?mode=1&factor=" + downsample + "&points=0&columns=" + valori[i] + ",time", { crossOrigin: "anonymous" }).then(function (data) {
-
-            if (!globalData.hasOwnProperty(valori[i])) {
-              globalData[valori[i]] = []; // Crea un nuovo array per la chiave se non esiste
-            }
-            globalData["time"] = []
-            globalData[valori[i]].push(eval("data." + valori[i])); // Aggiungi il dato all'array associato alla chiave
-            globalData["time"].push(data.time)
-            globalData["date start"] = []
-            globalData["date start"].push(data.Date_start.slice(0, -7).slice(11))
-            console.log(globalData);
-
-          })
-
-        }
-
-         sleep(1000).then(() => {
-          var toRedraw = []
-          showPopup("Downsample changed successfully!", true);
-
-        if (document.getElementById("aggregato").checked == false) {
-
-          for (let i = 0; i < allGroup.length; i++) { //Ridisegnamo dinamicamente :-) 
-
-            if (document.getElementById("svg" + allGroup[i]) != null) toRedraw.push(allGroup[i])
-
-          }
-
-          
-          clearSvg()
-
-          console.log(globalData)
-          for (let i = 0; i < toRedraw.length; i++) {
-            console.log("Redrawing " + toRedraw[i] + "...")
-            newGraph(toRedraw[i], globalData, 0)
-
-          }
-
-          console.log(globalData)
-
-
-
-        }
-
-        else {
-
-          
-
-          var toRedraw = []
-
-
-          
-          var to_add = document.getElementById("selectedValues").childNodes
-
-          for (let i = 0; i < to_add.length; i++) {
-
-            if (to_add[i] != undefined) {
-
-              if ((to_add[i].id != null) && (to_add[i].checked == true)) {
-
-                toRedraw.push(to_add[i].id)
-
-
-              }
-            }
-
-          }
-
-          clearSvg()
-
-          console.log(toRedraw)
-
-
-          for (let i = 0; i < toRedraw.length; i++) {
-
-            newGraph(toRedraw[i], globalData, 0)
-
-          }
-
-          document.getElementById("aggregato").checked = true
-
-          newGraph("", globalData, 1)
-          
-
-
-
-
-        }
-        
-    }
-  )}
-        
-
-      else return
-
-
-    
-  
-  })
-
-
-
- d3.select("#selectMenu").on("change", function (d) {
-    var selectedOption = d3.select(this).property("value");
-
-    // Rimuovi i dati precedenti dal div "info"
-    //document.getElementById("info").innerHTML = "";
-
-    d3.json("http://arca.diag.uniroma1.it:8082/data/myhsd/measurements/" + sn_myhsd + "", { crossOrigin: "anonymous" }).then(function (data) {
-      console.log(data);
-      for (let i = 0; i < data.results.length; i++) {
-        console.log(data.results[i]);
-        console.log(data.results[i].metrics[0].metric_name, selectedOption);
-        if (data.results[i].metrics[0].metric_name == selectedOption) {
-          console.log(data.results[i].metrics[0].metric_name, selectedOption);
-
-          // Aggiungi i dati al div "info" con la linea orizzontale
-          document.getElementById("info").innerHTML +=
-            "<div class='data-row'>" +
-            "<strong>Measurement ID:</strong> " + data.results[i].measurement_id + "<br>" +
-            "<strong>Timestamp:</strong> " + data.results[i].timestamp + "<br>" +
-            "<strong>Date:</strong> " + formatDate(data.results[i].date_timestamp) + "<br>" +
-            "<strong>Spindle ID:</strong> " + data.results[i].thing_id + "<br>" +
-            "<strong>Spindle Serial Number:</strong> " + data.results[i].thing_serial_number + "<br>" +
-            "<strong>Spindle Definition Name:</strong> " + data.results[i].thing_definition_name + "<br>" +
-            "<strong>Customer Name:</strong> " + data.results[i].customer_name + "<br>" +
-            "</div>";
-
-          // Loop through metrics array
-          for (var j = 0; j < data.results[i].metrics.length; j++) {
-            document.getElementById("info").innerHTML +=
-              "<div class='data-row-strong'>" +
-              "<strong>Metric ID:</strong> " + data.results[i].metrics[j].metric_id + "<br>" +
-              "<strong>Metric Name:</strong> " + data.results[i].metrics[j].metric_name + "<br>" +
-              "<strong>Value:</strong> " + data.results[i].metrics[j].value + "<br>" +
-              "</div>";
-          }
-
-          return;
-        }
-      }
-    });
-  });
+ 
 
   function formatDate(dateTimeString) {
     var dateTimeParts = dateTimeString.split("T");
@@ -1556,7 +1379,10 @@
         else{
           console.log("epique")
           if(document.getElementById("aggregato").checked == false) newGraph(selectedOption, data, 0)
-          else newGraph(selectedOption, data, 2)
+          else{ 
+            console.log("chiamato il 2")
+            newGraph(selectedOption, data, 2)
+          } 
 
         }
         
@@ -1605,13 +1431,20 @@
                 console.log('La mutazione dell\'innerHTML di "day-end" è avvenuta!');
                 console.log('Ecco l\'end:', end);
 
+                
+
                 if(document.getElementById("aggregato").checked == true){
                   newGraph("", null, 1)
                   console.log("ARSENE!!")
                   return
                 }
                 var start = document.getElementById("day-start").innerHTML
-               
+                if (start.length < 10){
+                  showPopup("Select the initial date first!", false)
+                  resetFilters()
+                  return
+
+                } 
 
                 // Puoi proseguire con il resto delle azioni qui
                 
