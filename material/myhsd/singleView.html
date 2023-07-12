@@ -408,7 +408,7 @@
                 sn_myhsd +
                 "/raw_data?columns=" +
                 selectedValues[i] +
-                "&mode=1&limit=1000",
+                "&mode=1&limit=20000",
                 { crossOrigin: "anonymous" }
               ).then(function (data) {
            
@@ -603,7 +603,7 @@
                startFormatted.replace("/", "%2F");
                endFormatted.replace("/", "%2F");
 
-              var afterSelectedGroup = "&mode=1&limit=1000" +"&dateStart=" + startFormatted + "&dateEnd=" + endFormatted
+              var afterSelectedGroup = "&mode=1&limit=20000" +"&dateStart=" + startFormatted + "&dateEnd=" + endFormatted
           
              
             
@@ -1045,7 +1045,7 @@
               startFormatted.replace("/", "%2F");
               endFormatted.replace("/", "%2F");
 
-              var afterSelectedGroup = "&mode=1&limit=1000" + "&dateStart=" + startFormatted + "&dateEnd=" + endFormatted
+              var afterSelectedGroup = "&mode=1&limit=20000" + "&dateStart=" + startFormatted + "&dateEnd=" + endFormatted
 
 
 
@@ -1127,7 +1127,7 @@
             for (let j = 0; j < valori.length; j++) { //parte  per calcolare una sola yscale.
 
 
-              if(end.length < 10) afterSelectedGroup = "&mode=1&limit=1000"
+              if(end.length < 10) afterSelectedGroup = "&mode=1&limit=20000"
               sleep(1000).then(() => {
                 var dataset = []
                 var selectedGroup = valori[j]
@@ -1387,7 +1387,7 @@
         sn_myhsd +
         "/raw_data?columns=" +
         selectedOption +
-        "&mode=1&limit=1000" +
+        "&mode=1&limit=20000" +
         "&dateStart=" + startFormatted + "&dateEnd=" +  endFormatted,
         { crossOrigin: "anonymous" }
       ).then(function (data) {
@@ -1422,7 +1422,7 @@
           sn_myhsd +
           "/raw_data?columns=" +
           selectedOption +
-          "&mode=1&limit=1000",
+          "&mode=1&limit=20000",
           { crossOrigin: "anonymous" }
         ).then(function (data) {
 
@@ -1523,7 +1523,7 @@
                       sn_myhsd +
                       "/raw_data?columns=" +
                       selectedOption +
-                      "&mode=1&limit=1000" +
+                      "&mode=1&limit=20000" +
                       "&dateStart=" + startFormatted + "&dateEnd=" + endFormatted,
                       { crossOrigin: "anonymous" }
                     ).then(function (data) {
