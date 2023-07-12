@@ -54,7 +54,7 @@ Insert Spindle SN <input type = "text" id ="request" maxlength="10" required pla
 
 <div id="popup" class="popup"></div>
 
-<h5>Pick Date</h5>
+<b id = "pickDate">Pick Date</b>
 
 <div class="button-wrapper">
 
@@ -165,6 +165,127 @@ Insert Spindle SN <input type = "text" id ="request" maxlength="10" required pla
 
 
 <script>
+
+  /* document.addEventListener("DOMContentLoaded", function () {
+      const observer = new MutationObserver(function (mutationsList) {
+        for (let mutation of mutationsList) {
+          if (mutation.type === 'childList' || mutation.type === 'characterData') {
+            const end = document.getElementById("day-end").innerHTML;
+            var start = document.getElementById("day-start").innerHTML
+
+            if ((end.length >= 10) && (start.length >= 10) && (document.getElementById("selectedValues") != null)) {
+              // L'innerHTML di "day-end" è stato modificato e ha una lunghezza sufficiente
+              // Esegui qui le azioni desiderate
+              console.log('La mutazione dell\'innerHTML di "day-end" è avvenuta!');
+              console.log('Ecco l\'end:', end);
+
+
+
+              if (document.getElementById("aggregato").checked == true) {
+                newGraph("", null, 1)
+                return
+              }
+
+              if (start.length < 10) {
+                showPopup("Select the initial date first!", false)
+                resetFilters()
+                return
+
+              }
+
+              // Puoi proseguire con il resto delle azioni qui
+
+              var to_add = document.getElementById("selectedValues").childNodes;
+              var selectedAttributes = [];
+              const startDate = new Date(start);
+              const endDate = new Date(end);
+              const startFormatted = `${startDate.getDate()}/${startDate.getMonth() + 1}/${startDate.getFullYear().toString().slice(-2)}`;
+              const endFormatted = `${endDate.getDate()}/${endDate.getMonth() + 1}/${endDate.getFullYear().toString().slice(-2)}`;
+              startFormatted.replace("/", "%2F");
+              endFormatted.replace("/", "%2F");
+
+              var to_add = document.getElementById("selectedValues").childNodes, selectedValues = []
+
+
+              colorSelector -= 1
+
+              ///
+
+
+              ///
+
+              for (let i = 0; i <= to_add.length; i++) {
+
+                if (to_add[i] != undefined) {
+
+                  if ((to_add[i].id != null) && (to_add[i].id.includes("label"))) {
+
+
+                    var selectedGroup = to_add[i].innerHTML
+                    var nsSelectedGroup = selectedGroup;
+                    if (typeof selectedGroup !== "string") {
+                      nsSelectedGroup = selectedGroup.toString();
+                    }
+                    if (nsSelectedGroup.includes(" ")) {
+                      nsSelectedGroup = nsSelectedGroup.replace(/\s/g, "");
+                    }
+                    if (document.getElementById(nsSelectedGroup).checked == true) selectedAttributes.push(selectedGroup)
+
+
+                  }
+
+
+                }
+              }
+
+
+
+              console.log(startFormatted, endFormatted);
+              clearSvg();
+              for (let j = 0; j < selectedAttributes.length; j++) {
+                (function (selectedOption) {
+                  d3.json(
+                    "http://arca.diag.uniroma1.it:8082/data/myhsd/" +
+                    sn_myhsd +
+                    "/raw_data?columns=" +
+                    selectedOption +
+                    "&mode=1&limit=1000" +
+                    "&dateStart=" + startFormatted + "&dateEnd=" + endFormatted,
+                    { crossOrigin: "anonymous" }
+                  ).then(function (data) {
+                    console.log(selectedOption);
+
+                    if (data[selectedOption].data.length == 0) {
+                      showPopup("No data to show for this date range!", false)
+
+                    }
+                    else {
+
+                      if (document.getElementById("aggregato").checked == true) console.log("hapl")
+                      else newGraph(selectedOption, data, 0);
+
+
+                    }
+
+                  });
+                })(selectedAttributes[j]);
+              }
+
+            }
+          }
+        }
+      });
+
+      const observerOptions = {
+        childList: true,
+        subtree: true,
+        characterData: true
+      };
+
+      observer.observe(document.getElementById("day-end"), observerOptions);
+      observer.observe(document.getElementById("day-start"), observerOptions);
+    }); */
+
 
 localStorage.setItem("resetClicked", JSON.stringify(0))
 

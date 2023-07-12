@@ -132,7 +132,6 @@ function setDate(day){
 
             //document.getElementById("day-end").innerHTML = "Data fine: "
             document.getElementById("day-end").innerHTML = day + " " + document.getElementById("month-picker").innerHTML + " " + document.getElementById("year").innerHTML
-            document.getElementById("calendar-day" + day).style.backgroundColor = "grey"
             /* flag = 0 */
             /* localStorage.setItem("day-end", JSON.stringify(day))
             localStorage.setItem("month-end", JSON.stringify(document.getElementById("month-picker").innerHTML))

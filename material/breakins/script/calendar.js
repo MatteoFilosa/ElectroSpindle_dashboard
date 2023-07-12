@@ -5,7 +5,7 @@ var flag = 0
 const month_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
 isLeapYear = (year) => {
-    return (year % 4 === 0 && year % 100 !== 0 && year % 400 !== 0) || (year % 100 === 0 && year % 400 ===0)
+    return (year % 4 === 0 && year % 100 !== 0 && year % 400 !== 0) || (year % 100 === 0 && year % 400 === 0)
 }
 
 getFebDays = (year) => {
@@ -14,7 +14,7 @@ getFebDays = (year) => {
 
 generateCalendar = (month, year) => {
 
-    
+
     let calendar_days = calendar.querySelector('.calendar-days')
     let calendar_header_year = calendar.querySelector('#year')
 
@@ -23,17 +23,17 @@ generateCalendar = (month, year) => {
     calendar_days.innerHTML = ''
 
     let currDate = new Date()
-    if(month == null) month = currDate.getMonth()
+    if (month == null) month = currDate.getMonth()
     if (!year) year = currDate.getFullYear()
 
     let curr_month = `${month_names[month]}`
     month_picker.innerHTML = curr_month
     calendar_header_year.innerHTML = year
 
-    
+
 
     // get first day of month
-    
+
     let first_day = new Date(year, month, 1)
 
     for (let i = 0; i <= days_of_month[month] + first_day.getDay() - 1; i++) {
@@ -50,7 +50,7 @@ generateCalendar = (month, year) => {
                             <span></span>`
             if (i - first_day.getDay() + 1 === currDate.getDate() && year === currDate.getFullYear() && month === currDate.getMonth()) {
                 day.classList.add('curr-date')
-                
+
             }
         }
         calendar_days.appendChild(day)
@@ -71,7 +71,7 @@ month_names.forEach((e, index) => {
         //console.log(curr_month.value)
     }
     month_list.appendChild(month)
-    
+
 })
 
 let month_picker = calendar.querySelector('#month-picker')
@@ -79,86 +79,70 @@ let month_picker = calendar.querySelector('#month-picker')
 month_picker.onclick = () => {
     month_list.classList.add('show')
 
-    if(document.getElementById("month-list").hidden == false){
+    if (document.getElementById("month-list").hidden == false) {
 
         document.getElementById("calendar-body").hidden = true
 
     }
 
 
-    
+
 }
 
 let currDate = new Date()
 
-let curr_month = {value: currDate.getMonth()}
-let curr_year = {value: currDate.getFullYear()}
+let curr_month = { value: currDate.getMonth() }
+let curr_year = { value: currDate.getFullYear() }
 
 generateCalendar(curr_month.value, curr_year.value)
 
-function resetCalendar(){
+function resetCalendar() {
     flag = 0
 }
 
 
-function setDate(day){
+function setDate(day) {
+
+    var buttonClicked = JSON.parse(localStorage.getItem("buttonClicked"))
 
     var resetClicked = JSON.parse(localStorage.getItem("resetClicked"))
-    if(document.getElementById("day-start").innerHTML.length <15){
-        if ((flag == 0) || (resetClicked == 1)){
+    console.log(buttonClicked)
 
-            //document.getElementById("day-start").innerHTML = "Data inizio: "
-            document.getElementById("day-start").innerHTML += day + " " + document.getElementById("month-picker").innerHTML + " " + document.getElementById("year").innerHTML
-            localStorage.setItem("day-start", JSON.stringify(day))
-            localStorage.setItem("month-start", JSON.stringify(document.getElementById("month-picker").innerHTML))
-            localStorage.setItem("year-start", JSON.stringify(document.getElementById("year").innerHTML))
-            //if(document.getElementById("cambia_data_fine")!= null) document.getElementById("cambia_data_fine").disabled = false
-            document.getElementById("calendar-original").hidden = true
-            localStorage.setItem("resetClicked", JSON.stringify(0))
-            if(resetClicked == 1) flag = 0
-    
-        }
-    }
+    if (buttonClicked == 0) {
 
-    
-    
-    if(document.getElementById("day-end").innerHTML.length <15){
-
-        if((flag == 1)){
-
-            //document.getElementById("day-end").innerHTML = "Data fine: "
-            document.getElementById("day-end").innerHTML += day + " " + document.getElementById("month-picker").innerHTML + " " + document.getElementById("year").innerHTML
-            document.getElementById("calendar-day" + day).style.backgroundColor = "grey"
-            flag = 0
-            localStorage.setItem("day-end", JSON.stringify(day))
-            localStorage.setItem("month-end", JSON.stringify(document.getElementById("month-picker").innerHTML))
-            localStorage.setItem("year-end", JSON.stringify(document.getElementById("year").innerHTML))
-            document.getElementById("calendar-original").hidden = true
-            document.getElementById("availableSpindles").innerHTML = "<div id = 'loader' style = 'margin-top: 60px;'></div>"
-            //if(document.getElementById("cambia_data_inizio")!= null) document.getElementById("cambia_data_inizio").disabled = false
+        //document.getElementById("day-start").innerHTML = "Data inizio: "
+        document.getElementById("day-start").innerHTML = day + " " + document.getElementById("month-picker").innerHTML + " " + document.getElementById("year").innerHTML
+        localStorage.setItem("day-start", JSON.stringify(day))
+        localStorage.setItem("month-start", JSON.stringify(document.getElementById("month-picker").innerHTML))
+        localStorage.setItem("year-start", JSON.stringify(document.getElementById("year").innerHTML)) 
+        //if(document.getElementById("cambia_data_fine")!= null) document.getElementById("cambia_data_fine").disabled = false
+        document.getElementById("calendar-original").hidden = true
+        localStorage.setItem("resetClicked", JSON.stringify(0))
+        console.log("okok")
+        if (resetClicked == 1) flag = 0
 
     }
-    
 
-    flag = 1
-    //console.log(flag)
+
+
+
+    else if (buttonClicked == 1) {
+
+        console.log("okok2")
+
+        //document.getElementById("day-end").innerHTML = "Data fine: "
+        document.getElementById("day-end").innerHTML = day + " " + document.getElementById("month-picker").innerHTML + " " + document.getElementById("year").innerHTML
+
+        /* flag = 0 */
+        localStorage.setItem("day-end", JSON.stringify(day))
+        localStorage.setItem("month-end", JSON.stringify(document.getElementById("month-picker").innerHTML))
+        localStorage.setItem("year-end", JSON.stringify(document.getElementById("year").innerHTML))
+        document.getElementById("calendar-original").hidden = true
+        //document.getElementById("availableSpindles").innerHTML = "<div id = 'loader' style = 'margin-top: 60px;'></div>"
+        //if(document.getElementById("cambia_data_inizio")!= null) document.getElementById("cambia_data_inizio").disabled = false
+        /* flag = 1 */
+
     }
-   
-}
-
-function cambia_data_inizio(day){
-    document.getElementById("calendar-day" + day).style.backgroundColor = ""
-    //document.getElementById("day-start").innerHTML = "Data inizio: "
-    flag = 0
-    document.getElementById("cambia_data_fine").disabled = true
-}
-
-function cambia_data_fine(day){
-
-    document.getElementById("calendar-day" + day).style.backgroundColor = ""
-    //document.getElementById("day-end").innerHTML = "Data inizio: "
-    flag = 1
-    document.getElementById("cambia_data_inizio").disabled = true
 
 }
 

@@ -392,9 +392,9 @@ input[type=checkbox] {
     box-shadow: none;
 }
 
-h5{
+#pickDate{
     position: absolute;
-    left:150px;
+    left:155px;
     top:120px;
 }
 
@@ -475,7 +475,7 @@ h3 {
 
    
     position: absolute;
-    left: 80px;
+    left: 60px;
     top: 200px;
 
 }
