@@ -349,82 +349,111 @@
         
 
 
-        function aggregateHelper(){
+        function aggregateHelper() {
 
 
-        
 
-          if(document.getElementById("aggregato").checked == true){
 
-            d3.selectAll("svg").remove()
+            if (document.getElementById("aggregato").checked == true) {
 
-            newGraph("", null, 1)
+              d3.selectAll("svg").remove()
 
-          } 
+              newGraph("", null, 1)
 
-          else { //vuol dire che devo rendere visibili gli attributi di prima
+            }
 
-            document.getElementById("legendAggregate").innerHTML = ""
+            else { //vuol dire che devo rendere visibili gli attributi di prima
 
-            var to_add = document.getElementById("selectedValues").childNodes, selectedValues = []
-    
-           
-            colorSelector -= 1
+              document.getElementById("legendAggregate").innerHTML = ""
 
-            ///
+              var to_add = document.getElementById("selectedValues").childNodes, selectedValues = []
 
-            
-            ///
 
-            for (let i = 0; i <= to_add.length; i++) {
-              
-              if(to_add[i] != undefined){
+              colorSelector -= 1
 
-                if ((to_add[i].id != null) && (to_add[i].id.includes("label"))) {
+              ///
+              var end = document.getElementById("day-end").innerHTML
+              var start = document.getElementById("day-start").innerHTML
+              var afterSelectedGroup = "&mode=1&limit=20000"
+              if ((end.length >= 10) && (start.length >= 10)) {
 
-               
-                  var selectedGroup = to_add[i].innerHTML
-                  var nsSelectedGroup = selectedGroup;
-                  if (typeof selectedGroup !== "string") {
-                    nsSelectedGroup = selectedGroup.toString();
+
+
+                const startDate = new Date(start);
+                const endDate = new Date(end);
+                const startFormatted = `${startDate.getDate()}/${startDate.getMonth() + 1}/${startDate.getFullYear().toString().slice(-2)}`;
+                const endFormatted = `${endDate.getDate()}/${endDate.getMonth() + 1}/${endDate.getFullYear().toString().slice(-2)}`;
+                startFormatted.replace("/", "%2F");
+                endFormatted.replace("/", "%2F");
+
+                afterSelectedGroup = "&mode=1&limit=20000" + "&dateStart=" + startFormatted + "&dateEnd=" + endFormatted
+                afterSelectedGroup.replace(" ", "%20")
+                console.log("ci sono")
+                console.log(startFormatted, endFormatted)
+              }
+
+
+              ///
+
+              for (let i = 0; i <= to_add.length; i++) {
+
+                if (to_add[i] != undefined) {
+
+                  if ((to_add[i].id != null) && (to_add[i].id.includes("label"))) {
+
+
+                    var selectedGroup = to_add[i].innerHTML
+                    var nsSelectedGroup = selectedGroup;
+                    if (typeof selectedGroup !== "string") {
+                      nsSelectedGroup = selectedGroup.toString();
+                    }
+                    if (nsSelectedGroup.includes(" ")) {
+                      nsSelectedGroup = nsSelectedGroup.replace(/\s/g, "");
+                    }
+                    if (document.getElementById(nsSelectedGroup).checked == true) selectedValues.push(selectedGroup)
+
+
                   }
-                  if (nsSelectedGroup.includes(" ")) {
-                    nsSelectedGroup = nsSelectedGroup.replace(/\s/g, "");
-                  }
-                  if(document.getElementById(nsSelectedGroup).checked == true) selectedValues.push(selectedGroup)
-                  
-              
+
+
                 }
-           
 
               }
+              console.log(selectedValues)
+              d3.select("#svg_default").remove()
+              
+            
+              for (let i = 0; i <= selectedValues.length; i++) {
+                console.log(selectedValues[i])
+                d3.json(
+                  "http://arca.diag.uniroma1.it:8082/data/myhsd/" +
+                  sn_myhsd +
+                  "/raw_data?columns=" +
+                  selectedValues[i] +
+                  afterSelectedGroup,
+                  { crossOrigin: "anonymous" }
+                ).then(function (data) {
+
+
+                  console.log("http://arca.diag.uniroma1.it:8082/data/myhsd/" +
+                    sn_myhsd +
+                    "/raw_data?columns=" +
+                    selectedValues[i] +
+                    afterSelectedGroup)
+                  newGraph(selectedValues[i], data, 3)
+
+                  
+                });
+              }
+
               
             }
-            d3.select("#svg_default").remove()
-
-            for (let i = 0; i <= selectedValues.length; i++) {
-              d3.json(
-                "http://arca.diag.uniroma1.it:8082/data/myhsd/" +
-                sn_myhsd +
-                "/raw_data?columns=" +
-                selectedValues[i] +
-                "&mode=1&limit=20000",
-                { crossOrigin: "anonymous" }
-              ).then(function (data) {
-           
-                newGraph(selectedValues[i], data, 3)
+          
 
 
-              });
-            }
 
 
           }
-
-
-
-
-        }
 
         function modifyElement(selectedGroup, flag){ 
           var selectedGroup = selectedGroup.id
