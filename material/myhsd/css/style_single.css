@@ -474,14 +474,29 @@
         box-shadow: none;
     }
 
-    #svg-div {
-        display: inline-flex;
+                
+    
+                svg {
+                    margin-right: 10px;
+                    /* Spazio tra gli SVG */
+                }
 
-    }
+                                .col-sm--shrunk {
+                                    /* prevents vertical stretching */
+                                    align-self: start;
+                                }
 
     #svg_default {
         margin-top: 20px;
 
+
+    }
+
+    #legendAggregate{
+
+        position:absolute;
+        left:450px;
+        top:320px;
 
     }
 

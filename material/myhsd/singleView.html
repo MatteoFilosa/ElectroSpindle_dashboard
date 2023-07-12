@@ -91,6 +91,8 @@
 
 <button id="clear" onclick="clearSvg()" class="button-red">Clear all</button>
 
+<div id = "legendAggregate"></div>
+
   <b id ="pickDate">Pick Date</b>
 <div class="button-wrapper">
 
@@ -105,6 +107,15 @@
   
 
 </div>
+  
+    
+  <div class="container">
+    <div class="row">
+     
+    </div>
+  </div>
+
+
 <div id="day-start"> </div>
 <div id="day-end"> </div>
 
@@ -353,6 +364,8 @@
 
           else { //vuol dire che devo rendere visibili gli attributi di prima
 
+            document.getElementById("legendAggregate").innerHTML = ""
+
             var to_add = document.getElementById("selectedValues").childNodes, selectedValues = []
     
            
@@ -489,6 +502,7 @@
 
         function clearSvg(){
 
+                document.getElementById("legendAggregate").innerHTML = ""
                 console.log("Clearing svgs...")
                 document.getElementById("selectedValues").innerHTML = ""
                 document.getElementById("aggregato").checked = false 
@@ -813,14 +827,9 @@
                     });
 
 
-                  svg.append('text')
-                    .attr('x', width / 2 + colorSelector * selectedGroup.length*12)
-                    .attr('y', 0)
-                    .attr('text-anchor', 'middle')
-                    .style('font-family', 'Helvetica')
-                    .style('font-size', 20)
-                    .style('fill', colors[colorSelector])
-                    .text("\u25A0 " + selectedGroup)
+                    document.getElementById("legendAggregate").innerHTML += "<span id = 'text" + selectedGroup + "'>  \u25A0" + selectedGroup + "</span><br>"
+                    document.getElementById("text" + selectedGroup).style.color = colors[colorSelector]
+                    //.text("\u25A0 " + selectedGroup)
 
 
 
@@ -936,8 +945,12 @@
               .scaleExtent([1, 10])
               .on("zoom", zoomed);
 
-            const svg = d3.select("body").append("svg")
-              .attr("width", width + margin.left + margin.right)
+  
+              
+
+            const svg = d3.select("body")
+              .append("svg")
+              .attr("width", "100%")
               .attr("height", height + margin.top + margin.bottom)
               .attr("id", function (d, i) { return "svg" + nsSelectedGroup })
               .call(zoom)
@@ -978,6 +991,15 @@
               .attr("class", "dots")
               .attr("clip-path", "url(#clip)");
 
+              svg.append('text')
+              .attr('x', width / 2)
+              .attr('y', 0)
+              .attr('text-anchor', 'middle')
+              .style('font-family', 'Helvetica')
+              .style('font-size', 20)
+              .style("font-weight", "bold")
+              .text(selectedGroup)
+
            
 
             function zoomed(event) {
@@ -998,6 +1020,8 @@
                   return "translate(" + newXScale(new Date(d[0])) + "," + newYScale(d[1]) + ")";
                 });
             }
+
+            
 
 
         }
@@ -1097,7 +1121,7 @@
 
 
 
-            var container = document.getElementById('svg-div');
+            
             var xScale, yScale //Modificare dopo in caso di dataset diversi
 
             for (let j = 0; j < valori.length; j++) { //parte  per calcolare una sola yscale.
@@ -1148,6 +1172,8 @@
               })
             }
 
+            document.getElementById("legendAggregate").innerHTML += "<span id = 'text" + selectedGroup + "'>  \u25A0" + selectedGroup + "</span><br>"
+            
 
 
 
@@ -1226,6 +1252,8 @@
                     .attr("d", line)
                     .attr("id", function (d, i) { return "path" + nsSelectedGroup })
                     .attr("clip-path", "url(#clip)");
+                  
+                    if (j + 1 == valori.length) document.getElementById("text" + selectedGroup).style.color = colors[colorSelector]
 
                   const points = svg.append("g")
                     .attr("class", "dots")
@@ -1244,16 +1272,9 @@
                     });
 
 
-                  svg.append('text')
-                    .attr('x', width / 3 + colorSelector * selectedGroup.length * 12)
-                    .attr('y', 0)
-                    .attr('text-anchor', 'middle')
-                    .style('font-family', 'Helvetica')
-                    .style('font-size', 20)
-                    .style('fill', colors[colorSelector])
-                    .text("\u25A0 " + selectedGroup)
-
-
+                  
+                     if (colorSelector < colors.length) colorSelector += 1
+                  else colorSelector = 0
 
 
 
@@ -1277,10 +1298,10 @@
                       });
                   }
 
-                  if (colorSelector < colors.length) colorSelector += 1
-                  else colorSelector = 0
+                  
+                 
 
-
+                  
 
 
                 })
