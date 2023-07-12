@@ -6,13 +6,11 @@ Electrospindle40!
 
 rm -r ElectroSpindle_dashboard
 
-git clone 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
+git clone https://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@github.com/MatteoFilosa/ElectroSpindle_dashboard.git
 
-(VECCHIO) https://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@github.com/MatteoFilosa/ElectroSpindle_dashboard.git
+docker stop d5d6f544ccd4 ---> stoppa lo specifico container
 
-docker stop 80f47ef9895e ---> stoppa lo specifico container
-
-docker rm 80f47ef9895e  ---->rimuove specifico container
+docker rm d5d6f544ccd4  ---->rimuove specifico container
 
 cd ElectroSpindle_dashboard
 
