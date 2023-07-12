@@ -588,7 +588,7 @@
           if(aggregato == 1){ // Caso AGGREGATO
 
             ///Variabili 
-            
+            document.getElementById("legendAggregate").innerHTML = ""
 
             const end = document.getElementById("day-end").innerHTML;
 
@@ -1445,8 +1445,9 @@
           for (let mutation of mutationsList) {
             if (mutation.type === 'childList' || mutation.type === 'characterData') {
               const end = document.getElementById("day-end").innerHTML;
+              var start = document.getElementById("day-start").innerHTML
 
-              if ((end.length >= 10) && (document.getElementById("selectedValues") != null)) {
+              if ((end.length >= 10) &&  (start.length >= 10) && (document.getElementById("selectedValues") != null)) {
                 // L'innerHTML di "day-end" è stato modificato e ha una lunghezza sufficiente
                 // Esegui qui le azioni desiderate
                 console.log('La mutazione dell\'innerHTML di "day-end" è avvenuta!');
@@ -1456,10 +1457,9 @@
 
                 if(document.getElementById("aggregato").checked == true){
                   newGraph("", null, 1)
-                  console.log("ARSENE!!")
                   return
                 }
-                var start = document.getElementById("day-start").innerHTML
+                
                 if (start.length < 10){
                   showPopup("Select the initial date first!", false)
                   resetFilters()
@@ -1557,6 +1557,7 @@
         };
 
         observer.observe(document.getElementById("day-end"), observerOptions);
+        observer.observe(document.getElementById("day-start"), observerOptions);
       });
 
 
