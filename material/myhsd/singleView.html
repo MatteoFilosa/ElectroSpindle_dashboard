@@ -665,8 +665,8 @@
               if (to_add[i] != undefined) {
 
                 if ((to_add[i].id != null) && (to_add[i].id.includes("label"))) {
-                  console.log(to_add[i])
-                  valori.push(to_add[i].innerHTML)
+                  if(document.getElementById(to_add[i].id.slice(5)).checked == true) valori.push(to_add[i].innerHTML)
+                  
 
 
                 }
@@ -1094,7 +1094,7 @@
             var max = 0
 
 
-
+            console.log("another log")
 
             var valori = []
             var to_add = document.getElementById("selectedValues").childNodes
@@ -1105,8 +1105,9 @@
               if (to_add[i] != undefined) {
 
                 if ((to_add[i].id != null) && (to_add[i].id.includes("label"))) {
-                  console.log(to_add[i])
-                  valori.push(to_add[i].innerHTML)
+                  console.log("debug ancora: " + to_add[i].id + to_add[i].id.slice(5))
+                  if (document.getElementById(to_add[i].id.slice(5)).checked == true) valori.push(to_add[i].innerHTML)
+
 
 
                 }
@@ -1149,7 +1150,7 @@
 
 
 
-
+            console.log("valori: ", valori)
             
             var xScale, yScale //Modificare dopo in caso di dataset diversi
 
@@ -1358,7 +1359,7 @@
             // codice finale
             //if (aggregato == 0) document.getElementById("selectedValues").style.visibility = "hidden"
        
-            if ((aggregato != 1)  && (aggregato != 3)) {
+            if ((aggregato != 1)  &&  (aggregato != 3)) {
              
               document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + nsSelectedGroup +'" onchange = "modifyElement('+ nsSelectedGroup +')" checked>' + "<label for='" + nsSelectedGroup + "' id = 'label" + nsSelectedGroup + "'>" + selectedGroup + "</label>" 
             }
@@ -1485,7 +1486,9 @@
                 
 
                 if(document.getElementById("aggregato").checked == true){
+                  console.log("quaquaqua")
                   newGraph("", null, 1)
+                  
                   return
                 }
                 
