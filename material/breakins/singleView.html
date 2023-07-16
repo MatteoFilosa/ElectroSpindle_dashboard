@@ -195,8 +195,9 @@
   <div id="tooltip"></div>
   <br>
 
-  <div id="downsamplePlaceholder">Insert downsample (current: 100)</div> <input type="text" id="downsample"
-    maxlength="3" required placeholder="Downsample"> <button class="button-green" id="downsampleBtn"
+  <div id="downsamplePlaceholder">Insert downsample (current: 100)</div>
+  <input type="number" id="downsample" required placeholder="Downsample">
+ <button class="button-green" id="downsampleBtn"
     onclick="restoreLoader()">Apply</button>
 
   <div id="popup" class="popup"></div>
@@ -468,6 +469,7 @@
     function clearSvg() {
 
       console.log("Clearing svgs...")
+      d3.selectAll("svg").remove()
       document.getElementById("selectedValues").innerHTML = ""
       document.getElementById("aggregato").checked = false
       document.getElementById("selectMenu").selectedIndex = 0;
@@ -1671,8 +1673,10 @@
       if (document.getElementById("loader") != null) document.getElementById("loader").remove()
       if (document.getElementById("loading") != null) document.getElementById("loading").remove()
 
+     
 
-      if (downsample.length >= 2) {
+
+      if ((downsample.length == 2) || (downsample.length == 3)) {
 
 
 
@@ -1698,6 +1702,8 @@
           }
 
         }
+
+        console.log(valori)
 
 
         for (let i = 0; i < valori.length; i++) {
@@ -1729,6 +1735,7 @@
               if (document.getElementById("svg" + allGroup[i]) != null) toRedraw.push(allGroup[i])
 
             }
+            console.log(toRedraw)
 
 
             clearSvg()
@@ -1786,6 +1793,15 @@
             newGraph("", globalData, 1)
 
 
+            //Evitare duplicati
+            for (let i = 0; i < toRedraw.length; i++) {
+
+              d3.select("#svg" + toRedraw[i]).remove()
+
+            }
+     
+
+
 
 
 
@@ -1796,7 +1812,8 @@
       }
 
 
-      else return
+      else if ((downsample.length == 1) || (downsample.length > 3)) showPopup ("Insert a minimum of 2 digits or a maximum of 3 for the downsample.", false)
+      
 
 
 

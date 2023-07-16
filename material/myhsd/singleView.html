@@ -25,8 +25,7 @@
           //document.getElementById("daButton").disabled = false
           sn_and_date = JSON.parse(localStorage.getItem("sn_and_date"))
 
-       
-          console.log(sn_and_date)
+      
 
         }
 
@@ -224,7 +223,7 @@
     function displayCalendar(flag) { // From : 0, To: 1
 
         localStorage.setItem("buttonClicked", JSON.stringify(flag))
-        console.log("displaycalendar")
+   
         calendar.hidden = false;
         //Migliorare popup
         if (flag == 0) calendar.style = "margin-left: 10px;"
@@ -339,8 +338,7 @@
           var query = params.get("spindle");
           var [spindle, date] = query.split("?date=");
 
-          console.log("Spindle:", spindle);
-          console.log("Date:", date);
+      
           sn_myhsd.push([spindle, date])
         } 
         else sn_myhsd = JSON.parse(localStorage.getItem("selectedSpindles")); */
@@ -388,8 +386,7 @@
 
                 afterSelectedGroup = "&mode=1&limit=20000" + "&dateStart=" + startFormatted + "&dateEnd=" + endFormatted
                 afterSelectedGroup.replace(" ", "%20")
-                console.log("ci sono")
-                console.log(startFormatted, endFormatted)
+   
               }
 
 
@@ -419,12 +416,12 @@
                 }
 
               }
-              console.log(selectedValues)
+     
               d3.select("#svg_default").remove()
               
             
               for (let i = 0; i <= selectedValues.length; i++) {
-                console.log(selectedValues[i])
+       
                 d3.json(
                   "http://arca.diag.uniroma1.it:8082/data/myhsd/" +
                   sn_myhsd +
@@ -435,11 +432,6 @@
                 ).then(function (data) {
 
 
-                  console.log("http://arca.diag.uniroma1.it:8082/data/myhsd/" +
-                    sn_myhsd +
-                    "/raw_data?columns=" +
-                    selectedValues[i] +
-                    afterSelectedGroup)
                   newGraph(selectedValues[i], data, 3)
 
                   
@@ -502,7 +494,7 @@
                 }
 
                 else {
-                  console.log("svg" +  nsSelectedGroup)
+            
                   d3.selectAll("#svg" + nsSelectedGroup).remove()
                   document.getElementById(selectedGroup).remove()
                   document.getElementById("label" + selectedGroup).remove()
@@ -532,7 +524,7 @@
         function clearSvg(){
 
                 document.getElementById("legendAggregate").innerHTML = ""
-                console.log("Clearing svgs...")
+  
                 document.getElementById("selectedValues").innerHTML = ""
                 document.getElementById("aggregato").checked = false 
                 document.getElementById("selectMenuColumns").selectedIndex = 0; 
@@ -570,23 +562,19 @@
       if(selectedGroup == null){
 
          selectedGroup = d3.select("#selectMenu").property("value");
-         console.log("qua")
+
 
       } 
 
       
-      //console.log(data["Tank piston return time"].data.length)
+   
       if(data == null){
-        console.log("ok")
+       
         attributeLength = 59
 
       } 
       else{
-       console.log("Debug: " + data);
-        console.log("Selected Group: " + selectedGroup);
-        console.log("Data Selected Group: " + data[selectedGroup]);
-        console.log("Data Selected Group Data: " + data[selectedGroup].data);
-        console.log("Data Selected Group Data Length: " + data[selectedGroup].data.length);
+  
 
         var attributeLength = data[selectedGroup].data.length
         
@@ -599,19 +587,19 @@
           //timeArray.push(time)
         }
 
-        console.log(date, time)
+  
         
 
       } 
       /* var scaleCheck = 0
       var time = globalData["time"][0]
       var time_start = globalData["date start"][0]
-      console.log(real_time) */
+     */
       //var real_time = aggiungiSecondi(time)
    
 
       /* if(document.getElementById("aggregato").checked != true) my_data = globalData[selectedGroup][0]
-      console.log(globalData, my_data) */
+ */
      
 
           if(aggregato == 1){ // Caso AGGREGATO
@@ -719,7 +707,7 @@
               sleep(1000).then(() => {
                 var dataset = []
                 var selectedGroup = valori[j]
-                console.log("qua: " + selectedGroup)
+                
                 if(end.length < 10) afterSelectedGroup = ""
 
                 d3.json(
@@ -803,7 +791,7 @@
 
                   }
 
-                  console.log(dataset)
+            
                   max = max + 5
                   min = min - 5
 
@@ -955,7 +943,7 @@
             const height = 500 - margin.top - margin.bottom;
             const tooltip = d3.select("#tooltip");
 
-            console.log(dataset)
+     
             const xScale = d3.scaleTime()
               .domain(d3.extent(dataset, function (d) {
                 return new Date(d[0]);
@@ -1057,7 +1045,7 @@
         
         else if (aggregato == 2){ //Caso in cui voglio aggiungere grafici al grafico degli aggregati già aggregato. Devo disegnare un grafico invisibile e poi uno degli aggregati.
 
-            
+          document.getElementById("legendAggregate").innerHTML = ""
           
           ///Variabili 
 
@@ -1094,9 +1082,8 @@
             var max = 0
 
 
-            console.log("another log")
 
-            var valori = []
+            var valori = [], deselect = []
             var to_add = document.getElementById("selectedValues").childNodes
 
             for (let i = 0; i < to_add.length; i++) {
@@ -1105,10 +1092,18 @@
               if (to_add[i] != undefined) {
 
                 if ((to_add[i].id != null) && (to_add[i].id.includes("label"))) {
-                  console.log("debug ancora: " + to_add[i].id + to_add[i].id.slice(5))
+          
                   if (document.getElementById(to_add[i].id.slice(5)).checked == true) valori.push(to_add[i].innerHTML)
 
+                   if(document.getElementById(to_add[i].id.slice(5)).checked == false){
 
+                    if (to_add[i].innerHTML.includes(" ")) {
+                       deselect.push([to_add[i].innerHTML.replace(/\s/g, ""), to_add[i].innerHTML])
+                     }
+
+                     else deselect.push([to_add[i].innerHTML, to_add[i].innerHTML])
+
+                   } 
 
                 }
               }
@@ -1117,7 +1112,8 @@
 
 
             valori.push(selectedGroup)
-            console.log(selectedGroup)
+            console.log(valori)
+          
             if (document.getElementById("svg_default") != null) document.getElementById("svg_default").remove()
 
             const margin = { top: 70, right: 30, bottom: 30, left: 80 };
@@ -1150,7 +1146,7 @@
 
 
 
-            console.log("valori: ", valori)
+        
             
             var xScale, yScale //Modificare dopo in caso di dataset diversi
 
@@ -1161,7 +1157,7 @@
               sleep(1000).then(() => {
                 var dataset = []
                 var selectedGroup = valori[j]
-                console.log("qua: " + selectedGroup)
+               
                 d3.json(
                   "http://arca.diag.uniroma1.it:8082/data/myhsd/" +
                   sn_myhsd +
@@ -1202,7 +1198,7 @@
               })
             }
 
-            document.getElementById("legendAggregate").innerHTML += "<span id = 'text" + selectedGroup + "'>  \u25A0" + selectedGroup + "</span><br>"
+           
             
 
 
@@ -1212,7 +1208,7 @@
 
 
 
-              sleep(1000).then(() => {
+              sleep(1500).then(() => {
                 var dataset = []
                 var selectedGroup = valori[j]
                 var nsSelectedGroup = selectedGroup;
@@ -1232,6 +1228,7 @@
                 ).then(function (data) {
                   var attributeLength = data[selectedGroup].data.length
 
+                   
 
                   for (let i = 0; i < attributeLength; i++) {
 
@@ -1247,7 +1244,7 @@
 
                   }
 
-                  console.log(dataset)
+             
                   max = max + 5
                   min = min - 5
 
@@ -1255,7 +1252,7 @@
 
 
 
-
+                  
 
                   var xAxis = d3.axisBottom(xScale);
                   var yAxis = d3.axisLeft(yScale);
@@ -1282,8 +1279,10 @@
                     .attr("d", line)
                     .attr("id", function (d, i) { return "path" + nsSelectedGroup })
                     .attr("clip-path", "url(#clip)");
-                  
-                    if (j + 1 == valori.length) document.getElementById("text" + selectedGroup).style.color = colors[colorSelector]
+
+
+                     document.getElementById("legendAggregate").innerHTML += "<span id = 'text" + selectedGroup + "'>  \u25A0" + selectedGroup + "</span><br>"
+                    document.getElementById("text" + selectedGroup).style.color = colors[colorSelector]
 
                   const points = svg.append("g")
                     .attr("class", "dots")
@@ -1331,7 +1330,7 @@
                   
                  
 
-                  
+                 
 
 
                 })
@@ -1359,10 +1358,20 @@
             // codice finale
             //if (aggregato == 0) document.getElementById("selectedValues").style.visibility = "hidden"
        
-            if ((aggregato != 1)  &&  (aggregato != 3)) {
+            if ((aggregato != 1) && (aggregato != 3)) {
+
+              console.log("triggered: " + nsSelectedGroup)
              
               document.getElementById("selectedValues").innerHTML += '<input type = "checkbox" id = "' + nsSelectedGroup +'" onchange = "modifyElement('+ nsSelectedGroup +')" checked>' + "<label for='" + nsSelectedGroup + "' id = 'label" + nsSelectedGroup + "'>" + selectedGroup + "</label>" 
             }
+
+            if(aggregato == 2){
+              for (let i = 0; i < deselect.length; i++){
+                document.getElementById(deselect[i][0]).remove()
+                document.getElementById("label" + deselect[i][0]).remove()
+              }
+            }
+            
               selectedValues.push(selectedGroup)
             localStorage.setItem("selectedValues", JSON.stringify(selectedValues))
 
@@ -1409,9 +1418,7 @@
 
         startFormatted.replace("/", "%2F")
         endFormatted.replace("/", "%2F")
-        console.log(startFormatted);
-        console.log(endFormatted);
-
+     
         d3.json(
         "http://arca.diag.uniroma1.it:8082/data/myhsd/" +
         sn_myhsd +
@@ -1421,17 +1428,16 @@
         "&dateStart=" + startFormatted + "&dateEnd=" +  endFormatted,
         { crossOrigin: "anonymous" }
       ).then(function (data) {
-        console.log(data)
-        console.log(data[selectedOption].data.length)
+     
         if (data[selectedOption].data.length == 0) {
           showPopup("No data to show for this date range!", false)
       
         }
         else{
-          console.log("epique")
+      
           if(document.getElementById("aggregato").checked == false) newGraph(selectedOption, data, 0)
           else{ 
-            console.log("chiamato il 2")
+       
             newGraph(selectedOption, data, 2)
           } 
 
@@ -1445,7 +1451,7 @@
 
       else{
 
-        console.log("big chungus")
+     
 
         d3.json(
           "http://arca.diag.uniroma1.it:8082/data/myhsd/" +
@@ -1486,7 +1492,7 @@
                 
 
                 if(document.getElementById("aggregato").checked == true){
-                  console.log("quaquaqua")
+               
                   newGraph("", null, 1)
                   
                   return
@@ -1546,7 +1552,7 @@
 
 
 
-                console.log(startFormatted, endFormatted);
+              
                 clearSvg();
                 for (let j = 0; j < selectedAttributes.length; j++) {
                   (function (selectedOption) {
@@ -1559,7 +1565,7 @@
                       "&dateStart=" + startFormatted + "&dateEnd=" + endFormatted,
                       { crossOrigin: "anonymous" }
                     ).then(function (data) {
-                      console.log(selectedOption);
+                   
 
                       if (data[selectedOption].data.length == 0) {
                         showPopup("No data to show for this date range!", false)
@@ -1567,8 +1573,7 @@
                       }
                       else{
 
-                        if(document.getElementById("aggregato").checked == true) console.log("hapl")
-                        else newGraph(selectedOption, data, 0);
+                        if(document.getElementById("aggregato").checked == false) newGraph(selectedOption, data, 0);
                         
 
                       }
